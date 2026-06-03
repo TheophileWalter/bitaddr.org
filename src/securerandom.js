@@ -79,6 +79,11 @@
 	// ---- Output generation --------------------------------------------------
 
 	sr.prototype.nextBytes = function (ba) {
+		// Capture pool state the first time bytes are generated (for entropy audit display)
+		if (sr.poolCopyOnInit === null) {
+			sr.poolCopyOnInit = sr.pool.slice();
+		}
+
 		if (window.crypto && window.crypto.getRandomValues && window.Uint8Array) {
 			try {
 				// Step 1 – fresh OS CSPRNG bytes (primary source)
@@ -155,8 +160,7 @@
 			}
 		} catch (e) { }
 
-		// Save a snapshot of the pool for the entropy-progress display in the UI
-		sr.poolCopyOnInit = sr.pool.slice();
+		// poolCopyOnInit stays null here; it is assigned on first key generation (see nextBytes)
 	})();
 
 })();

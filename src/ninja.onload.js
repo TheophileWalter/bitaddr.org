@@ -1,3 +1,5 @@
+// sync theme toggle button with the theme applied by the inline head script
+ninja.theme.init();
 // run unit tests
 if (ninja.getQueryString()["unittests"] == "true" || ninja.getQueryString()["unittests"] == "1") {
 	ninja.unitTests.runSynchronousTests(true);

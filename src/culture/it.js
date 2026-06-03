@@ -1,10 +1,10 @@
-﻿(function (translator) {
+(function (translator) {
 	translator.translations["it"] = {
 		// javascript alerts or messages
 		"testneteditionactivated": "TESTNET EDITION ATTIVATO",
 		"paperlabelbitcoinaddress": "Indirizzo Bitcoin:",
 		"paperlabelprivatekey": "Chiave privata:",
-		"paperlabelencryptedkey": "Chiave privata criptata (password richiesta)",
+		"paperlabelencryptedkey": "Chiave Privata Cifrata (password richiesta)",
 		"bulkgeneratingaddresses": "Generazione indirizzi... ",
 		"brainalertpassphrasetooshort": "La passphrase inserita è troppo corta.\n\n",
 		"brainalertpassphrasewarning": "Attenzione: La scelta di una passphrase robusta è importante per evitare attacchi brute force in grado di indovinare la tua passphrase e rubare i tuoi Bitcoin",
@@ -19,17 +19,31 @@
 		"vanityprivatekeyonlyavailable": "Non disponibile quando vengono combinate due chiavi private",
 		"vanityalertinvalidinputprivatekeysmatch": "Dati inseriti non validi. Entrambe le chiavi private combaciano. Devi inserire due chiavi differenti.",
 
+		// address type select options
+		"paperaddrtype":  { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "SegWit Nativo (bc1q…)", "taproot": "Taproot (bc1p…)" },
+		"bulkaddrtype":   { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "SegWit Nativo (bc1q…)", "taproot": "Taproot (bc1p…)" },
+		"brainaddrtype":  { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "SegWit Nativo (bc1q…)", "taproot": "Taproot (bc1p…)" },
+		"vanityaddrtype": { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "SegWit Nativo (bc1q…)", "taproot": "Taproot (bc1p…)" },
+		"splitaddrtype":  { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "SegWit Nativo (bc1q…)", "taproot": "Taproot (bc1p…)" },
+
+		// address type labels
+		"paperlabeladdrtype": "Tipo di indirizzo:",
+		"bulklabeladdrtype": "Tipo di indirizzo:",
+		"brainlabeladdrtype": "Tipo di indirizzo:",
+		"vanitylabeladdrtype": "Tipo di indirizzo:",
+		"splitlabeladdrtype": "Tipo di indirizzo:",
+
 		// header and menu html
 		"tagline": "Open Source JavaScript Client-Side Bitcoin Wallet Generator",
 		"generatelabelbitcoinaddress": "Generazione Indirizzo Bitcoin...",
 		"generatelabelmovemouse": "MUOVI il tuo mouse per contribuire alla generazione dei numeri casuali...",
-		"generatelabelkeypress": "OR type some random characters into this textbox", //TODO: please translate
+		"generatelabelkeypress": "OPPURE digita alcuni caratteri casuali in questo campo di testo",
 		"singlewallet": "Singolo portafoglio",
 		"paperwallet": "Paper Wallet",
 		"bulkwallet": "Portafogli multipli",
 		"brainwallet": "Brain Wallet",
 		"vanitywallet": "Vanity Wallet",
-		"splitwallet": "Split Wallet", //TODO: please translate
+		"splitwallet": "Portafoglio Diviso",
 		"detailwallet": "Dettagli portafoglio",
 
 		// footer html
@@ -45,42 +59,45 @@
 		"footerlabelnowarranty": "Nessuna garanzia.",
 
 		// status html
-		"statuslabelcryptogood": "&#10004; Good!", //TODO: please translate
-		"statuslabelcryptogood1": "Your browser can generate cryptographically random keys using window.crypto.getRandomValues", //TODO: please translate
-		"statusokcryptogood": "OK", //TODO: please translate
-		"statuslabelcryptobad": "&times; Oh no!", //TODO: please translate
-		"statuslabelcryptobad1": "Your browser does NOT support window.crypto.getRandomValues. You should use a more modern browser with this generator to increase the security of the keys generated.",
-		"statusokcryptobad": "OK", //TODO: please translate
-		"statuslabelunittestsgood": "&#10004; Good!", //TODO: please translate
-		"statuslabelunittestsgood1": "All synchronous unit tests passed.", //TODO: please translate
-		"statusokunittestsgood": "OK", //TODO: please translate
-		"statuslabelunittestsbad": "&times; Oh no!", //TODO: please translate
-		"statuslabelunittestsbad1": "Some synchronous unit tests DID NOT pass. You should find another browser to use with this generator.", //TODO: please translate
-		"statusokunittestsbad": "OK", //TODO: please translate
-		"statuslabelprotocolgood": "&#10004; Good!", //TODO: please translate
-		"statuslabelprotocolgood1": "You are running this generator from your local computer. <br />Tip: Double check you are offline by trying ", //TODO: please translate
-		"statusokprotocolgood": "OK", //TODO: please translate
-		"statuslabelprotocolbad": "&#9888; Think twice!", //TODO: please translate
-		"statuslabelprotocolbad1": "You appear to be running this generator online from a live website. For valuable wallets it is recommended to", //TODO: please translate
-		"statuslabelprotocolbad2": "download", //TODO: please translate
-		"statuslabelprotocolbad3": "the zip file from GitHub and run this generator offline as a local html file.", //TODO: please translate
-		"statusokprotocolbad": "OK", //TODO: please translate
-		"statuslabelkeypool1": "This is a log of all the Bitcoin Addresses and Private Keys you generated during your current session. Reloading the page will create a new session.", //TODO: please translate
-		"statuskeypoolrefresh": "Refresh", //TODO: please translate
-		"statusokkeypool": "OK", //TODO: please translate
+		"statuslabelcryptogood": "&#10004; Ottimo!",
+		"statuslabelcryptogood1": "Il tuo browser può generare chiavi casuali crittograficamente usando window.crypto.getRandomValues",
+		"statusokcryptogood": "OK",
+		"statuslabelcryptobad": "&times; Attenzione!",
+		"statuslabelcryptobad1": "Il tuo browser NON supporta window.crypto.getRandomValues. Dovresti usare un browser più moderno per aumentare la sicurezza delle chiavi generate.",
+		"statusokcryptobad": "OK",
+		"statuslabelunittestsgood": "&#10004; Ottimo!",
+		"statuslabelunittestsgood1": "Tutti i test unitari sincroni sono stati superati.",
+		"statusokunittestsgood": "OK",
+		"statuslabelunittestsbad": "&times; Attenzione!",
+		"statuslabelunittestsbad1": "Alcuni test unitari sincroni NON sono stati superati. Dovresti usare un altro browser per questo generatore.",
+		"statusokunittestsbad": "OK",
+		"statuslabelprotocolgood": "&#10004; Ottimo!",
+		"statuslabelprotocolgood1": "Stai eseguendo questo generatore dal tuo computer locale. <br />Suggerimento: Verifica di essere offline provando ",
+		"statusokprotocolgood": "OK",
+		"statuslabelprotocolbad": "&#9888; Riflettici due volte!",
+		"statuslabelprotocolbad1": "Sembra che tu stia eseguendo questo generatore online da un sito web live. Per portafogli di valore si raccomanda di",
+		"statuslabelprotocolbad2": "scaricare",
+		"statuslabelprotocolbad3": "il file zip da GitHub ed eseguire questo generatore offline come file HTML locale.",
+		"statusokprotocolbad": "OK",
+		"statuslabelkeypool1": "Questo è un registro di tutti gli Indirizzi Bitcoin e Chiavi Private che hai generato durante la sessione corrente. Ricaricare la pagina creerà una nuova sessione.",
+		"statuskeypoolrefresh": "Aggiorna",
+		"statusokkeypool": "OK",
 
 		// single wallet html
 		"newaddress": "Genera un Nuovo Indirizzo",
 		"singleprint": "Stampa",
-		"singlelabelbitcoinaddress": "Indirizzo Bitcoin:",
-		"singlelabelprivatekey": "Chiave privata (Wallet Import Format):",
+		"singlelabelbitcoinaddress": "Indirizzo Bitcoin (Legacy P2PKH)",
+		"singlelabelP2SH": "P2SH-P2WPKH (3…)",
+		"singlelabelSegwit": "SegWit Nativo P2WPKH (bc1q…)",
+		"singlelabelTaproot": "Taproot P2TR (bc1p…)",
+		"singlelabelprivatekey": "Chiave Privata (WIF compressa)",
 		"singletip1": "<b>Un portafogli bitcoin</b> è composto semplicemente da una coppia di valori: l'indirizzo e la sua chiave privata. Un portafogli è stato appena generato sul tuo browser e mostrato sopra.",
 		"singletip2": "<b>Per mettere in sicurezza questo portafogli</b> devi stampare o quantomeno salvare l'indirizzo bitcoin e la Chiave privata. È molto importante fare una copia di backup della chiave privata e conservarla in un posto sicuro. Questo sito non conosce la tua chiave privata. Se hai familiarità con PGP, puoi scaricare per intero questa pagina HTML e controllare la sua autentiticità. Puoi confrontare il codice SHA256 della pagina scaricata con il codice firmato dall'autore che trovi nella cronologia delle versioni (in fondo alla pagina). Se abbandoni/aggiorni la pagina web oppure premi il tasto Genera, un nuovo indirizzo sostituirà quello vecchio che non potrà più essere recuperato. La chiave privata dovrebbe essere tenuta segreta, chiunque conosca la chiave privata può avere accesso e spendere i tuoi bitcoin. Se stampi il tuo portafogli conservalo in una busta di plastica sigillata per tenerla al riparo dall'acqua. Tratta quanto stampato alla stregua di una banconota.",
 		"singletip3": "<b>Ricevi fondi</b> su questo portafogli mostrando l'indirizzo bitcoin per il versamento.",
 		"singletip4": "<b>Controlla il saldo</b> visitando blockchain.info o blockexplorer.com cercando il tuo indirizzo bitcoin.",
 		"singletip5": "<b>Spendi i tuoi bitcoin</b> aprendo un account su blockchain.info usando la chiave privata. Puoi anche spendere i tuoi bitcoin scaricando il popolare client p2p ed importando in esso il portafogli. Tieni presente che quando importi una chiave nel client p2p, nel momento in cui spendi le monete, la chiave viene raggruppata insieme alle altre presenti nel programma con i restanti bitcoin. Quando esegui una transazione gli spiccioli verranno invitati verso un altro indirizzo all'interno del tuo portafogli gestito dal client p2p. Quindi dovresti tenere un backup del portafogli contenuto nel client p2p e tenere questo in un posto sicuro fin tanto terrai dei bitcoin lì. Satoshi consiglia di non cancellare mai un portafogli. ",
-		"singleshare": "SHARE", //TODO: please translate
-		"singlesecret": "SECRET", //TODO: please translate
+		"singleshare": "CONDIVIDI",
+		"singlesecret": "SEGRETO",
 
 		// paper wallet html
 		"paperlabelhideart": "Senza grafica?",
@@ -89,12 +106,12 @@
 		"papergenerate": "Genera",
 		"paperprint": "Stampa",
 		"paperlabelBIPpassphrase": "Passphrase:",
-		"paperlabelencrypt": "BIP38 criptato?",
+		"paperlabelencrypt": "Cifratura BIP38?",
 
 		// bulk wallet html
 		"bulklabelstartindex": "Indice iniziale:",
 		"bulklabelrowstogenerate": "Righe da generare:",
-		"bulklabelcompressed": "Indirizzo compresso?",
+		"bulklabelcompressed": "Indirizzi compressi?",
 		"bulkgenerate": "Genera",
 		"bulkprint": "Stampa",
 		"bulklabelcsv": "Valori Separati da virgola:",
@@ -140,6 +157,14 @@
 		"vanitylabelprivatekey": "Chiave privata del Vanity Wallet (WIF):",
 		"vanitylabelnotesprivatekey": "Quella sopra è la Chiave Privata nel formato esadecimale.  ",
 
+		// split wallet html
+		"splitlabelthreshold": "Soglia minima di parti necessarie per combinare",
+		"splitlabelshares": "Numero di parti",
+		"splitview": "Genera",
+		"combinelabelentershares": "Inserisci le parti disponibili (separate da spazi)",
+		"combineview": "Combina le Parti",
+		"combinelabelprivatekey": "Chiave Privata Combinata",
+
 		// detail wallet html
 		"detaillabelenterprivatekey": "Inserisci la Chiave Privata",
 		"detailkeyformats": "Key Formats: WIF, WIFC, HEX, B64, B6, MINI, BIP38",
@@ -147,8 +172,11 @@
 		"detailprint": "Stampa",
 		"detaillabelnote1": "La tua Chiave privata Bitcoin è rappresentata da un numero segreto, unico al mondo, che dovresti conoscere soltanto tu. Può essere codificato in molti formati differenti. Di seguito verrà mostrato l'indirizzo Bitcoin e la chiave pubblica, con la corrispondente chiave privata, nei più diffusi formati di codifica (WIF, WIFC, HEX, B64).",
 		"detaillabelnote2": "Il client Bitcoin, dalla versione v0.6, memorizza le chiavi pubbliche in formato compresso. Il programma ora supporta l'importazione e l'esportazione delle chiavi private attraverso importprivkey/dumpprivkey. Il formato con cui viene esportata la chiave privata dipende se l'indirizzo generato è stato creato con il nuovo o vecchio portafogli.",
-		"detaillabelbitcoinaddress": "Indirizzo Bitcoin",
-		"detaillabelbitcoinaddresscomp": "Indirizzo Bitcoin compresso",
+		"detaillabelbitcoinaddress": "Indirizzo Bitcoin (Legacy P2PKH)",
+		"detaillabelbitcoinaddresscomp": "Indirizzo Bitcoin Compresso (Legacy P2PKH)",
+		"detaillabelP2SH": "Indirizzo P2SH-P2WPKH (3…)",
+		"detaillabelSegwit": "SegWit Nativo P2WPKH (bc1q…)",
+		"detaillabelTaproot": "Taproot P2TR (bc1p…)",
 		"detaillabelpublickey": "Chiave pubblica (130 caratteri [0-9A-F]):",
 		"detaillabelpublickeycomp": "Chiave pubblica (compressa, 66 caratteri [0-9A-F]):",
 		"detaillabelprivwif": "Chiave privata WIF<br>51 caratteri base58, inizia per a",
@@ -158,9 +186,9 @@
 		"detaillabelprivb64": "Chiave privata Base64 (44 caratteri):",
 		"detaillabelprivmini": "Chiave privata formato mini (22, 26 or 30 caratteri, inizia per 'S'):",
 		"detaillabelpassphrase": "Inserisci passphrase BIP38",
-		"detailbip38decryptbutton": "Decripta BIP38",
-		"detailbip38encryptbutton": "Encrypt BIP38", //TODO: please translate
-		"detaillabelq1": "How do I make a wallet using dice? What is B6?", //TODO: please translate
-		"detaila1": "An important part of creating a Bitcoin wallet is ensuring the random numbers used to create the wallet are truly random. Physical randomness is better than computer generated pseudo-randomness. The easiest way to generate physical randomness is with dice. To create a Bitcoin private key you only need one six sided die which you roll 99 times. Stopping each time to record the value of the die. When recording the values follow these rules: 1=1, 2=2, 3=3, 4=4, 5=5, 6=0. By doing this you are recording the big random number, your private key, in B6 or base 6 format. You can then enter the 99 character base 6 private key into the text field above and click View Details. You will then see the Bitcoin address associated with your private key. You should also make note of your private key in WIF format since it is more widely used." //TODO: please translate
+		"detailbip38decryptbutton": "Decifra BIP38",
+		"detailbip38encryptbutton": "Cifra BIP38",
+		"detaillabelq1": "Come creo un portafoglio usando i dadi? Cosa è B6?",
+		"detaila1": "Una parte importante nella creazione di un portafoglio Bitcoin è assicurarsi che i numeri casuali usati per crearlo siano veramente casuali. La casualità fisica è migliore della pseudo-casualità generata dal computer. Il modo più semplice per generare casualità fisica è con i dadi. Per creare una chiave privata Bitcoin hai bisogno solo di un dado a sei facce che lancerai 99 volte. Fermandoti ogni volta per registrare il valore del dado. Quando registri i valori segui queste regole: 1=1, 2=2, 3=3, 4=4, 5=5, 6=0. Facendo questo stai registrando il grande numero casuale, la tua chiave privata, in formato B6 o base 6. Puoi poi inserire la chiave privata in base 6 di 99 caratteri nel campo di testo sopra e cliccare su Mostra Dettagli. Vedrai quindi l'indirizzo Bitcoin associato alla tua chiave privata. Dovresti anche prendere nota della tua chiave privata in formato WIF poiché è più ampiamente utilizzato."
 	};
 })(ninja.translator);

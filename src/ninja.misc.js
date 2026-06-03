@@ -1,4 +1,26 @@
-﻿(function (ninja) {
+﻿// ── Theme toggle ────────────────────────────────────────────────────────
+ninja.theme = {
+	current: function () {
+		return document.documentElement.getAttribute('data-theme') || 'dark';
+	},
+	apply: function (theme) {
+		document.documentElement.setAttribute('data-theme', theme);
+		localStorage.setItem('bitaddress-theme', theme);
+		var label = document.getElementById('themelabel');
+		var icon  = document.querySelector('#themetoggle .theme-icon');
+		if (label) label.textContent = theme === 'light' ? 'Dark' : 'Light';
+		if (icon)  icon.innerHTML    = theme === 'light' ? '&#9790;' : '&#9788;';
+	},
+	toggle: function () {
+		ninja.theme.apply(ninja.theme.current() === 'light' ? 'dark' : 'light');
+	},
+	init: function () {
+		// Sync button label with the theme already applied by the inline <head> script
+		ninja.theme.apply(ninja.theme.current());
+	}
+};
+
+(function (ninja) {
 	var status = ninja.status = function() {
 		var cryptoCase = "";
 		if (window.crypto && window.crypto.getRandomValues) {

@@ -1,10 +1,10 @@
-﻿(function (translator) {
+(function (translator) {
 	translator.translations["de"] = {
 		// javascript alerts or messages
 		"testneteditionactivated": "TESTNET AKTIVIERT",
 		"paperlabelbitcoinaddress": "Bitcoin-Adresse:",
 		"paperlabelprivatekey": "Privater Schl&uuml;ssel:",
-		"paperlabelencryptedkey": "Verschl&uuml;sselter privater Schl&uuml;ssel (Passwort ben&ouml;tigt)",
+		"paperlabelencryptedkey": "Verschlüsselter privater Schlüssel (Passwort erforderlich)",
 		"bulkgeneratingaddresses": "Adressen erstellen... ",
 		"brainalertpassphrasetooshort": "Die eingegebene Passphrase ist zu kurz.\n\n",
 		"brainalertpassphrasewarning": "Hinweis: Eine längere Passphrase schützt besser vor Brute-Force-Attacken, bei denen auf gut Glück Passphrasen probiert werden.",
@@ -19,17 +19,31 @@
 		"vanityprivatekeyonlyavailable": "Nur verfügbar, wenn zwei private Schlüssel kombiniert werden.",
 		"vanityalertinvalidinputprivatekeysmatch": "Unzulässige Eingaben. Die eingegebenen privaten Schlüssel stimmen überein. Bitte gib zwei unterschiedliche Schlüssel ein.",
 
+		// address type select options
+		"paperaddrtype":  { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "Natives SegWit (bc1q…)", "taproot": "Taproot (bc1p…)" },
+		"bulkaddrtype":   { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "Natives SegWit (bc1q…)", "taproot": "Taproot (bc1p…)" },
+		"brainaddrtype":  { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "Natives SegWit (bc1q…)", "taproot": "Taproot (bc1p…)" },
+		"vanityaddrtype": { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "Natives SegWit (bc1q…)", "taproot": "Taproot (bc1p…)" },
+		"splitaddrtype":  { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "Natives SegWit (bc1q…)", "taproot": "Taproot (bc1p…)" },
+
+		// address type labels
+		"paperlabeladdrtype": "Adresstyp:",
+		"bulklabeladdrtype": "Adresstyp:",
+		"brainlabeladdrtype": "Adresstyp:",
+		"vanitylabeladdrtype": "Adresstyp:",
+		"splitlabeladdrtype": "Adresstyp:",
+
 		// header and menu html
 		"tagline": "Offener, client-seitiger Bitcoin-Wallet-Generator in JavaScript",
 		"generatelabelbitcoinaddress": "Erstelle Bitcoin-Wallet...",
 		"generatelabelmovemouse": "Bewege deine Maus umher, um die Zuf&auml;lligkeit zu erh&ouml;hen...",
-		"generatelabelkeypress": "OR type some random characters into this textbox", //TODO: please translate
+		"generatelabelkeypress": "ODER tippe einige zufällige Zeichen in dieses Textfeld",
 		"singlewallet": "Einzelnes Wallet",
 		"paperwallet": "Papier-Wallet",
 		"bulkwallet": "Massen-Wallet",
 		"brainwallet": "Kopf-Wallet",
 		"vanitywallet": "Personalisiertes Wallet",
-		"splitwallet": "Split Wallet", //TODO: please translate
+		"splitwallet": "Aufgeteiltes Wallet",
 		"detailwallet": "Walletdetails",
 
 		// footer html
@@ -45,42 +59,45 @@
 		"footerlabelnowarranty": "Ohne Gew&auml;hr.",
 
 		// status html
-		"statuslabelcryptogood": "&#10004; Good!", //TODO: please translate
-		"statuslabelcryptogood1": "Your browser can generate cryptographically random keys using window.crypto.getRandomValues", //TODO: please translate
-		"statusokcryptogood": "OK", //TODO: please translate
-		"statuslabelcryptobad": "&times; Oh no!", //TODO: please translate
-		"statuslabelcryptobad1": "Your browser does NOT support window.crypto.getRandomValues. You should use a more modern browser with this generator to increase the security of the keys generated.",
-		"statusokcryptobad": "OK", //TODO: please translate
-		"statuslabelunittestsgood": "&#10004; Good!", //TODO: please translate
-		"statuslabelunittestsgood1": "All synchronous unit tests passed.", //TODO: please translate
-		"statusokunittestsgood": "OK", //TODO: please translate
-		"statuslabelunittestsbad": "&times; Oh no!", //TODO: please translate
-		"statuslabelunittestsbad1": "Some synchronous unit tests DID NOT pass. You should find another browser to use with this generator.", //TODO: please translate
-		"statusokunittestsbad": "OK", //TODO: please translate
-		"statuslabelprotocolgood": "&#10004; Good!", //TODO: please translate
-		"statuslabelprotocolgood1": "You are running this generator from your local computer. <br />Tip: Double check you are offline by trying ", //TODO: please translate
-		"statusokprotocolgood": "OK", //TODO: please translate
-		"statuslabelprotocolbad": "&#9888; Think twice!", //TODO: please translate
-		"statuslabelprotocolbad1": "You appear to be running this generator online from a live website. For valuable wallets it is recommended to", //TODO: please translate
-		"statuslabelprotocolbad2": "download", //TODO: please translate
-		"statuslabelprotocolbad3": "the zip file from GitHub and run this generator offline as a local html file.", //TODO: please translate
-		"statusokprotocolbad": "OK", //TODO: please translate
-		"statuslabelkeypool1": "This is a log of all the Bitcoin Addresses and Private Keys you generated during your current session. Reloading the page will create a new session.", //TODO: please translate
-		"statuskeypoolrefresh": "Refresh", //TODO: please translate
-		"statusokkeypool": "OK", //TODO: please translate
+		"statuslabelcryptogood": "&#10004; Gut!",
+		"statuslabelcryptogood1": "Ihr Browser kann kryptographisch zufällige Schlüssel über window.crypto.getRandomValues erzeugen",
+		"statusokcryptogood": "OK",
+		"statuslabelcryptobad": "&times; Oh nein!",
+		"statuslabelcryptobad1": "Ihr Browser unterstützt window.crypto.getRandomValues NICHT. Sie sollten einen moderneren Browser verwenden, um die Sicherheit der generierten Schlüssel zu erhöhen.",
+		"statusokcryptobad": "OK",
+		"statuslabelunittestsgood": "&#10004; Gut!",
+		"statuslabelunittestsgood1": "Alle synchronen Unit-Tests wurden bestanden.",
+		"statusokunittestsgood": "OK",
+		"statuslabelunittestsbad": "&times; Oh nein!",
+		"statuslabelunittestsbad1": "Einige synchrone Unit-Tests wurden NICHT bestanden. Bitte verwenden Sie einen anderen Browser für diesen Generator.",
+		"statusokunittestsbad": "OK",
+		"statuslabelprotocolgood": "&#10004; Gut!",
+		"statuslabelprotocolgood1": "Sie führen diesen Generator von Ihrem lokalen Computer aus. <br />Tipp: Überprüfen Sie, ob Sie offline sind, indem Sie versuchen, ",
+		"statusokprotocolgood": "OK",
+		"statuslabelprotocolbad": "&#9888; Zweimal nachdenken!",
+		"statuslabelprotocolbad1": "Es scheint, dass Sie diesen Generator online von einer Live-Website aus ausführen. Für wertvolle Wallets wird empfohlen,",
+		"statuslabelprotocolbad2": "herunterzuladen",
+		"statuslabelprotocolbad3": "die Zip-Datei von GitHub und diesen Generator offline als lokale HTML-Datei auszuführen.",
+		"statusokprotocolbad": "OK",
+		"statuslabelkeypool1": "Dies ist ein Protokoll aller Bitcoin-Adressen und privaten Schlüssel, die Sie in Ihrer aktuellen Sitzung generiert haben. Das Neuladen der Seite erstellt eine neue Sitzung.",
+		"statuskeypoolrefresh": "Aktualisieren",
+		"statusokkeypool": "OK",
 
 		// single wallet html
 		"newaddress": "Neues Wallet erstellen",
 		"singleprint": "Drucken",
-		"singlelabelbitcoinaddress": "Bitcoin-Adresse",
-		"singlelabelprivatekey": "Privater Schl&uuml;ssel (WIF &ndash; zum Importieren geeignet):",
+		"singlelabelbitcoinaddress": "Bitcoin-Adresse (Legacy P2PKH)",
+		"singlelabelP2SH": "P2SH-P2WPKH (3…)",
+		"singlelabelSegwit": "Natives SegWit P2WPKH (bc1q…)",
+		"singlelabelTaproot": "Taproot P2TR (bc1p…)",
+		"singlelabelprivatekey": "Privater Schlüssel (WIF komprimiert)",
 		"singletip1": "<b>Ein Bitcoin-Wallet </b>(Geldb&ouml;rse) ist nichts anderes als eine Bitcoin-Adresse (&ouml;ffentlicher Schl&uuml;ssel) und der zu ihr geh&ouml;rende private Schl&uuml;ssel. Oben findest du ein solches, gerade f&uuml;r dich erstelltes Wallet, bestehend aus den beiden Zeichenketten. Die QR-Codes dienen lediglich der Vereinfachung und enthalten kodiert die Adresse bzw. den privaten Schl&uuml;ssel.",
 		"singletip2": "<b>Um dieses Wallet zu sch&uuml;tzen,</b> musst du es entweder ausdrucken oder anderweitig die Bitcoin-Adresse und den privaten Schl&uuml;ssel sichern. Fertige auf jeden Fall eine Kopie des privaten Schl&uuml;ssels an und bewahre sie an einem sicheren Ort auf. Der private Schl&uuml;ssel liegt nur lokal auf deinem Rechner vor und wurde nicht ins Internet &uuml;bertragen. Falls du dich mit PGP auskennst, kannst du dir diese all-in-one HTML-Seite herunterladen. Um zu &uuml;berpr&uuml;fen, ob die heruntergeladene Version authentisch ist, kannst du den SHA256-Hash dieser Seite mit dem SHA256-Hash in der signierten Versionsgeschichte am unteren Ende dieser Seite abgleichen. Wenn du diese Seite verl&auml;sst, sie neul&auml;dst bzw. den \"Neues Wallet erstellen\"-Button dr&uuml;ckst, wird ein neues Wallet erstellt und das vorherige wird nicht mehr abrufbar sein. Du solltest deinen privaten Schl&uuml;ssel geheim halten. Wer den privaten Schl&uuml;ssel hat, kann damit auf alle im Wallet befindlichen Bitcoin zugreifen und sie nach Belieben ausgeben. Behandle dein gedrucktes Wallet wie echtes Geld!",
 		"singletip3": "Du kannst <b>Guthaben</b> zu deinem Wallet <b>hinzuf&uuml;gen</b>, indem du genau wie bei anderen &Uuml;berweisungen Bitcoins an die Bitcoin-Adresse deines Wallets schickst.",
 		"singletip4": "<b>&Uuml;berpr&uuml;fe dein Guthaben,</b> indem du deine Bitcoin-Adresse auf blockchain.info bzw. blockexplorer.com eingibst.",
 		"singletip5": "Du kannst deine <b>Bitcoins ausgeben</b>, indem du das gesamte mit deinem privaten Schl&uuml;ssel verbundene Guthaben auf deinen Account bei blockchain.info &uuml;bertr&auml;gst. Alternativ kannst du dir ein Bitcoinprogramm herunterladen und deinen privaten Schl&uuml;ssel in dieses importieren. Beachte dabei aber, dass, sobald du Bitcoins mit dem Programm sendest, dein privater Schl&uuml;ssel mit den anderen privaten Schl&uuml;sseln, die vom Programm bereitgestellt werden, verbunden wird. Bei einer &Uuml;berweisung wird etwas R&uuml;ckgeld an eine der Bitcoin-Adressen des Programms geschickt. Deswegen musst du, um tats&auml;chlich dein gesamtes Guthaben zu sichern, ein Backup vom gesamten Wallet des Programms, das nun auch deinen importierten privaten Schl&uuml;ssel enth&auml;lt, anfertigen. Satoshi r&auml;t, dass man unter keinen Umst&auml;nden ein Wallet l&ouml;schen sollte.",
-		"singleshare": "SHARE", //TODO: please translate
-		"singlesecret": "SECRET", //TODO: please translate
+		"singleshare": "TEILEN",
+		"singlesecret": "GEHEIM",
 
 		// paper wallet html
 		"paperlabelhideart": "Grafische Gestaltung ausblenden?",
@@ -89,7 +106,7 @@
 		"papergenerate": "Erstellen",
 		"paperprint": "Drucken",
 		"paperlabelBIPpassphrase": "Passwort:",
-		"paperlabelencrypt": "Mit BIP38 verschl&uuml;sseln?",
+		"paperlabelencrypt": "BIP38-Verschlüsselung?",
 
 		// bulk wallet html
 		"bulklabelstartindex": "Startindex:",
@@ -140,6 +157,14 @@
 		"vanitylabelprivatekey": "Personalisierter privater Schl&uuml;ssel (WIF):",
 		"vanitylabelnotesprivatekey": "Der obige private Schl&uuml;ssel erm&ouml;glicht das Importieren in andere Wallets.",
 
+		// split wallet html
+		"splitlabelthreshold": "Mindestanzahl an Teilen zum Zusammenführen",
+		"splitlabelshares": "Anzahl der Teile",
+		"splitview": "Generieren",
+		"combinelabelentershares": "Verfügbare Teile eingeben (durch Leerzeichen getrennt)",
+		"combineview": "Teile zusammenführen",
+		"combinelabelprivatekey": "Zusammengeführter privater Schlüssel",
+
 		// detail wallet html
 		"detaillabelenterprivatekey": "Privaten Schl&uuml;ssel eingeben:",
 		"detailkeyformats": "Unterstützte Formate: WIF, WIFC, HEX, B64, B6, MINI, BIP38",
@@ -147,8 +172,11 @@
 		"detailprint": "Drucken",
 		"detaillabelnote1": "Der private Schl&uuml;ssel deines Wallets ist eine geheime, einzigartige Zeichenfolge, die nur du kennst. Er kann auf mehrer Arten dargestellt werden. Unten findest du die zugeh&ouml;rige Bitcoin-Adresse bzw. &ouml;ffentlichen Schl&uuml;ssel sowie den privaten Schl&uuml;ssel in den verbreitetsten Formaten.",
 		"detaillabelnote2": "Ab Version 0.6 speichert Bitcoin-qt &ouml;ffentliche Schl&uuml;ssel komprimiert. Das Programm unterst&uuml;tzt nun auch den Import und Export von privaten Schl&uuml;sseln mit importprivkey/dumpprivkey. Das Format des exportierten privaten Schl&uuml;ssels h&auml;ngt davon ab, ob die Adresse in einem alten oder neuen Wallet erstellt wurde.",
-		"detaillabelbitcoinaddress": "Bitcoin-Adresse:",
-		"detaillabelbitcoinaddresscomp": "Komprimierte Bitcoin-Adresse:",
+		"detaillabelbitcoinaddress": "Bitcoin-Adresse (Legacy P2PKH)",
+		"detaillabelbitcoinaddresscomp": "Bitcoin-Adresse Komprimiert (Legacy P2PKH)",
+		"detaillabelP2SH": "P2SH-P2WPKH Adresse (3…)",
+		"detaillabelSegwit": "Natives SegWit P2WPKH (bc1q…)",
+		"detaillabelTaproot": "Taproot P2TR (bc1p…)",
 		"detaillabelpublickey": "&Ouml;ffentlicher Schl&uuml;ssel (130 Zeichen [0-9A-F]):",
 		"detaillabelpublickeycomp": "Komprimierter &ouml;ffentlicher Schl&uuml;ssel (66 Zeichen [0-9A-F]):",
 		"detaillabelprivwif": "Privater Schl&uuml;ssel WIF  <br /> 51 Zeichen in base58, beginnt mit",
@@ -157,9 +185,9 @@
 		"detaillabelprivhex": "Privater Schl&uuml;ssel in Hexadezimal (64 Zeichen [0-9A-F]):",
 		"detaillabelprivb64": "Privater Schl&uuml;ssel in base64 (44 Zeichen):",
 		"detaillabelprivmini": "Privater Schl&uuml;ssel in mini (22, 26 oder 30 Zeichen, beginnt mit 'S'):",
-		"detaillabelpassphrase": "Passwort f&uuml;r BIP38 eingeben",
-		"detailbip38decryptbutton": "Entschl&uuml;sseln",
-		"detailbip38encryptbutton": "Encrypt BIP38", //TODO: please translate
+		"detaillabelpassphrase": "BIP38-Passphrase eingeben",
+		"detailbip38decryptbutton": "BIP38 entschlüsseln",
+		"detailbip38encryptbutton": "BIP38 verschlüsseln",
 		"detaillabelq1": "Wie erstelle ich ein Wallet mithilfe eines Würfels? Was versteht man unter B6?",
 		"detaila1": "Beim Erstellen eines Bitcoin-Wallets sollten die dafür genutzten Zufallszahlen auch tatsächlich zufällig sein. Ein echter Würfel liefert wesentlich zufälligere Zahlen als ein Computer. Um einen privaten Schlüssel zu erstellen, sind lediglich 99 Würfe mit einem normalen Würfel nötig. Nach jedem Wurf solltest du die Augenzahl nach folgendem Muster aufschreiben: 1-\>1, 2-\>2, 3-\>3, 4-\>4, 5-\>5, 6-\>0. Die so entstandene Zufallszahl stellt deinen privaten Schlüssel in B6 bzw. zur Basis 6 dar. Diesen 99 Zeichen langen Basis-6-Schlüssel kannst du im obigen Eingabefeld eingeben und dir dann die zugehörigen Details anzeigen lassen. U.a. wird dir die zu deinem privaten Schlüssel gehörende Bitcoin-Adresse angezeigt. Es wäre ratsam, sich die ebenfalls berechnete WIF-Version des privaten Schlüssels zu notieren, weil sie häufiger genutzt wird."
 	};

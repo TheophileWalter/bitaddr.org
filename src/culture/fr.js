@@ -1,166 +1,199 @@
-﻿(function (translator) {
+(function (translator) {
 	translator.translations["fr"] = {
-		// javascript alerts or messages
+		// alertes et messages javascript
 		"testneteditionactivated": "ÉDITION TESTNET ACTIVÉE",
-		"paperlabelbitcoinaddress": "Adresse Bitcoin:",
-		"paperlabelprivatekey": "Clé Privée:",
-		"paperlabelencryptedkey": "Encrypted Private Key (Password required)", //TODO: please translate
-		"bulkgeneratingaddresses": "Création de l'adresse... ",
-		"brainalertpassphrasetooshort": "Le mot de passe que vous avez entré est trop court.\n\n",
-		"brainalertpassphrasewarning": "Attention: Choisir un mot de passe solide est important pour vous protéger des attaques bruteforce visant à trouver votre mot de passe et voler vos Bitcoins.",
-		"brainalertpassphrasedoesnotmatch": "Le mot de passe ne correspond pas au mot de passe de vérification.",
-		"detailalertnotvalidprivatekey": "Le texte que vous avez entré n'est pas une Clé Privée valide",
-		"detailconfirmsha256": "Le texte que vous avez entré n'est pas une Clé Privée valide!\n\nVoulez-vous utiliser le texte comme un mot de passe et créer une Clé Privée à partir d'un hash SHA256 de ce mot de passe?\n\nAttention: Choisir un mot de passe solide est important pour vous protéger des attaques bruteforce visant à trouver votre mot de passe et voler vos Bitcoins.",
-		"bip38alertincorrectpassphrase": "Incorrect passphrase for this encrypted private key.", //TODO: please translate
-		"bip38alertpassphraserequired": "Mot de passe a inventé pour crypter en BIP38",
-		"vanityinvalidinputcouldnotcombinekeys": "Entrée non valide. Impossible de combiner les clés.",
-		"vanityalertinvalidinputpublickeysmatch": "Entrée non valide. La clé publique des deux entrées est identique. Vous devez entrer deux clés différentes.",
-		"vanityalertinvalidinputcannotmultiple": "Entrée non valide. Il n'est pas possible de multiplier deux clés publiques. Sélectionner 'Ajouter' pour ajouter deux clés publiques pour obtenir une adresse Bitcoin.",
-		"vanityprivatekeyonlyavailable": "Seulement disponible si vos combinez deux clés privées",
-		"vanityalertinvalidinputprivatekeysmatch": "Entrée non valide. La clé Privée des deux entrées est identique. Vous devez entrer deux clés différentes.",
+		"paperlabelbitcoinaddress": "Adresse Bitcoin :",
+		"paperlabelprivatekey": "Clé Privée :",
+		"paperlabelencryptedkey": "Clé Privée Chiffrée (Mot de passe requis)",
+		"bulkgeneratingaddresses": "Génération des adresses... ",
+		"brainalertpassphrasetooshort": "La phrase de passe que vous avez saisie est trop courte.\n\n",
+		"brainalertpassphrasewarning": "Attention : Choisir une phrase de passe solide est essentiel pour vous protéger des attaques par force brute visant à deviner votre phrase de passe et voler vos Bitcoins.",
+		"brainalertpassphrasedoesnotmatch": "La phrase de passe ne correspond pas à la confirmation.",
+		"detailalertnotvalidprivatekey": "Le texte saisi n'est pas une Clé Privée valide",
+		"detailconfirmsha256": "Le texte saisi n'est pas une Clé Privée valide !\n\nVoulez-vous utiliser ce texte comme phrase de passe et créer une Clé Privée via un hash SHA256 de cette phrase ?\n\nAttention : Choisir une phrase de passe solide est essentiel pour vous protéger des attaques par force brute.",
+		"detailbip38decryptbutton": "Déchiffrer BIP38",
+		"detailbip38encryptbutton": "Chiffrer BIP38",
+		"bip38alertincorrectpassphrase": "Phrase de passe incorrecte pour cette clé privée chiffrée.",
+		"bip38alertpassphraserequired": "Une phrase de passe est requise pour la clé BIP38",
+		"vanityinvalidinputcouldnotcombinekeys": "Entrée invalide. Impossible de combiner les clés.",
+		"vanityalertinvalidinputpublickeysmatch": "Entrée invalide. Les Clés Publiques des deux entrées sont identiques. Vous devez saisir deux clés différentes.",
+		"vanityalertinvalidinputcannotmultiple": "Entrée invalide. Il est impossible de multiplier deux clés publiques. Sélectionnez « Ajouter » pour additionner deux clés publiques.",
+		"vanityprivatekeyonlyavailable": "Disponible uniquement lors de la combinaison de deux clés privées",
+		"vanityalertinvalidinputprivatekeysmatch": "Entrée invalide. Les Clés Privées des deux entrées sont identiques. Vous devez saisir deux clés différentes.",
 
-		// header and menu html
+		// options des sélecteurs de type d'adresse
+		"paperaddrtype":  { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "SegWit Natif (bc1q…)", "taproot": "Taproot (bc1p…)" },
+		"bulkaddrtype":   { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "SegWit Natif (bc1q…)", "taproot": "Taproot (bc1p…)" },
+		"brainaddrtype":  { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "SegWit Natif (bc1q…)", "taproot": "Taproot (bc1p…)" },
+		"vanityaddrtype": { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "SegWit Natif (bc1q…)", "taproot": "Taproot (bc1p…)" },
+		"splitaddrtype":  { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "SegWit Natif (bc1q…)", "taproot": "Taproot (bc1p…)" },
+
+		// libellés de type d'adresse
+		"paperlabeladdrtype": "Type d'adresse :",
+		"bulklabeladdrtype": "Type d'adresse :",
+		"brainlabeladdrtype": "Type d'adresse :",
+		"vanitylabeladdrtype": "Type d'adresse :",
+		"splitlabeladdrtype": "Type d'adresse :",
+
+		// en-tête et menu
 		"tagline": "Générateur De Porte-Monnaie Bitcoin Javascript Hors-Ligne",
 		"generatelabelbitcoinaddress": "Création de l'adresse Bitcoin...",
 		"generatelabelmovemouse": "BOUGEZ votre souris pour ajouter de l'entropie...",
-		"generatelabelkeypress": "OU veuillez taper des caractères aléatoires dans le rectangle blanc suivant",
+		"generatelabelkeypress": "OU tapez des caractères aléatoires dans le champ ci-dessous",
 		"singlewallet": "Porte-Monnaie Simple",
 		"paperwallet": "Porte-Monnaie Papier",
 		"bulkwallet": "Porte-Monnaie En Vrac",
 		"brainwallet": "Porte-Monnaie Cerveau",
 		"vanitywallet": "Porte-Monnaie Vanité",
-		"splitwallet": "Split Wallet", //TODO: please translate
+		"splitwallet": "Porte-Monnaie Partagé",
 		"detailwallet": "Détails du Porte-Monnaie",
 
-		// footer html
-		"footerlabeldonations": "Dons:",
-		"footerlabeltranslatedby": "Traduction: 1Gy7NYSJNUYqUdXTBow5d7bCUEJkUFDFSq",
+		// porte-monnaie simple
+		"newaddress": "Générer Une Nouvelle Adresse",
+		"singleprint": "Imprimer",
+		"singlelabelbitcoinaddress": "Adresse Bitcoin (Legacy P2PKH)",
+		"singlelabelP2SH": "P2SH-P2WPKH (3…)",
+		"singlelabelSegwit": "SegWit Natif P2WPKH (bc1q…)",
+		"singlelabelTaproot": "Taproot P2TR (bc1p…)",
+		"singlelabelprivatekey": "Clé Privée (WIF compressé)",
+		"singleshare": "PARTAGER",
+		"singlesecret": "SECRET",
+		"singletip1": "Un porte-monnaie Bitcoin est simplement une paire constituée d'une adresse Bitcoin et de la clé privée correspondante. Ce porte-monnaie a été généré dans votre navigateur et est affiché ci-dessus.",
+		"singletip2": "Pour sécuriser ce porte-monnaie, imprimez-le ou enregistrez l'adresse et la clé privée. Il est important de conserver une copie de sauvegarde de la clé privée dans un endroit sûr. Ce site ne conserve aucune trace de votre clé privée. Si vous quittez ou rafraîchissez la page, ou cliquez sur « Générer Une Nouvelle Adresse », une nouvelle clé privée sera créée et l'ancienne sera définitivement perdue. Votre clé privée Bitcoin doit rester secrète — quiconque la possède peut dépenser vos fonds. Si vous imprimez votre porte-monnaie, conservez-le à l'abri de l'humidité. Traitez un porte-monnaie papier comme des espèces.",
+		"singletip3": "Pour alimenter ce porte-monnaie, demandez à vos correspondants d'envoyer des Bitcoins à votre adresse Bitcoin.",
+		"singletip4": "Vérifiez votre solde sur blockchain.info ou blockexplorer.com en y renseignant votre adresse Bitcoin.",
+		"singletip5": "Pour dépenser vos Bitcoins, rendez-vous sur blockchain.info et effectuez un « sweep » (transfert total) de votre clé privée. Vous pouvez aussi importer la clé dans un client Bitcoin. Notez que lors d'une transaction, la monnaie restante sera renvoyée vers une nouvelle adresse du portefeuille — pensez à effectuer une sauvegarde.",
+
+		// porte-monnaie papier
+		"paperlabelhideart": "Masquer l'image ?",
+		"paperlabeladdressesperpage": "Adresses par page :",
+		"paperlabeladdressestogenerate": "Nombre d'adresses à générer :",
+		"papergenerate": "Générer",
+		"paperprint": "Imprimer",
+		"paperlabelBIPpassphrase": "Phrase de passe :",
+		"paperlabelencrypt": "Chiffrement BIP38 ?",
+
+		// porte-monnaie en vrac
+		"bulklabelstartindex": "Index de départ :",
+		"bulklabelrowstogenerate": "Lignes à générer :",
+		"bulklabelcompressed": "Adresses compressées ?",
+		"bulkgenerate": "Générer",
+		"bulkprint": "Imprimer",
+		"bulklabelcsv": "Valeurs Séparées Par Des Virgules (CSV) :",
+		"bulklabelformat": "Index,Adresse,Clé Privée (WIF)",
+		"bulklabelencrypt": "Chiffrement BIP38 ?",
+		"bulklabelBIPpassphrase": "Phrase de passe :",
+		"bulklabelq1": "Pourquoi utiliser un Porte-Monnaie En Vrac pour accepter les Bitcoins sur mon site ?",
+		"bulklabelq2": "Comment utiliser le Porte-Monnaie En Vrac pour accepter les Bitcoins sur mon site ?",
+		"bulklabela2li1": "Utilisez l'onglet Porte-Monnaie En Vrac pour pré-générer un grand nombre d'adresses Bitcoin (10 000+). Copiez-collez les données CSV dans un fichier texte sécurisé. Sauvegardez ce fichier en lieu sûr.",
+		"bulklabela2li2": "Importez les adresses Bitcoin dans une base de données sur votre serveur web. (N'y mettez pas les clés privées — seulement les adresses visibles par les clients.)",
+		"bulklabela2li3": "Proposez le paiement en Bitcoin dans votre panier. Quand un client choisit Bitcoin, affichez-lui une adresse de votre base de données et associez-la à sa commande.",
+		"bulklabela2li4": "Abonnez-vous à un service de notification de paiement Bitcoin pour être averti des transactions. Une fois la notification reçue, traitez la commande. Pour vérifier manuellement, utilisez Block Explorer en remplaçant ADRESSE par l'adresse à vérifier.",
+		"bulklabela2li5": "Les Bitcoins s'accumulent en toute sécurité sur la blockchain. Utilisez le fichier de porte-monnaie généré à l'étape 1 pour les dépenser.",
+
+		// porte-monnaie cerveau
+		"brainlabelenterpassphrase": "Phrase de passe : ",
+		"brainlabelshow": "Afficher ?",
+		"brainprint": "Imprimer",
+		"brainlabelconfirm": "Confirmer la phrase de passe : ",
+		"brainlabelcompressed": "Adresse compressée ?",
+		"brainview": "Visualiser",
+		"brainalgorithm": "Algorithme : SHA256(phrase de passe)",
+		"brainlabelbitcoinaddress": "Adresse Bitcoin :",
+		"brainlabelprivatekey": "Clé Privée (Format d'importation) :",
+
+		// porte-monnaie vanité
+		"vanitylabelstep1": "Étape 1 — Générer votre paire de clés",
+		"vanitynewkeypair": "Générer",
+		"vanitylabelstep1publickey": "Clé Publique (Étape 1) :",
+		"vanitylabelstep1pubnotes": "Copiez-collez cette clé dans le champ « Votre Clé Publique » du site Vanity Pool.",
+		"vanitylabelstep1privatekey": "Clé Privée (Étape 1) :",
+		"vanitylabelstep1privnotes": "Copiez-collez cette Clé Privée dans un fichier texte. Idéalement, sauvegardez-la sur un support chiffré. Elle sera nécessaire pour récupérer la Clé Privée une fois que Vanity Pool aura trouvé votre préfixe.",
+		"vanitylabelstep2calculateyourvanitywallet": "Étape 2 — Calculer votre Porte-Monnaie Vanité",
+		"vanitylabelenteryourpart": "Entrez votre Clé Privée (générée à l'étape 1 et préalablement sauvegardée) :",
+		"vanitylabelnote1": "[NOTE : ce champ accepte une clé publique ou une clé privée]",
+		"vanitylabelenteryourpoolpart": "Entrez la Clé Privée du Pool (issue de Vanity Pool) :",
+		"vanitylabelnote2": "[NOTE : ce champ accepte une clé publique ou une clé privée]",
+		"vanitylabelradioadd": "Ajouter",
+		"vanitylabelradiomultiply": "Multiplier",
+		"vanitycalc": "Calculer le Porte-Monnaie Vanité",
+		"vanitylabelbitcoinaddress": "Adresse Bitcoin Vanité :",
+		"vanitylabelnotesbitcoinaddress": "L'adresse ci-dessus est votre nouvelle adresse qui devrait inclure le préfixe désiré.",
+		"vanitylabelpublickeyhex": "Clé Publique Vanité (HEX) :",
+		"vanitylabelnotespublickeyhex": "La Clé Publique en format hexadécimal.",
+		"vanitylabelprivatekey": "Clé Privée Vanité (WIF) :",
+		"vanitylabelnotesprivatekey": "La Clé Privée à importer dans votre porte-monnaie.",
+
+		// porte-monnaie partagé
+		"splitlabelthreshold": "Nombre minimum de parts pour reconstituer",
+		"splitlabelshares": "Nombre de parts",
+		"splitview": "Générer",
+		"combinelabelentershares": "Entrez les parts disponibles (séparées par des espaces)",
+		"combineview": "Reconstituer",
+		"combinelabelprivatekey": "Clé Privée Reconstituée",
+
+		// détails du porte-monnaie
+		"detaillabelenterprivatekey": "Entrez la Clé Privée",
+		"detailkeyformats": "Formats : WIF, WIFC, HEX, B64, B6, MINI, BIP38",
+		"detailview": "Voir les Détails",
+		"detailprint": "Imprimer",
+		"detaillabelencrypt": "Chiffrer en BIP38 ?",
+		"detaillabelpassphrase": "Phrase de passe BIP38",
+		"detaillabelnote1": "Votre Clé Privée Bitcoin est un nombre secret connu de vous seul. Elle peut être encodée sous différents formats. Ci-dessous sont affichés l'adresse Bitcoin et la Clé Publique correspondant à votre Clé Privée, ainsi que la Clé Privée dans les formats les plus courants (WIF, WIFC, HEX, B64).",
+		"detaillabelnote2": "Bitcoin v0.6+ conserve les clés publiques en format compressé. Le client supporte désormais l'import/export de clés privées via importprivkey/dumpprivkey. Le format de la clé exportée dépend du type de porte-monnaie d'origine.",
+		"detaillabelbitcoinaddress": "Adresse Bitcoin (Legacy P2PKH)",
+		"detaillabelbitcoinaddresscomp": "Adresse Bitcoin Compressée (Legacy P2PKH)",
+		"detaillabelP2SH": "Adresse P2SH-P2WPKH (3…)",
+		"detaillabelSegwit": "SegWit Natif P2WPKH (bc1q…)",
+		"detaillabelTaproot": "Taproot P2TR (bc1p…)",
+		"detaillabelpublickey": "Clé Publique (130 caractères [0-9A-F]) :",
+		"detaillabelpublickeycomp": "Clé Publique compressée (66 caractères [0-9A-F]) :",
+		"detaillabelprivwif": "Clé Privée WIF\n51 caractères base58, commence par un",
+		"detailwifprefix": "« 5 »",
+		"detaillabelprivwifcomp": "Clé Privée WIF compressée\n52 caractères base58, commence par un",
+		"detailcompwifprefix": "« K » ou « L »",
+		"detaillabelprivhex": "Clé Privée Format Hexadécimal (64 caractères [0-9A-F]) :",
+		"detaillabelprivb64": "Clé Privée Base64 (44 caractères) :",
+		"detaillabelprivmini": "Clé Privée Format Mini (22, 26 ou 30 caractères, commence par « S ») :",
+		"detaillabelprivb6": "Clé Privée Format Base6 (99 caractères [0-5]) :",
+		"detaillabelq1": "Comment créer un porte-monnaie avec des dés ? Qu'est-ce que B6 ?",
+		"deaila1": "Une partie importante de la création d'un porte-monnaie Bitcoin consiste à s'assurer que les nombres aléatoires utilisés sont véritablement aléatoires. L'aléatoire physique est supérieur au pseudo-aléatoire informatique. Le moyen le plus simple est d'utiliser des dés. Pour créer une clé privée Bitcoin, lancez un dé à six faces 99 fois et notez chaque résultat selon la règle : 1=1, 2=2, 3=3, 4=4, 5=5, 6=0. Vous obtenez ainsi votre clé privée en format B6 (base 6). Saisissez ensuite les 99 caractères dans le champ ci-dessus et cliquez sur « Voir les Détails ».",
+
+		// pied de page
+		"footerlabeldonations": "Dons :",
+		"footerlabeltranslatedby": "Traduction : 1Gy7NYSJNUYqUdXTBow5d7bCUEJkUFDFSq",
 		"footerlabelpgp": "PGP",
-		"footerlabelversion": "Historique De Version",
+		"footerlabelversion": "Historique des Versions",
 		"footerlabelgithub": "Dépôt GitHub",
 		"footerlabelgithubzip": "zip",
 		"footerlabelsig": "sig",
 		"footerlabelcopyright1": "Copyright bitaddress.org.",
-		"footerlabelcopyright2": "Les droits d'auteurs JavaScript sont inclus dans le code source.",
+		"footerlabelcopyright2": "Les droits d'auteur JavaScript sont inclus dans le code source.",
 		"footerlabelnowarranty": "Aucune garantie.",
 
-		// status html
-		"statuslabelcryptogood": "&#10004; Good!", //TODO: please translate
-		"statuslabelcryptogood1": "Your browser can generate cryptographically random keys using window.crypto.getRandomValues", //TODO: please translate
-		"statusokcryptogood": "OK", //TODO: please translate
-		"statuslabelcryptobad": "&times; Oh no!", //TODO: please translate
-		"statuslabelcryptobad1": "Your browser does NOT support window.crypto.getRandomValues. You should use a more modern browser with this generator to increase the security of the keys generated.",
-		"statusokcryptobad": "OK", //TODO: please translate
-		"statuslabelunittestsgood": "&#10004; Good!", //TODO: please translate
-		"statuslabelunittestsgood1": "All synchronous unit tests passed.", //TODO: please translate
-		"statusokunittestsgood": "OK", //TODO: please translate
-		"statuslabelunittestsbad": "&times; Oh no!", //TODO: please translate
-		"statuslabelunittestsbad1": "Some synchronous unit tests DID NOT pass. You should find another browser to use with this generator.", //TODO: please translate
-		"statusokunittestsbad": "OK", //TODO: please translate
-		"statuslabelprotocolgood": "&#10004; Good!", //TODO: please translate
-		"statuslabelprotocolgood1": "You are running this generator from your local computer. <br />Tip: Double check you are offline by trying ", //TODO: please translate
-		"statusokprotocolgood": "OK", //TODO: please translate
-		"statuslabelprotocolbad": "&#9888; Think twice!", //TODO: please translate
-		"statuslabelprotocolbad1": "You appear to be running this generator online from a live website. For valuable wallets it is recommended to", //TODO: please translate
-		"statuslabelprotocolbad2": "download", //TODO: please translate
-		"statuslabelprotocolbad3": "the zip file from GitHub and run this generator offline as a local html file.", //TODO: please translate
-		"statusokprotocolbad": "OK", //TODO: please translate
-		"statuslabelkeypool1": "This is a log of all the Bitcoin Addresses and Private Keys you generated during your current session. Reloading the page will create a new session.", //TODO: please translate
-		"statuskeypoolrefresh": "Refresh", //TODO: please translate
-		"statusokkeypool": "OK", //TODO: please translate
-
-		// single wallet html
-		"newaddress": "Générer Une Nouvelle Adresse",
-		"singleprint": "Imprimer",
-		"singlelabelbitcoinaddress": "Adresse Bitcoin:",
-		"singlelabelprivatekey": "Clé Privée (Format d'importation de porte-monnaie):",
-		"singletip1": "Un porte-monnaie Bitcoin est aussi simple qu'une paire d'adresses Bitcoin dont une correspond à l'adresse privée Bitcoin. Ce porte-monnaie affiché a été généré pour vous dans votre propre navigateur internet et est donc affiché ci-dessus.",
-		"singletip2": "Pour garder en sécurité ce porte-monnaie, vous devez l'imprimer ou, alternativement, enregistrer l'adresse de réception Bitcoin et la clé privée. Il est important de créer une copie de sauvegarde de la clé privée et de la stocker à un endroit sûr. Ce site n'a aucune base prédéterminée ou de sauvegarde de votre clé privée. Si vous êtes initiés à PGP, vous pouvez télécharger la version toute-en-1 de la page HTML et ainsi vérifier que vous avez une version authentique issue de l'auteur du site en comparant l'encryptage SHA1 de votre page HTML sauvegardée avec l'encryptage SHA1 disponible sur l'historique certifiée indiquée en bas de ce site. Si vous quittez ou rafraichissez ce site ou que vous appuyez sur \"générer une nouvelle adresse\" ... alors une nouvelle clé privée sera générée et la précédente clé privée affichée ne pourra plus être retrouvée. Votre clé privée Bitcoin doit être gardée secrète. Celui qui connaît la clé privée aura la possibilité de vider tous les bitcoins accumulés et associés à l'adresse de réception. Si vous imprimez le porte-monnaie, pensez à le mettre à l'abri de l'eau dans un sac étanche. Traitez le porte-monnaie papier comme de l'argent en espèces et billets.",
-		"singletip3": "Pour ajouter des fonds à votre porte-monnaie, indiquez d'envoyer les Bitcoins à votre adresse de réception.",
-		"singletip4": "Vérifier le contenu de votre porte-monnaie en consultant blockchain.info ou blockexplorer.com et en y tapant votre adresse de réception Bitcoin.",
-		"singletip5": "Pour dépenser vos bitcoins, allez sur blockchain.info et transférez l'ensemble des fonds de votre adresse privée vers le compte de ce site. Vous pouvez, aussi, dépenser vos fonds en téléchargeant un des programmes P2P bitcoin populaires et en y important votre clé privée dans un porte-monnaie P2P. Gardez à l'esprit que quand vous importez votre clé privée dans le programme P2P bitcoin et que vous dépensez vos fonds, votre clé privée sera intégrée avec d'autres clés privées dans le porte-monnaie P2P. Quand vous effectuez une transaction, le changement sera envoyé sur une autre adresse bitcoin privée à l'intérieur du porte-monnaie P2P. Vous DEVEZ, alors, faire une sauvegarde du porte-monnaie P2P et le garder en sécurité car l'ensemble des bitcoins restant y sera stocké. Satoshi a averti qu'il ne faudrait jamais supprimer un porte-monnaie.",
-		"singleshare": "PARTAGER",
-		"singlesecret": "SECRET",
-
-		// paper wallet html
-		"paperlabelhideart": "Enlever l'image ?",
-		"paperlabeladdressesperpage": "Adresses par page:",
-		"paperlabeladdressestogenerate": "Nombre d'adresses à créer:",
-		"papergenerate": "Générer",
-		"paperprint": "Imprimer",
-		"paperlabelBIPpassphrase": "mot de passe:",
-		"paperlabelencrypt": "Cryptage en BIP38 ?", //TODO: please translate
-
-		// bulk wallet html
-		"bulklabelstartindex": "Commencer à l'index:",
-		"bulklabelrowstogenerate": "Colonnes à générer:",
-		"bulklabelcompressed": "Compressed addresses?", //TODO: please translate
-		"bulkgenerate": "Générer",
-		"bulkprint": "Imprimer",
-		"bulklabelcsv": "Valeurs Séparées Par Des Virgules (CSV):",
-		"bulklabelformat": "Index,Adresse,Clé Privée (WIF)",
-		"bulklabelq1": "Pourquoi utiliserais-je un Porte-monnaie en vrac pour accepter les Bitcoins sur mon site web?",
-		"bulka1": "L'approche traditionnelle pour accepter des Bitcoins sur votre site web requière l'installation du logiciel Bitcoin officiel (\"bitcoind\"). Plusieurs hébergeurs ne supportent pas l'installation du logiciel Bitcoin. De plus, faire fonctionner le logiciel Bitcoin sur votre serveur web signifie que vos clés privées sont hébergées sur le serveur et pourraient donc être volées si votre serveur web était compromis. En utilisant un Porte-monnaie en vrac, vous pouvez publiquer seulement les adresses Bitcoin sur votre serveur et non les clés privées. Vous n'avez alors pas à vous inquiéter du risque de vous faire voler votre porte-monnaie si votre serveur était compromis.",
-		"bulklabelq2": "Comment utiliser le Porte-monnaie en vrac pour utiliser le Bitcoin sur mon site web?",
-		"bulklabela2li1": "Utilisez le Porte-monnaie en vrac pour pré-générer une large quantité d'adresses Bitcoin (10,000+). Copiez collez les données séparées par des virgules (CSV) dans un fichier texte sécurisé dans votre ordinateur. Sauvegardez ce fichier dans un endroit sécurisé.",
-		"bulklabela2li2": "Importez les adresses Bitcoin dans une base de donnée sur votre serveur web. (N'ajoutez pas le porte-monnaie ou les clés privées sur votre serveur web, sinon vous courrez le risque de vous faire voler si votre serveur est compromis. Ajoutez seulement les adresses Bitcoin qui seront visibles à vos visiteurs.)",
-		"bulklabela2li3": "Ajoutez une option dans votre panier en ligne pour que vos clients puissent vous payer en Bitcoin. Quand un client choisi de vous payer en Bitcoin, vous pouvez afficher une des adresses de votre base de donnée comme \"adresse de paiment\" pour votre client et sauvegarder cette adresse avec sa commande.",
-		"bulklabela2li4": "Vous avez maintenant besoin d'être avisé quand le paiement est reçu. Cherchez \"bitcoin payment notification\" sur Google et inscrivez-vous à un service de notification de paiement Bitcoin. Il y a plusieurs services qui vous avertiront via des services Web, API, SMS, Email, etc. Une fois que vous avez reçu la notification, qui devrait être programmée automatiquement, vous pouvez traiter la commande de votre client. Pour vérifier manuellement si un paiement est arrivé, vous pouvez utiliser Block Explorer. Remplacez ADRESSE par l'adresse Bitcoin que vous souhaitez vérifier. La confirmation de la transaction pourrait prendre de 10 à 60 minutes pour être confirmée.<br />http://www.blockexplorer.com/address/ADRESSE<br /><br />Les transactions non confirmées peuvent être visualisées ici: http://blockchain.info/ <br />Vous devriez voir la transaction à l'intérieur de 30 secondes.",
-		"bulklabela2li5": "Les Bitcoins vos s'accumuler de façon sécuritaire dans la chaîne de blocs. Utilisez le porte-monnaie original que vous avez généré à l'étape 1 pour les dépenser.",
-
-		// brain wallet html
-		"brainlabelenterpassphrase": "Entrez votre mot de passe: ",
-		"brainlabelshow": "Afficher?",
-		"brainprint": "Imprimer",
-		"brainlabelconfirm": "Confirmer le mot de passe: ",
-		"brainview": "Visualiser",
-		"brainalgorithm": "Algorithme: SHA256(mot de passe)",
-		"brainlabelbitcoinaddress": "Adresse Bitcoin:",
-		"brainlabelprivatekey": "Clé Privée (Format d'importation de porte-monnaie):",
-
-		// vanity wallet html
-		"vanitylabelstep1": "Étape 1 - Générer votre \"Étape 1 Paire De Clés\"",
-		"vanitynewkeypair": "Générer",
-		"vanitylabelstep1publickey": "Étape 1 Clé Publique:",
-		"vanitylabelstep1pubnotes": "Copiez celle-ci dans la case Votre-Clé-Publique du site de Vanity Pool.",
-		"vanitylabelstep1privatekey": "Step 1 Clé Privée:",
-		"vanitylabelstep1privnotes": "Copiez la cette Clé Privée dans un fichier texte. Idéalement, sauvegardez la dans un fichier encrypté. Vous en aurez besoin pour récupérer la Clé Privée lors que Vanity Pool aura trouvé votre préfixe.",
-		"vanitylabelstep2calculateyourvanitywallet": "Étape 2 - Calculer votre Porte-monnaie Vanité",
-		"vanitylabelenteryourpart": "Entrez votre Clé Privée (générée à l'étape 1 plus haut et précédemment sauvegardée):",
-		"vanitylabelenteryourpoolpart": "Entrez la Clé Privée (provenant de Vanity Pool):",
-		"vanitylabelnote1": "[NOTE: cette case peut accepter une clé publique ou un clé privée]",
-		"vanitylabelnote2": "[NOTE: cette case peut accepter une clé publique ou un clé privée]",
-		"vanitylabelradioadd": "Ajouter",
-		"vanitylabelradiomultiply": "Multiplier",
-		"vanitycalc": "Calculer Le Porte-monnaie Vanité",
-		"vanitylabelbitcoinaddress": "Adresse Bitcoin Vanité:",
-		"vanitylabelnotesbitcoinaddress": "Ci-haut est votre nouvelle adresse qui devrait inclure le préfix requis.",
-		"vanitylabelpublickeyhex": "Clé Public Vanité (HEX):",
-		"vanitylabelnotespublickeyhex": "Celle-ci est la Clé Publique dans le format hexadécimal. ",
-		"vanitylabelprivatekey": "Clé Privée Vanité (WIF):",
-		"vanitylabelnotesprivatekey": "Celle-ci est la Clé Privée pour accéder à votre porte-monnaie. ",
-
-		// detail wallet html
-		"detaillabelenterprivatekey": "Entrez la Clé Privée",
-		"detailkeyformats": "Key Formats: WIF, WIFC, HEX, B64, B6, MINI, BIP38",
-		"detailview": "Voir les détails",
-		"detailprint": "Imprimer",
-		"detaillabelnote1": "Votre Clé Privée Bitcoin est un nombre secret que vous êtes le seul à connaître. Il peut être encodé sous la forme d'un nombre sous différents formats. Ci-bas, nous affichons l'adresse Bitcoin et la Clé Publique qui corresponds à la Clé Privée ainsi que la Clé Privée dans les formats d'encodage les plus populaires (WIF, WIFC, HEX, B64).",
-		"detaillabelnote2": "Bitcoin v0.6+ conserve les clés publiques dans un format compressé. Le logiciel supporte maintenant aussi l'importation et l'exportation de clés privées avec importprivkey/dumpprivkey. Le format de la clé privée exportée est déterminé selon la version du porte-monnaie Bitcoin.",
-		"detaillabelbitcoinaddress": "Adresse Bitcoin:",
-		"detaillabelbitcoinaddresscomp": "Adresse Bitcoin (compressée):",
-		"detaillabelpublickey": "Clé Publique (130 caractères [0-9A-F]):",
-		"detaillabelpublickeycomp": "Clé Publique (compressée, 66 caractères [0-9A-F]):",
-		"detaillabelprivwif": "Clé Privée WIF (51 caractères base58, débute avec un a",
-		"detaillabelprivwifcomp": "Clé Privée WIF (compressée, 52 caractères base58, débute avec un a",
-		"detailcompwifprefix": "'K' ou 'L'",
-		"detaillabelprivhex": "Clé Privée Format Hexadecimal (64 caractères [0-9A-F]):",
-		"detaillabelprivb64": "Clé Privée Base64 (44 caractères):",
-		"detaillabelprivmini": "Clé Privée Format Mini (22, 26 ou 30 caractères, débute avec un 'S'):",
-		"detaillabelpassphrase": "BIP38 Passphrase", //TODO: please translate
-		"detailbip38decryptbutton": "Decrypt BIP38", //TODO: please translate
-		"detailbip38encryptbutton": "Encrypt BIP38", //TODO: please translate
-		"detaillabelq1": "How do I make a wallet using dice? What is B6?", //TODO: please translate
-		"detaila1": "An important part of creating a Bitcoin wallet is ensuring the random numbers used to create the wallet are truly random. Physical randomness is better than computer generated pseudo-randomness. The easiest way to generate physical randomness is with dice. To create a Bitcoin private key you only need one six sided die which you roll 99 times. Stopping each time to record the value of the die. When recording the values follow these rules: 1=1, 2=2, 3=3, 4=4, 5=5, 6=0. By doing this you are recording the big random number, your private key, in B6 or base 6 format. You can then enter the 99 character base 6 private key into the text field above and click View Details. You will then see the Bitcoin address associated with your private key. You should also make note of your private key in WIF format since it is more widely used." //TODO: please translate
+		// barre de statut
+		"statuslabelcryptogood": "&#10004; Parfait !",
+		"statuslabelcryptogood1": "Votre navigateur peut générer des clés cryptographiquement aléatoires via window.crypto.getRandomValues",
+		"statusokcryptogood": "OK",
+		"statuslabelcryptobad": "&times; Attention !",
+		"statuslabelcryptobad1": "Votre navigateur ne supporte PAS window.crypto.getRandomValues. Utilisez un navigateur plus récent pour améliorer la sécurité des clés générées.",
+		"statusokcryptobad": "OK",
+		"statuslabelunittestsgood": "&#10004; Parfait !",
+		"statuslabelunittestsgood1": "Tous les tests unitaires synchrones ont réussi.",
+		"statusokunittestsgood": "OK",
+		"statuslabelunittestsbad": "&times; Attention !",
+		"statuslabelunittestsbad1": "Certains tests unitaires synchrones ont ÉCHOUÉ. Utilisez un autre navigateur pour ce générateur.",
+		"statusokunittestsbad": "OK",
+		"statuslabelprotocolgood": "&#10004; Parfait !",
+		"statuslabelprotocolgood1": "Vous exécutez ce générateur depuis votre ordinateur local. <br />Conseil : Vérifiez que vous êtes bien hors ligne en essayant ",
+		"statusokprotocolgood": "OK",
+		"statuslabelprotocolbad": "&#9888; Réfléchissez !",
+		"statuslabelprotocolbad1": "Vous semblez utiliser ce générateur en ligne depuis un site web. Pour des porte-monnaies de valeur, il est recommandé de",
+		"statuslabelprotocolbad2": "télécharger",
+		"statuslabelprotocolbad3": "le fichier zip depuis GitHub et d'exécuter ce générateur hors ligne en tant que fichier HTML local.",
+		"statusokprotocolbad": "OK",
+		"statuslabelkeypool1": "Ceci est un journal de toutes les adresses Bitcoin et clés privées générées durant votre session. Recharger la page créera une nouvelle session.",
+		"statuskeypoolrefresh": "Actualiser",
+		"statusokkeypool": "OK"
 	};
 })(ninja.translator);

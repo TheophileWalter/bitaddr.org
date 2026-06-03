@@ -1,4 +1,4 @@
-﻿(function (translator) {
+(function (translator) {
 	translator.translations["hu"] = {
 		// 02-MAR-2014 16:57
 		// javascript alerts or messages
@@ -19,6 +19,20 @@
 		"vanityalertinvalidinputcannotmultiple": "Érvénytelen bemenet. Két nyilvános kulcs összeszorzása nem lehetséges. Válassza az 'Összeadás'-t, ha két nyilvános kulcsból szeretne egy bitcoin címet kapni.",
 		"vanityprivatekeyonlyavailable": "Csak két privát kulcs kombinálásakor lehetséges",
 		"vanityalertinvalidinputprivatekeysmatch": "Érvénytelen bemenet. A két megadott privát kulcs azonos. Két különböző kulcs bevitelére van szükség.",
+
+		// address type select options
+		"paperaddrtype":  { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "Natív SegWit (bc1q…)", "taproot": "Taproot (bc1p…)" },
+		"bulkaddrtype":   { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "Natív SegWit (bc1q…)", "taproot": "Taproot (bc1p…)" },
+		"brainaddrtype":  { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "Natív SegWit (bc1q…)", "taproot": "Taproot (bc1p…)" },
+		"vanityaddrtype": { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "Natív SegWit (bc1q…)", "taproot": "Taproot (bc1p…)" },
+		"splitaddrtype":  { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "Natív SegWit (bc1q…)", "taproot": "Taproot (bc1p…)" },
+
+		// address type labels
+		"paperlabeladdrtype": "Cím típusa:",
+		"bulklabeladdrtype": "Cím típusa:",
+		"brainlabeladdrtype": "Cím típusa:",
+		"vanitylabeladdrtype": "Cím típusa:",
+		"splitlabeladdrtype": "Cím típusa:",
 
 		// header and menu html
 		"tagline": "Nyílt forráskódú, ügyfél oldali JavaScript Bitcoin tárca készítő program",
@@ -46,35 +60,38 @@
 		"footerlabelnowarranty": "Garancia nincs.",
 
 		// status html
-		"statuslabelcryptogood": "&#10004; Helyes!", 
-		"statuslabelcryptogood1": "A böngészője képes kriptográfiai szempontból véletlen kulcsok generálására (a window.crypto.getRandomValues metódus támogatott)", 
-		"statusokcryptogood": "Rendben", 
-		"statuslabelcryptobad": "&times; Ó jaj!", 
+		"statuslabelcryptogood": "&#10004; Helyes!",
+		"statuslabelcryptogood1": "A böngészője képes kriptográfiai szempontból véletlen kulcsok generálására (a window.crypto.getRandomValues metódus támogatott)",
+		"statusokcryptogood": "Rendben",
+		"statuslabelcryptobad": "&times; Ó jaj!",
 		"statuslabelcryptobad1": "Böngészője NEM támogatja a window.crypto.getRandomValues metódust. A metódust támogató, modernebb böngészőt kell használnia, ha növelni szeretné a generált kulcsok biztonsági szintjét!",
-		"statusokcryptobad": "Rendben", 
-		"statuslabelunittestsgood": "&#10004; Helyes!", 
-		"statuslabelunittestsgood1": "Minden szinkron unit-teszt sikeres.", 
-		"statusokunittestsgood": "Rendben", 
-		"statuslabelunittestsbad": "&times; Ó, jaj!", 
-		"statuslabelunittestsbad1": "Néhány szinkron unit-teszt NEM volt sikeres. Jobb, ha egy másik böngészőt használ ehhez a generátorhoz!", 
-		"statusokunittestsbad": "Rendben", 
-		"statuslabelprotocolgood": "&#10004; Helyes!", 
-		"statuslabelprotocolgood1": "Ezt a generátort a helyi gépről futtatja. <br />Tipp: Győzdjön meg róla, hogy nem kapcsolódik a hálózatra: ", 
-		"statusokprotocolgood": "Rendben", 
+		"statusokcryptobad": "Rendben",
+		"statuslabelunittestsgood": "&#10004; Helyes!",
+		"statuslabelunittestsgood1": "Minden szinkron unit-teszt sikeres.",
+		"statusokunittestsgood": "Rendben",
+		"statuslabelunittestsbad": "&times; Ó, jaj!",
+		"statuslabelunittestsbad1": "Néhány szinkron unit-teszt NEM volt sikeres. Jobb, ha egy másik böngészőt használ ehhez a generátorhoz!",
+		"statusokunittestsbad": "Rendben",
+		"statuslabelprotocolgood": "&#10004; Helyes!",
+		"statuslabelprotocolgood1": "Ezt a generátort a helyi gépről futtatja. <br />Tipp: Győzdjön meg róla, hogy nem kapcsolódik a hálózatra: ",
+		"statusokprotocolgood": "Rendben",
 		"statuslabelprotocolbad": "&#9888; Gondolja át!",
-		"statuslabelprotocolbad1": "A jelek szerint élő honlapról futtatja a generátort. Használható tárcák készítéséhez javasoljuk, hogy ", 
-		"statuslabelprotocolbad2": "töltse le", 
-		"statuslabelprotocolbad3": "a GitHub-on található zip állományt és futtassa a generátort offline módban, helyi html állományként.", 
-		"statusokprotocolbad": "Rendben", 
-		"statuslabelkeypool1": "Az ügymenet során készített valamennyi Bitcoin cím és privát kulcs naplója. A lap újratöltésével új ügymenetet indíthat.", 
-		"statuskeypoolrefresh": "Frissítés", 
-		"statusokkeypool": "Rendben", 
+		"statuslabelprotocolbad1": "A jelek szerint élő honlapról futtatja a generátort. Használható tárcák készítéséhez javasoljuk, hogy ",
+		"statuslabelprotocolbad2": "töltse le",
+		"statuslabelprotocolbad3": "a GitHub-on található zip állományt és futtassa a generátort offline módban, helyi html állományként.",
+		"statusokprotocolbad": "Rendben",
+		"statuslabelkeypool1": "Az ügymenet során készített valamennyi Bitcoin cím és privát kulcs naplója. A lap újratöltésével új ügymenetet indíthat.",
+		"statuskeypoolrefresh": "Frissítés",
+		"statusokkeypool": "Rendben",
 
 		// single wallet html
 		"newaddress": "Új cím előállítása",
 		"singleprint": "Nyomtatás",
-		"singlelabelbitcoinaddress": "Bitcoin cím:",
-		"singlelabelprivatekey": "Privát kulcs:",
+		"singlelabelbitcoinaddress": "Bitcoin cím (Legacy P2PKH)",
+		"singlelabelP2SH": "P2SH-P2WPKH (3…)",
+		"singlelabelSegwit": "Natív SegWit P2WPKH (bc1q…)",
+		"singlelabelTaproot": "Taproot P2TR (bc1p…)",
+		"singlelabelprivatekey": "Privát kulcs (WIF tömörített)",
 		"singletip1": "<b>A bitcoin pénztárca</b> nem más, mint egy bitcoin címből és a hozzá tartozó privát kulcsból álló számpár. Egy ilyen pénztárcát állítottunk elő és jelenítettünk meg fent az Ön számára a Web böngészőben.",
 		"singletip2": "<b>A pénztárca biztonságos megőrzése</b> érdekében nyomtassa ki vagy más módon rögzítse a bitcoin címet és privát kulcsot. Fontos, hogy a privát kulcsból készítsen másolatot, és tárolja biztonságos helyen. Ez a webhely nem tárol az ön privát kulcsaival kapcsolatos információt. Ha ismeri a PGP-t, akkor egyben letöltheti az egész honlapot, és ellenőrizheti, hogy a webhely szerzője álatal írt valódi változatot töltötte-e le. Ehhez össze kell hasonlítania a HTML-ből képzett SHA256 zanzát a webhely láblécében hivatkozott, digitálisan aláírt verzió történetben lévő SHA256 zanzával. Amennyiben elhagyja vagy frissíti a webhelyet illetve megnyomja az 'Új cím előállítása' gombot, akkor új privát kulcs készül és az előzőleg megjelenített privát kulcs elvész. A bitcoin címhez tartozó privát kulcsot titokban kell tartani. Bárki, aki megszerzi ezt a kulcsot, el tudja költeni a címhez tartozó valamennyi bitcoint. Ha kinyomtatja a pénztárcát, akkor tárolja egy villámzáras vízhatlan nejlonzacskóban. A papírtárcát kezelje úgy, mintha pénz lenne.",
 		"singletip3": "<b>Pénzt úgy tehet</b> a pénztárcájába, hogy másokkal bitcoinokat küldet erre a Bitcoin címre.",
@@ -154,8 +171,11 @@
 		"detailprint": "Nyomtatás",
 		"detaillabelnote1": "A Bitcoin Privát Kulcs egy titkos szám, melyet csak Ön ismer. Számos különböző formátumban kódolható. Az alábbiakban megjelenítettük a a Privát Kulcshoz tartozó Bitcoin Címet és Publikus kulcsot, valamint a Privát Kulcsot a legnépszerűbb kódolási formátumokban (WIF, WIFC, HEX, B64).",
 		"detaillabelnote2": "A Bitcoin v0.6+ a publikus kulcsokat tömörített formátumban tárolja. A kliens az importprivkey/dumpprivkey parancsokkal a privát kulcsok importálását és exportálását is támogatja. Az exportált privát kulcsok formátumát csupán a Bitcoin pénztárca verziószáma határozza meg.",
-		"detaillabelbitcoinaddress": "Bitcoin cím:",
-		"detaillabelbitcoinaddresscomp": "Tömörített Bitcoin cím:",
+		"detaillabelbitcoinaddress": "Bitcoin cím (Legacy P2PKH)",
+		"detaillabelbitcoinaddresscomp": "Tömörített Bitcoin cím (Legacy P2PKH)",
+		"detaillabelP2SH": "P2SH-P2WPKH Cím (3…)",
+		"detaillabelSegwit": "Natív SegWit P2WPKH (bc1q…)",
+		"detaillabelTaproot": "Taproot P2TR (bc1p…)",
 		"detaillabelpublickey": "Publikus Kulcs (130 karakter [0-9A-F]):",
 		"detaillabelpublickeycomp": "Tömörített Publikus Kulcs (66 karakter [0-9A-F]):",
 		"detaillabelprivwif": "WIF Privát Kulcs <br />51 db base58 karakter, melynek kezdete",
@@ -166,7 +186,7 @@
 		"detaillabelprivmini": "Mini formátumú Privát Kulcs (22, 26 vagy 30 karakter, amely egy 'S'-sel kezdődik):",
 		"detaillabelpassphrase": "BIP38 jelmondat",
 		"detailbip38decryptbutton": "BIP38 dekódolás",
-		"detailbip38encryptbutton": "BIP38 titkosítás", 
+		"detailbip38encryptbutton": "BIP38 titkosítás",
 		"detaillabelq1": "Hogyan lehet dobókockával pénztárcát készíteni? Mit jelent a B6 formátum?",
 		"detaila1": "A Bitcoin pénztárca előállításakor nagyon fontos, hogy a felhasznált véletlen számok valóban véletlenek legyenek. A fizikai véletlen jobb, mint a számítógéppel előállított pszeudo-véletlen. Fizikai véletlen a legegyszerűbben egy dobókockával állítható elő. Ha szeretne egy Bitcoin privát címet előállítani, akkor csupán egy dobókockára van szüksége, mellyel 99-szer kell dobni. Jegyezze fel minden egyes dobása eredményét. Az eredmények feljegyzésekor a következő szabályokat kövesse: 1->1, 2->2, 3->3, 4->4, 5->5, 6->0. Ha így tesz, akkor a privát kulcshoz tartozó véletlen számot B6 formátumban, vagyis 6-os számrendszerben rögzíti. Írja be ezt a 99 karakterből álló 6-os számrendszerbeli privát kulcsot a fenti szövegmezőbe, majd nyomja meg a 'Részletek megjelenítése' gombot. Ekkor megjelenik az a Bitcoin cím, amely ehhez a privát kulcshoz tartozik. Érdemes felírni a WIF formátumú privát kulcsot is, mivel ezt szélesebb körben használják."
 	};

@@ -1,4 +1,4 @@
-﻿(function (translator) {
+(function (translator) {
 	translator.translations["zh-cn"] = {
 		// javascript alerts or messages
 		"testneteditionactivated": "TESTNET EDITION ACTIVATED",
@@ -19,6 +19,20 @@
 		"vanityprivatekeyonlyavailable": "使用两个私钥合成，才会得到合成私钥。",
 		"vanityalertinvalidinputprivatekeysmatch": "错误输入，请使用不同的私钥。",
 
+		// address type select options
+		"paperaddrtype":  { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "原生隔离见证 (bc1q…)", "taproot": "Taproot (bc1p…)" },
+		"bulkaddrtype":   { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "原生隔离见证 (bc1q…)", "taproot": "Taproot (bc1p…)" },
+		"brainaddrtype":  { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "原生隔离见证 (bc1q…)", "taproot": "Taproot (bc1p…)" },
+		"vanityaddrtype": { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "原生隔离见证 (bc1q…)", "taproot": "Taproot (bc1p…)" },
+		"splitaddrtype":  { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "原生隔离见证 (bc1q…)", "taproot": "Taproot (bc1p…)" },
+
+		// address type labels
+		"paperlabeladdrtype": "地址类型：",
+		"bulklabeladdrtype": "地址类型：",
+		"brainlabeladdrtype": "地址类型：",
+		"vanitylabeladdrtype": "地址类型：",
+		"splitlabeladdrtype": "地址类型：",
+
 		// header and menu html
 		"tagline": "开源JavaScript比特币钱包工具",
 		"generatelabelbitcoinaddress": "地址生成中...",
@@ -29,7 +43,7 @@
 		"bulkwallet": "批量钱包",
 		"brainwallet": "脑钱包",
 		"vanitywallet": "虚荣钱包",
-		"splitwallet": "分裂钱包",
+		"splitwallet": "分割钱包",
 		"detailwallet": "钱包详情",
 
 		// footer html
@@ -45,35 +59,38 @@
 		"footerlabelnowarranty": "No warranty",
 
 		// status html
-		"statuslabelcryptogood": "&#10004; Good!", //TODO: please translate
-		"statuslabelcryptogood1": "Your browser can generate cryptographically random keys using window.crypto.getRandomValues", //TODO: please translate
-		"statusokcryptogood": "OK", //TODO: please translate
-		"statuslabelcryptobad": "&times; Oh no!", //TODO: please translate
-		"statuslabelcryptobad1": "Your browser does NOT support window.crypto.getRandomValues. You should use a more modern browser with this generator to increase the security of the keys generated.",
-		"statusokcryptobad": "OK", //TODO: please translate
-		"statuslabelunittestsgood": "&#10004; Good!", //TODO: please translate
-		"statuslabelunittestsgood1": "All synchronous unit tests passed.", //TODO: please translate
-		"statusokunittestsgood": "OK", //TODO: please translate
-		"statuslabelunittestsbad": "&times; Oh no!", //TODO: please translate
-		"statuslabelunittestsbad1": "Some synchronous unit tests DID NOT pass. You should find another browser to use with this generator.", //TODO: please translate
-		"statusokunittestsbad": "OK", //TODO: please translate
-		"statuslabelprotocolgood": "&#10004; Good!", //TODO: please translate
-		"statuslabelprotocolgood1": "You are running this generator from your local computer. <br />Tip: Double check you are offline by trying ", //TODO: please translate
-		"statusokprotocolgood": "OK", //TODO: please translate
-		"statuslabelprotocolbad": "&#9888; Think twice!", //TODO: please translate
-		"statuslabelprotocolbad1": "You appear to be running this generator online from a live website. For valuable wallets it is recommended to", //TODO: please translate
-		"statuslabelprotocolbad2": "download", //TODO: please translate
-		"statuslabelprotocolbad3": "the zip file from GitHub and run this generator offline as a local html file.", //TODO: please translate
-		"statusokprotocolbad": "OK", //TODO: please translate
-		"statuslabelkeypool1": "This is a log of all the Bitcoin Addresses and Private Keys you generated during your current session. Reloading the page will create a new session.", //TODO: please translate
-		"statuskeypoolrefresh": "Refresh", //TODO: please translate
-		"statusokkeypool": "OK", //TODO: please translate
+		"statuslabelcryptogood": "&#10004; 良好！",
+		"statuslabelcryptogood1": "您的浏览器可以使用window.crypto.getRandomValues生成密码学安全的随机密钥",
+		"statusokcryptogood": "OK",
+		"statuslabelcryptobad": "&times; 注意！",
+		"statuslabelcryptobad1": "您的浏览器不支持window.crypto.getRandomValues。您应该使用更现代的浏览器以提高生成密钥的安全性。",
+		"statusokcryptobad": "OK",
+		"statuslabelunittestsgood": "&#10004; 良好！",
+		"statuslabelunittestsgood1": "所有同步单元测试均已通过。",
+		"statusokunittestsgood": "OK",
+		"statuslabelunittestsbad": "&times; 注意！",
+		"statuslabelunittestsbad1": "部分同步单元测试未通过。您应该找另一个浏览器使用此生成器。",
+		"statusokunittestsbad": "OK",
+		"statuslabelprotocolgood": "&#10004; 良好！",
+		"statuslabelprotocolgood1": "您正在从本地计算机运行此生成器。<br />提示：通过尝试以下方式双重确认您处于离线状态 ",
+		"statusokprotocolgood": "OK",
+		"statuslabelprotocolbad": "&#9888; 请三思！",
+		"statuslabelprotocolbad1": "您似乎正在从在线网站运行此生成器。对于有价值的钱包，建议",
+		"statuslabelprotocolbad2": "下载",
+		"statuslabelprotocolbad3": "从GitHub下载zip文件并将此生成器作为本地html文件离线运行。",
+		"statusokprotocolbad": "OK",
+		"statuslabelkeypool1": "这是您在当前会话中生成的所有比特币地址和私钥的日志。重新加载页面将创建新会话。",
+		"statuskeypoolrefresh": "刷新",
+		"statusokkeypool": "OK",
 
 		// single wallet html
 		"newaddress": "生成新地址",
 		"singleprint": "打印",
-		"singlelabelbitcoinaddress": "比特币地址",
-		"singlelabelprivatekey": "私钥 (WIF格式-可导入客户端的格式)",
+		"singlelabelbitcoinaddress": "比特币地址 (Legacy P2PKH)",
+		"singlelabelP2SH": "P2SH-P2WPKH (3…)",
+		"singlelabelSegwit": "原生隔离见证 P2WPKH (bc1q…)",
+		"singlelabelTaproot": "Taproot P2TR (bc1p…)",
+		"singlelabelprivatekey": "私钥（WIF压缩）",
 		"singletip1": "<b>比特币钱包</b>就是这么简单，一个地址，对应一个私钥，浏览器已自动生成了一个，就显示在上面。私钥必须保密，地址可以公开。",
 		"singletip2": "<b>妥善保管你的钱包</b> 为了保护你的钱包，建议你用打印或者其他方式来保管你的私钥和地址。把你的私钥备份保存在安全、保密的位置是必要的。本站不提供私钥的相关知识，请自行学习。如果你熟悉PGP，你也可以下载这个HTML文件（它是单文件全功能的），用它的SHA256摘要和作者在本站页脚留下的相比对。本工具支持离线使用，这样它生成的私钥-地址就很难被监视了。比特币私钥必须保密，任何知道你私钥的人都可以随意花费其对应地址的比特币。你可以打印你的钱包（即纸钱包），把它装进一个防水的口袋里——就像你在保管纸币一样。",
 		"singletip3": "<b>获得比特币: </b> 让别人往你的地址汇入比特币。",
@@ -98,12 +115,12 @@
 		"bulklabelcsv": "逗号分隔值：",
 		"bulklabelformat": "编号,地址,私钥(WIF格式)",
 		"bulklabelq1": "什么时候我会需要批量钱包？",
-		"bulka1": "例如，当你建设一个比特币收款网站，需要分别为每一个用户准备一个收款地址时，传统的做法是使用比特币客户端“bitcoind”生成大量的地址，但是不一定所有的网站托管都支持它。另外，你在服务器上运行比特币客户端，也就意味着你的私钥也会保存在服务器上，当骇客攻破服务器时，你的比特币可能会被盗。使用批量钱包一次生成大量的钱包，只把生成的地址放在服务器上，即使服务器被攻破，也不必担心比特币的安全。",
+		"bulka1": "例如，当你建设一个比特币收款网站，需要分别为每一个用户准备一个收款地址时，传统的做法是使用比特币客户端\"bitcoind\"生成大量的地址，但是不一定所有的网站托管都支持它。另外，你在服务器上运行比特币客户端，也就意味着你的私钥也会保存在服务器上，当骇客攻破服务器时，你的比特币可能会被盗。使用批量钱包一次生成大量的钱包，只把生成的地址放在服务器上，即使服务器被攻破，也不必担心比特币的安全。",
 		"bulklabelq2": "我该怎样在我的网站上使用批量钱包接受比特币？",
 		"bulklabela2li1": "    在批量钱包选项卡预生成大量比特币地址（比如，一万个）。把生成的逗号分隔值清单（CSV）复制到一个安全的环境中，注意备份。",
 		"bulklabela2li2": "    把地址列表导入到Web服务器上（注意，<b>不要</b>把私钥部分也一并导入，否则会有被盗的危险）",
-		"bulklabela2li3": "    为你的客户提供一个比特币支付的接口。每当一名客户选择使用比特币支付，你就从你的数据库中提取一个地址，作为该客户专用的“付款地址”，并保存订单信息。",
-		"bulklabela2li4": "接下来你需要一个收款通知，联系相关服务的供应商（谷歌搜索“bitcoin payment notification”），它们可以监视指定地址的资金变动，并通过WebAPI、短信、电邮或者其他方式来提醒你，你也可以通过编程使一切自动化。在http://www.blockexplorer.com/address/地址 或者 https://blockchain.info/address/地址 查看交易确认数。通常情况下，你能够在30秒之内看见交易，而根据你对安全的要求不同，你可能需要10分钟到1小时的时间等待交易确认。",
+		"bulklabela2li3": "    为你的客户提供一个比特币支付的接口。每当一名客户选择使用比特币支付，你就从你的数据库中提取一个地址，作为该客户专用的\"付款地址\"，并保存订单信息。",
+		"bulklabela2li4": "接下来你需要一个收款通知，联系相关服务的供应商（谷歌搜索\"bitcoin payment notification\"），它们可以监视指定地址的资金变动，并通过WebAPI、短信、电邮或者其他方式来提醒你，你也可以通过编程使一切自动化。在http://www.blockexplorer.com/address/地址 或者 https://blockchain.info/address/地址 查看交易确认数。通常情况下，你能够在30秒之内看见交易，而根据你对安全的要求不同，你可能需要10分钟到1小时的时间等待交易确认。",
 		"bulklabela2li5": "比特币在区块链上稳定之后，你就可以使用在第一步中生成的私钥来花费它们。",
 
 		// brain wallet html
@@ -141,7 +158,7 @@
 		// split wallet html
 		"splitlabelthreshold": "组合私钥时，需要的最少分裂私钥的份数（区间[2,127]）",
 		"splitlabelshares": "分裂的总份数（[2,127]）",
-		"splitview": "制造分裂私钥",
+		"splitview": "生成",
 		"combinelabelentershares": "输入找到的分裂私钥（空格分隔）",
 		"combineview": "组合它们",
 		"combinelabelprivatekey": "组合后的私钥",
@@ -153,8 +170,11 @@
 		"detailprint": "打印",
 		"detaillabelnote1": "比特币私钥应当是只有你知道的保密代码，这段代码有许多种不同的编码格式。下面会给出此私钥对应的地址、公钥，以及最流行的私钥编码格式(WIF, WIFC, HEX, B64, MINI)",
 		"detaillabelnote2": "Bitcoin v0.6+ 存储压缩格式的公钥。现在客户端支持导入/导出私钥，命令是importprivkey/dumpprivkey，导出的格式可能因钱包文件版本而不同。",
-		"detaillabelbitcoinaddress": "比特币地址",
-		"detaillabelbitcoinaddresscomp": "比特币地址(压缩格式)",
+		"detaillabelbitcoinaddress": "比特币地址 (Legacy P2PKH)",
+		"detaillabelbitcoinaddresscomp": "比特币地址(压缩格式) (Legacy P2PKH)",
+		"detaillabelP2SH": "P2SH-P2WPKH 地址 (3…)",
+		"detaillabelSegwit": "原生隔离见证 P2WPKH (bc1q…)",
+		"detaillabelTaproot": "Taproot P2TR (bc1p…)",
 		"detaillabelpublickey": "公钥 (130位[0-9A-F]字符)",
 		"detaillabelpublickeycomp": "公钥 (压缩格式，66位[0-9A-F]字符)",
 		"detaillabelprivwif": "私钥 (WIF格式)<br />(51位base58字符) ",
@@ -165,8 +185,8 @@
 		"detaillabelprivb64": "私钥(base64) (44位)",
 		"detaillabelpassphrase": "输入BIP38的口令",
 		"detailbip38decryptbutton": "BIP38解码",
-		"detailbip38encryptbutton": "Encrypt BIP38", //TODO: please translate
+		"detailbip38encryptbutton": "BIP38加密",
 		"detaillabelq1": "怎样用骰子生成私钥？B6是什么意思？",
-		"detaila1": "真正用随机数产生的钱包才是好钱包。物理产生的随机数可能会比计算机产生的随机数更优越（计算机的伪随机算法可能被识破，但是物理随机不太可能）。生成物理随机的最简单的办法是使用骰子，掷一枚六面骰99次，记录结果，将结果“6”记为“0”（或者将所有结果-1记录），这样你得到的记录将会是由0 1 2 3 4 5 组成的一串数字，称为“Base6格式”，简称“B6”。将它输入上面的文本框，点击“显示详情”按钮，得到你的私钥、地址。",
+		"detaila1": "真正用随机数产生的钱包才是好钱包。物理产生的随机数可能会比计算机产生的随机数更优越（计算机的伪随机算法可能被识破，但是物理随机不太可能）。生成物理随机的最简单的办法是使用骰子，掷一枚六面骰99次，记录结果，将结果\"6\"记为\"0\"（或者将所有结果-1记录），这样你得到的记录将会是由0 1 2 3 4 5 组成的一串数字，称为\"Base6格式\"，简称\"B6\"。将它输入上面的文本框，点击\"显示详情\"按钮，得到你的私钥、地址。"
 	};
 })(ninja.translator);

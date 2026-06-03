@@ -47,6 +47,14 @@
 
 	<title>bitaddress.org</title>
 	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<script>
+		// Apply saved theme before first paint to avoid flash
+		(function() {
+			var t = localStorage.getItem('bitaddress-theme') || 'dark';
+			document.documentElement.setAttribute('data-theme', t);
+		})();
+	</script>
 
 	<script type="text/javascript">
 //cryptojs.js	
@@ -112,6 +120,10 @@
 <body onclick="SecureRandom.seedTime();" onmousemove="ninja.seeder.seed(event);">
 	<div id="busyblock"></div>
 	<div id="main">
+		<button id="themetoggle" onclick="ninja.theme.toggle();" title="Toggle light/dark theme">
+			<span class="theme-icon">&#9788;</span>
+			<span class="theme-label" id="themelabel">Light</span>
+		</button>
 		<div id="culturemenu">
             <div class="culturemenurow">
                 <span><a href="?culture=en" id="cultureen" class="selected" onclick="ninja.translator.translate('en'); return false;">English</a></span> |
@@ -220,15 +232,15 @@
 					</div>
 					<div id="paperadvancedcommands" class="row extra">
 						<span>
-							<label for="paperaddrtype">Address type:</label>
+							<label id="paperlabeladdrtype" for="paperaddrtype">Address type:</label>
 							<select id="paperaddrtype" onchange="ninja.wallets.paperwallet.onAddressTypeChange(this);">
 								<option value="legacy">Legacy P2PKH (1…)</option>
 								<option value="p2sh">P2SH-P2WPKH (3…)</option>
-								<option value="segwit">Native SegWit (bc1q…)</option>
+								<option value="segwit" selected="selected">Native SegWit (bc1q…)</option>
 								<option value="taproot">Taproot (bc1p…)</option>
 							</select>
 						</span>
-						<span><label id="paperlabelencrypt" for="paperencrypt">BIP38 Encrypt?</label> <input type="checkbox" id="paperencrypt" onchange="ninja.wallets.paperwallet.toggleEncrypt(this);" /></span>
+						<span><label id="paperlabelencrypt" for="paperencrypt">BIP38 Encrypt?</label> <input type="checkbox" id="paperencrypt" disabled="disabled" onchange="ninja.wallets.paperwallet.toggleEncrypt(this);" /></span>
 						<span><label id="paperlabelBIPpassphrase" for="paperpassphrase">Passphrase:</label> <input type="text" id="paperpassphrase" /></span>
 						<span><label id="paperlabeladdressesperpage" for="paperlimitperpage">Addresses per page:</label> <input type="text" id="paperlimitperpage" /></span>
 					</div>
@@ -241,21 +253,21 @@
 					<div id="bulkcommands" class="row">
 						<span><label id="bulklabelstartindex" for="bulkstartindex">Start index:</label> <input type="text" id="bulkstartindex" value="1" /></span>
 						<span><label id="bulklabelrowstogenerate" for="bulklimit">Rows to generate:</label> <input type="text" id="bulklimit" value="3" /></span>
-						<span><label id="bulklabelcompressed" for="bulkcompressed">Compressed addresses?</label> <input type="checkbox" id="bulkcompressed" checked="checked" /></span>
+						<span><label id="bulklabelcompressed" for="bulkcompressed">Compressed addresses?</label> <input type="checkbox" id="bulkcompressed" checked="checked" disabled="disabled" /></span>
 						<span><input type="button" id="bulkgenerate" value="Generate" onclick="ninja.wallets.bulkwallet.buildCSV(document.getElementById('bulklimit').value * 1, document.getElementById('bulkstartindex').value * 1, document.getElementById('bulkcompressed').checked, document.getElementById('bulkpassphrase').value);" /> </span>
 						<span class="print"><input type="button" name="print" id="bulkprint" value="Print" onclick="window.print();" /></span>
 					</div>
 					<div id="bulkadvancedcommands" class="row extra">
 						<span>
-							<label for="bulkaddrtype">Address type:</label>
+							<label id="bulklabeladdrtype" for="bulkaddrtype">Address type:</label>
 							<select id="bulkaddrtype" onchange="ninja.wallets.bulkwallet.onAddressTypeChange(this);">
 								<option value="legacy">Legacy P2PKH (1…)</option>
 								<option value="p2sh">P2SH-P2WPKH (3…)</option>
-								<option value="segwit">Native SegWit (bc1q…)</option>
+								<option value="segwit" selected="selected">Native SegWit (bc1q…)</option>
 								<option value="taproot">Taproot (bc1p…)</option>
 							</select>
 						</span>
-						<span><label id="bulklabelencrypt" for="bulkencrypt">BIP38 Encrypt?</label> <input type="checkbox" id="bulkencrypt" onchange="ninja.wallets.bulkwallet.toggleEncrypt(this);" /></span>
+						<span><label id="bulklabelencrypt" for="bulkencrypt">BIP38 Encrypt?</label> <input type="checkbox" id="bulkencrypt" disabled="disabled" onchange="ninja.wallets.bulkwallet.toggleEncrypt(this);" /></span>
 						<span><label id="bulklabelBIPpassphrase" for="bulkpassphrase">Passphrase:</label> <input type="text" id="bulkpassphrase" /></span>
 					</div>
 				</div>
@@ -304,13 +316,13 @@
 						<span id="brainalgorithm" class="notes right">Algorithm: SHA256(passphrase)</span>
 					</div>
 					<div class ="row extra">
-						<span><label tabindex="3" id="brainlabelcompressed" for="braincompressed">Compressed address?</label> <input type="checkbox" id="braincompressed" onchange="ninja.wallets.brainwallet.onCompressionChange(this);" /></span>
+						<span><label tabindex="3" id="brainlabelcompressed" for="braincompressed">Compressed address?</label> <input type="checkbox" id="braincompressed" checked="checked" disabled="disabled" onchange="ninja.wallets.brainwallet.onCompressionChange(this);" /></span>
 						<span>
-							<label for="brainaddrtype">Address type:</label>
+							<label id="brainlabeladdrtype" for="brainaddrtype">Address type:</label>
 							<select id="brainaddrtype" onchange="ninja.wallets.brainwallet.onAddressTypeChange(this);">
 								<option value="legacy">Legacy P2PKH (1…)</option>
 								<option value="p2sh">P2SH-P2WPKH (3…)</option>
-								<option value="segwit">Native SegWit (bc1q…)</option>
+								<option value="segwit" selected="selected">Native SegWit (bc1q…)</option>
 								<option value="taproot">Taproot (bc1p…)</option>
 							</select>
 						</span>
@@ -374,11 +386,11 @@
 						<label for="vanityradiomultiply" id="vanitylabelradiomultiply">Multiply</label> <input type="radio" id="vanityradiomultiply" name="vanityradio" value="multiply" />
 					</div>
 					<div>
-						<label for="vanityaddrtype">Address type:</label>
+						<label id="vanitylabeladdrtype" for="vanityaddrtype">Address type:</label>
 						<select id="vanityaddrtype">
 							<option value="legacy">Legacy P2PKH (1…)</option>
 							<option value="p2sh">P2SH-P2WPKH (3…)</option>
-							<option value="segwit">Native SegWit (bc1q…)</option>
+							<option value="segwit" selected="selected">Native SegWit (bc1q…)</option>
 							<option value="taproot">Taproot (bc1p…)</option>
 						</select>
 						<input type="button" id="vanitycalc" value="Calculate Vanity Wallet" onclick="ninja.wallets.vanitywallet.addKeys();" />
@@ -413,11 +425,11 @@
 					<label id="splitlabelshares">Number of shares</label>
 					<input type="text" id="splitshares" value="3" size="4"/>
 					<br/>
-					<label for="splitaddrtype">Address type:</label>
+					<label id="splitlabeladdrtype" for="splitaddrtype">Address type:</label>
 					<select id="splitaddrtype">
 						<option value="legacy">Legacy P2PKH (1…)</option>
 						<option value="p2sh">P2SH-P2WPKH (3…)</option>
-						<option value="segwit">Native SegWit (bc1q…)</option>
+						<option value="segwit" selected="selected">Native SegWit (bc1q…)</option>
 						<option value="taproot">Taproot (bc1p…)</option>
 					</select>
 					<span><input type="button" id="splitview" value="Generate" onclick="ninja.wallets.splitwallet.splitKey();"></span>
@@ -477,7 +489,7 @@
 							<span class="output" id="detailaddresscomp"></span>
 						</div>
 					</div>
-					<div class="pubqr" style="margin-top:10px;">
+					<div class="pubqr">
 						<div class="item">
 							<span class="label" id="detaillabelP2SH">P2SH-P2WPKH Address (3...)</span>
 							<div id="detailqrcodepublicP2SH" class="qrcode_public"></div>
@@ -489,7 +501,7 @@
 							<span class="output" id="detailaddressSegwit"></span>
 						</div>
 					</div>
-					<div class="pubqr" style="margin-top:10px;">
+					<div class="pubqr">
 						<div class="item">
 							<span class="label" id="detaillabelTaproot">Taproot P2TR (bc1p...)</span>
 							<div id="detailqrcodepublicTaproot" class="qrcode_public"></div>

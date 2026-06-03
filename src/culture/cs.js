@@ -1,4 +1,4 @@
-﻿(function (translator) {
+(function (translator) {
 	translator.translations["cs"] = {
 		// javascript alerts or messages
 		"testneteditionactivated": "TESTNET aktivován",
@@ -19,6 +19,20 @@
 		"vanityprivatekeyonlyavailable": "Dostupné pouze při kombinaci dvou soukromých klíčů",
 		"vanityalertinvalidinputprivatekeysmatch": "Špatný vstup. Soukromý klíč obou položek je shodný. Musíte zadat dva různé klíče.",
 
+		// address type select options
+		"paperaddrtype":  { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "Nativní SegWit (bc1q…)", "taproot": "Taproot (bc1p…)" },
+		"bulkaddrtype":   { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "Nativní SegWit (bc1q…)", "taproot": "Taproot (bc1p…)" },
+		"brainaddrtype":  { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "Nativní SegWit (bc1q…)", "taproot": "Taproot (bc1p…)" },
+		"vanityaddrtype": { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "Nativní SegWit (bc1q…)", "taproot": "Taproot (bc1p…)" },
+		"splitaddrtype":  { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "Nativní SegWit (bc1q…)", "taproot": "Taproot (bc1p…)" },
+
+		// address type labels
+		"paperlabeladdrtype": "Typ adresy:",
+		"bulklabeladdrtype": "Typ adresy:",
+		"brainlabeladdrtype": "Typ adresy:",
+		"vanitylabeladdrtype": "Typ adresy:",
+		"splitlabeladdrtype": "Typ adresy:",
+
 		// header and menu html
 		"tagline": "Open Source generátor Bitcoin peněženky napsaný v JavaScript",
 		"generatelabelbitcoinaddress": "Generuji Bitcoin adresu",
@@ -29,7 +43,7 @@
 		"bulkwallet": "Hromadná peněženka",
 		"brainwallet": "Myšlenková peněženka",
 		"vanitywallet": "Peněženka Vanity",
-		"splitwallet": "Split Wallet", //TODO: please translate
+		"splitwallet": "Rozdělená Peněženka",
 		"detailwallet": "Detail peněženky",
 
 		// footer html
@@ -45,35 +59,38 @@
 		"footerlabelnowarranty": "Bez záruky.",
 
 		// status html
-		"statuslabelcryptogood": "&#10004; Good!", //TODO: please translate
-		"statuslabelcryptogood1": "Your browser can generate cryptographically random keys using window.crypto.getRandomValues", //TODO: please translate
-		"statusokcryptogood": "OK", //TODO: please translate
-		"statuslabelcryptobad": "&times; Oh no!", //TODO: please translate
-		"statuslabelcryptobad1": "Your browser does NOT support window.crypto.getRandomValues. You should use a more modern browser with this generator to increase the security of the keys generated.",
-		"statusokcryptobad": "OK", //TODO: please translate
-		"statuslabelunittestsgood": "&#10004; Good!", //TODO: please translate
-		"statuslabelunittestsgood1": "All synchronous unit tests passed.", //TODO: please translate
-		"statusokunittestsgood": "OK", //TODO: please translate
-		"statuslabelunittestsbad": "&times; Oh no!", //TODO: please translate
-		"statuslabelunittestsbad1": "Some synchronous unit tests DID NOT pass. You should find another browser to use with this generator.", //TODO: please translate
-		"statusokunittestsbad": "OK", //TODO: please translate
-		"statuslabelprotocolgood": "&#10004; Good!", //TODO: please translate
-		"statuslabelprotocolgood1": "You are running this generator from your local computer. <br />Tip: Double check you are offline by trying ", //TODO: please translate
-		"statusokprotocolgood": "OK", //TODO: please translate
-		"statuslabelprotocolbad": "&#9888; Think twice!", //TODO: please translate
-		"statuslabelprotocolbad1": "You appear to be running this generator online from a live website. For valuable wallets it is recommended to", //TODO: please translate
-		"statuslabelprotocolbad2": "download", //TODO: please translate
-		"statuslabelprotocolbad3": "the zip file from GitHub and run this generator offline as a local html file.", //TODO: please translate
-		"statusokprotocolbad": "OK", //TODO: please translate
-		"statuslabelkeypool1": "This is a log of all the Bitcoin Addresses and Private Keys you generated during your current session. Reloading the page will create a new session.", //TODO: please translate
-		"statuskeypoolrefresh": "Refresh", //TODO: please translate
-		"statusokkeypool": "OK", //TODO: please translate
+		"statuslabelcryptogood": "&#10004; Dobře!",
+		"statuslabelcryptogood1": "Váš prohlížeč může generovat kryptograficky náhodné klíče pomocí window.crypto.getRandomValues",
+		"statusokcryptogood": "OK",
+		"statuslabelcryptobad": "&times; Pozor!",
+		"statuslabelcryptobad1": "Váš prohlížeč NEPODPORUJE window.crypto.getRandomValues. Měli byste použít modernější prohlížeč pro zvýšení bezpečnosti generovaných klíčů.",
+		"statusokcryptobad": "OK",
+		"statuslabelunittestsgood": "&#10004; Dobře!",
+		"statuslabelunittestsgood1": "Všechny synchronní unit testy prošly.",
+		"statusokunittestsgood": "OK",
+		"statuslabelunittestsbad": "&times; Pozor!",
+		"statuslabelunittestsbad1": "Některé synchronní unit testy NEPROŠLY. Měli byste použít jiný prohlížeč pro tento generátor.",
+		"statusokunittestsbad": "OK",
+		"statuslabelprotocolgood": "&#10004; Dobře!",
+		"statuslabelprotocolgood1": "Spouštíte tento generátor z místního počítače. <br />Tip: Zkontrolujte, že jste offline, zkusením ",
+		"statusokprotocolgood": "OK",
+		"statuslabelprotocolbad": "&#9888; Rozmyslete si to!",
+		"statuslabelprotocolbad1": "Zdá se, že spouštíte tento generátor online z živého webu. Pro hodnotné peněženky se doporučuje",
+		"statuslabelprotocolbad2": "stáhnout",
+		"statuslabelprotocolbad3": "zip soubor z GitHubu a spustit tento generátor offline jako lokální html soubor.",
+		"statusokprotocolbad": "OK",
+		"statuslabelkeypool1": "Toto je protokol všech Bitcoin adres a soukromých klíčů, které jste vygenerovali během aktuální relace. Opětovné načtení stránky vytvoří novou relaci.",
+		"statuskeypoolrefresh": "Obnovit",
+		"statusokkeypool": "OK",
 
 		// single wallet html
 		"newaddress": "Vytvořit novou adresu",
 		"singleprint": "Tisk",
-		"singlelabelbitcoinaddress": "Bitcoin adresa",
-		"singlelabelprivatekey": "Soukromý klíč (WIF &ndash; Formát pro import do peněženky):",
+		"singlelabelbitcoinaddress": "Bitcoin adresa (Legacy P2PKH)",
+		"singlelabelP2SH": "P2SH-P2WPKH (3…)",
+		"singlelabelSegwit": "Nativní SegWit P2WPKH (bc1q…)",
+		"singlelabelTaproot": "Taproot P2TR (bc1p…)",
+		"singlelabelprivatekey": "Soukromý klíč (WIF komprimovaný)",
 		"singletip1": "<b>Bitcoin peněženka</b> je jednoduchý pár Bitcoin adresy s přidruženým soukromým klíčem. Taková peněženka byla právě vytvořena ve vašem prohlížeči a zobrazena výše.",
 		"singletip2": "<b>Pro zabezpečení této peněženky</b> musíte tuto Bitcoin adresu a soukromý klíč vytisknout a nebo jinak poznamenat. Je důležité provést zálohu soukromého klíče a jeho uschování na bezpečném místě. Tato webová stránka nemá žádné informace o vašem soukromém klíči. Pokud ovládáte PGP, můžete celou tuto stránku stáhnout v jednom HTML souboru a ověřit její pravost srovnáním SHA256 hashe s podepsaným dokumentem historie verzí. Odkaz naleznete v patičce této stránky. Pokud opustíte či obnovíte tuto stránku nebo kliknete na 'Vytvořit novou adresu' dojde k vygenerování nového soukromého klíče a předtím zobrazený klíč bude ztracen. Váš soukromý klíč musíte uchovat v tajnosti. Každý kdo má tento klíč k dispozici může utratit všechny peníze v této peněžence. Pokud budete peněženku tisknout, uzavřete ji do nepropustného obalu nebo ji zalaminujte. Tím zabráníte jejímu poškození vodou. Chovejte se k této peněžence jako k normálním bankovkám.",
 		"singletip3": "<b>Pro vložení</b> peněz do této peněženky stačí zaslat peníze na Bitcoin adresu.",
@@ -140,6 +157,14 @@
 		"vanitylabelprivatekey": "Soukromý klíč Vanity (WIF):",
 		"vanitylabelnotesprivatekey": "Výše je soukromý klíč pro načtení do vaší peněženky.",
 
+		// split wallet html
+		"splitlabelthreshold": "Minimální počet podílů potřebných ke kombinaci",
+		"splitlabelshares": "Počet podílů",
+		"splitview": "Generovat",
+		"combinelabelentershares": "Zadejte dostupné podíly (oddělené mezerami)",
+		"combineview": "Kombinovat podíly",
+		"combinelabelprivatekey": "Kombinovaný soukromý klíč",
+
 		// detail wallet html
 		"detaillabelenterprivatekey": "Zadejte soukromý klíč:",
 		"detailkeyformats": "Podporované formáty: WIF, WIFC, HEX, B64, B6, MINI, BIP38",
@@ -147,8 +172,11 @@
 		"detailprint": "Tisk",
 		"detaillabelnote1": "",
 		"detaillabelnote2": "",
-		"detaillabelbitcoinaddress": "Bitcoin adresa:",
-		"detaillabelbitcoinaddresscomp": "Komprimovaná bitcoin adresa:",
+		"detaillabelbitcoinaddress": "Bitcoin adresa (Legacy P2PKH)",
+		"detaillabelbitcoinaddresscomp": "Komprimovaná bitcoin adresa (Legacy P2PKH)",
+		"detaillabelP2SH": "P2SH-P2WPKH Adresa (3…)",
+		"detaillabelSegwit": "Nativní SegWit P2WPKH (bc1q…)",
+		"detaillabelTaproot": "Taproot P2TR (bc1p…)",
 		"detaillabelpublickey": "Veřejný klíč (130 znaků [0-9A-F]):",
 		"detaillabelpublickeycomp": "Komprimovaný veřejný klíč (66 znaků [0-9A-F]):",
 		"detaillabelprivwif": "Soukromý klíč WIF  <br />51 znaků v base58, začíná",
@@ -159,7 +187,7 @@
 		"detaillabelprivmini": "Soukromý klíč v mini formátů (22, 26 nebo 30 znaků, začíná 'S'):",
 		"detaillabelpassphrase": "Zadejte BIP38 heslo:",
 		"detailbip38decryptbutton": "Dešifrovat",
-		"detailbip38encryptbutton": "Encrypt BIP38", //TODO: please translate
+		"detailbip38encryptbutton": "Šifrovat BIP38",
 		"detaillabelq1": "Jak si mohu vytvořit peněženku pomocí hrací kostky? Co je to B6?",
 		"detaila1": "Důležitá součást vytváření Bitcoin peněženky je jistota, že náhodná čísla použitá pro její tvorbu jsou opravdu náhodná. Fyzická náhoda je lepší než počítačem generovaná pseudonáhoda. Pomocí hrací kostky je možné jednoduše získat fyzicky náhodná čísla. Pro vytvoření soukromého klíče potřebujete pouze šestihrannou kostku, kterou 99x hodíte. Každý tento hod zaznamenejte. Při zapisování převeďte čísla takto: 1=1, 2=2, 3=3, 4=4, 5=5, 6=0. Pomocí této techniky zapisujete velké, opravdu náhodné číslo, svůj soukromý klíč v B6 nebo také base 6 formátu. Těchto 99 čísel napište do pole výše a klikněte na Zobrazit detail. Poté se vám zobrazí Bitcoin adresa přidružená k tomuto soukromému klíči. Soukromý klíč byste si měli zaznamenat také ve WIF formátu, který je široce používán."
 	};

@@ -1,10 +1,10 @@
-﻿(function (translator) {
+(function (translator) {
 	translator.translations["el"] = {
 		// javascript alerts or messages
 		"testneteditionactivated": "ΕΝΕΡΓΗ ΕΚΔΟΣΗ TESTNET",
 		"paperlabelbitcoinaddress": "Διεύθυνση Bitcoin:",
 		"paperlabelprivatekey": "Προσωπικό Κλειδί:",
-		"paperlabelencryptedkey": "Encrypted Private Key (Password required)", //TODO: please translate
+		"paperlabelencryptedkey": "Κρυπτογραφημένο Προσωπικό Κλειδί (Απαιτείται κωδικός)",
 		"bulkgeneratingaddresses": "Δημιουργία διευθύνσεων... ",
 		"brainalertpassphrasetooshort": "Η φράση κωδικός που δώσατε είναι πολύ αδύναμη.\n\n",
 		"brainalertpassphrasewarning": "Προσοχή: Είναι σημαντικό να επιλέξετε μια ισχυρή φράση κωδικό που θα σας προφυλάξει από απόπειρες παραβίασής της τύπου brute force και κλοπή των bitcoins σας.",
@@ -19,17 +19,31 @@
 		"vanityprivatekeyonlyavailable": "Διαθέσιμο μόνο κατά το συνδυασμό δύο Προσωπικών Κλειδιών",
 		"vanityalertinvalidinputprivatekeysmatch": "Μη έγκυρη εισαγωγή. Τα Προσωπικά Κλειδιά των δύο εγγραφών είναι όμοια. Πρέπει να εισάγετε δύο διαφορετικά Κλειδιά.",
 
+		// address type select options
+		"paperaddrtype":  { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "Εγγενές SegWit (bc1q…)", "taproot": "Taproot (bc1p…)" },
+		"bulkaddrtype":   { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "Εγγενές SegWit (bc1q…)", "taproot": "Taproot (bc1p…)" },
+		"brainaddrtype":  { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "Εγγενές SegWit (bc1q…)", "taproot": "Taproot (bc1p…)" },
+		"vanityaddrtype": { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "Εγγενές SegWit (bc1q…)", "taproot": "Taproot (bc1p…)" },
+		"splitaddrtype":  { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "Εγγενές SegWit (bc1q…)", "taproot": "Taproot (bc1p…)" },
+
+		// address type labels
+		"paperlabeladdrtype": "Τύπος διεύθυνσης:",
+		"bulklabeladdrtype": "Τύπος διεύθυνσης:",
+		"brainlabeladdrtype": "Τύπος διεύθυνσης:",
+		"vanitylabeladdrtype": "Τύπος διεύθυνσης:",
+		"splitlabeladdrtype": "Τύπος διεύθυνσης:",
+
 		// header and menu html
 		"tagline": "Δημιουργός Διευθύνσεων Bitcoin, ανοικτού κώδικα Javascript",
 		"generatelabelbitcoinaddress": "Δημιουργία Διεύθυνσης Bitcoin...",
 		"generatelabelmovemouse": "ΚΟΥΝΗΣΤΕ το ποντίκι τριγύρω για να προσθέσετε επιπλέον τυχαιότητα...",
-		"generatelabelkeypress": "OR type some random characters into this textbox", //TODO: please translate
+		"generatelabelkeypress": "Ή πληκτρολογήστε μερικούς τυχαίους χαρακτήρες σε αυτό το πλαίσιο κειμένου",
 		"singlewallet": "Απλό Πορτοφόλι",
 		"paperwallet": "Χάρτινο Πορτοφόλι",
 		"bulkwallet": "Πολλαπλά Πορτοφόλια",
 		"brainwallet": "Μνημονικό Πορτοφόλι",
 		"vanitywallet": "Πορτοφόλι Vanity",
-		"splitwallet": "Split Wallet", //TODO: please translate
+		"splitwallet": "Διαιρεμένο Πορτοφόλι",
 		"detailwallet": "Λεπτομέρειες Πορτοφολιού",
 
 		// footer html
@@ -45,42 +59,45 @@
 		"footerlabelnowarranty": "Καμία εγγύηση.",
 
 		// status html
-		"statuslabelcryptogood": "&#10004; Good!", //TODO: please translate
-		"statuslabelcryptogood1": "Your browser can generate cryptographically random keys using window.crypto.getRandomValues", //TODO: please translate
-		"statusokcryptogood": "OK", //TODO: please translate
-		"statuslabelcryptobad": "&times; Oh no!", //TODO: please translate
-		"statuslabelcryptobad1": "Your browser does NOT support window.crypto.getRandomValues. You should use a more modern browser with this generator to increase the security of the keys generated.",
-		"statusokcryptobad": "OK", //TODO: please translate
-		"statuslabelunittestsgood": "&#10004; Good!", //TODO: please translate
-		"statuslabelunittestsgood1": "All synchronous unit tests passed.", //TODO: please translate
-		"statusokunittestsgood": "OK", //TODO: please translate
-		"statuslabelunittestsbad": "&times; Oh no!", //TODO: please translate
-		"statuslabelunittestsbad1": "Some synchronous unit tests DID NOT pass. You should find another browser to use with this generator.", //TODO: please translate
-		"statusokunittestsbad": "OK", //TODO: please translate
-		"statuslabelprotocolgood": "&#10004; Good!", //TODO: please translate
-		"statuslabelprotocolgood1": "You are running this generator from your local computer. <br />Tip: Double check you are offline by trying ", //TODO: please translate
-		"statusokprotocolgood": "OK", //TODO: please translate
-		"statuslabelprotocolbad": "&#9888; Think twice!", //TODO: please translate
-		"statuslabelprotocolbad1": "You appear to be running this generator online from a live website. For valuable wallets it is recommended to", //TODO: please translate
-		"statuslabelprotocolbad2": "download", //TODO: please translate
-		"statuslabelprotocolbad3": "the zip file from GitHub and run this generator offline as a local html file.", //TODO: please translate
-		"statusokprotocolbad": "OK", //TODO: please translate
-		"statuslabelkeypool1": "This is a log of all the Bitcoin Addresses and Private Keys you generated during your current session. Reloading the page will create a new session.", //TODO: please translate
-		"statuskeypoolrefresh": "Refresh", //TODO: please translate
-		"statusokkeypool": "OK", //TODO: please translate
+		"statuslabelcryptogood": "&#10004; Καλά!",
+		"statuslabelcryptogood1": "Το πρόγραμμα περιήγησής σας μπορεί να δημιουργήσει κρυπτογραφικά τυχαία κλειδιά χρησιμοποιώντας window.crypto.getRandomValues",
+		"statusokcryptogood": "OK",
+		"statuslabelcryptobad": "&times; Προσοχή!",
+		"statuslabelcryptobad1": "Το πρόγραμμα περιήγησής σας ΔΕΝ υποστηρίζει window.crypto.getRandomValues. Θα πρέπει να χρησιμοποιήσετε ένα πιο σύγχρονο πρόγραμμα περιήγησης για να αυξήσετε την ασφάλεια των κλειδιών που δημιουργούνται.",
+		"statusokcryptobad": "OK",
+		"statuslabelunittestsgood": "&#10004; Καλά!",
+		"statuslabelunittestsgood1": "Όλες οι σύγχρονες δοκιμές μονάδας πέρασαν.",
+		"statusokunittestsgood": "OK",
+		"statuslabelunittestsbad": "&times; Προσοχή!",
+		"statuslabelunittestsbad1": "Ορισμένες σύγχρονες δοκιμές μονάδας ΔΕΝ πέρασαν. Θα πρέπει να βρείτε άλλο πρόγραμμα περιήγησης για να χρησιμοποιήσετε με αυτόν τον γεννήτορα.",
+		"statusokunittestsbad": "OK",
+		"statuslabelprotocolgood": "&#10004; Καλά!",
+		"statuslabelprotocolgood1": "Εκτελείτε αυτόν τον γεννήτορα από τον τοπικό σας υπολογιστή. <br />Συμβουλή: Ελέγξτε ότι είστε εκτός σύνδεσης δοκιμάζοντας ",
+		"statusokprotocolgood": "OK",
+		"statuslabelprotocolbad": "&#9888; Σκεφτείτε το!",
+		"statuslabelprotocolbad1": "Φαίνεται ότι εκτελείτε αυτόν τον γεννήτορα διαδικτυακά από έναν ζωντανό ιστότοπο. Για πολύτιμα πορτοφόλια συνιστάται να",
+		"statuslabelprotocolbad2": "κατεβάσετε",
+		"statuslabelprotocolbad3": "το αρχείο zip από το GitHub και να εκτελέσετε αυτόν τον γεννήτορα εκτός σύνδεσης ως τοπικό αρχείο html.",
+		"statusokprotocolbad": "OK",
+		"statuslabelkeypool1": "Αυτό είναι ένα αρχείο καταγραφής όλων των Διευθύνσεων Bitcoin και Προσωπικών Κλειδιών που δημιουργήσατε κατά την τρέχουσα συνεδρία. Η επαναφόρτωση της σελίδας θα δημιουργήσει νέα συνεδρία.",
+		"statuskeypoolrefresh": "Ανανέωση",
+		"statusokkeypool": "OK",
 
 		// single wallet html
 		"newaddress": "Δημιουργία μιας νέας Διεύθυνσης",
 		"singleprint": "Εκτύπωση",
-		"singlelabelbitcoinaddress": "Διεύθυνση Bitcoin:",
-		"singlelabelprivatekey": "Προσωπικό Κλειδί (Μορφή εισαγωγής σε πορτοφόλι):",
-		"singletip1": "<b>A Bitcoin wallet</b> is as simple as a single pairing of a Bitcoin address with it's corresponding Bitcoin private key. Such a wallet has been generated for you in your web browser and is displayed above.", //TODO: please translate
-		"singletip2": "<b>To safeguard this wallet</b> you must print or otherwise record the Bitcoin address and private key. It is important to make a backup copy of the private key and store it in a safe location. This site does not have knowledge of your private key. If you are familiar with PGP you can download this all-in-one HTML page and check that you have an authentic version from the author of this site by matching the SHA256 hash of this HTML with the SHA256 hash available in the signed version history document linked on the footer of this site. If you leave/refresh the site or press the Generate New Address button then a new private key will be generated and the previously displayed private key will not be retrievable.	Your Bitcoin private key should be kept a secret. Whomever you share the private key with has access to spend all the bitcoins associated with that address. If you print your wallet then store it in a zip lock bag to keep it safe from water. Treat a paper wallet like cash.", //TODO: please translate
-		"singletip3": "<b>Add funds</b> to this wallet by instructing others to send bitcoins to your Bitcoin address.", //TODO: please translate
-		"singletip4": "<b>Check your balance</b> by going to blockchain.info or blockexplorer.com and entering your Bitcoin address.", //TODO: please translate
-		"singletip5": "<b>Spend your bitcoins</b> by going to blockchain.info and sweep the full balance of your private key into your account at their website. You can also spend your funds by downloading one of the popular bitcoin p2p clients and importing your private key to the p2p client wallet. Keep in mind when you import your single key to a bitcoin p2p client and spend funds your key will be bundled with other private keys in the p2p client wallet. When you perform a transaction your change will be sent to another bitcoin address within the p2p client wallet. You must then backup the p2p client wallet and keep it safe as your remaining bitcoins will be stored there. Satoshi advised that one should never delete a wallet.", //TODO: please translate
-		"singleshare": "SHARE", //TODO: please translate
-		"singlesecret": "SECRET", //TODO: please translate
+		"singlelabelbitcoinaddress": "Διεύθυνση Bitcoin (Legacy P2PKH)",
+		"singlelabelP2SH": "P2SH-P2WPKH (3…)",
+		"singlelabelSegwit": "Εγγενές SegWit P2WPKH (bc1q…)",
+		"singlelabelTaproot": "Taproot P2TR (bc1p…)",
+		"singlelabelprivatekey": "Ιδιωτικό Κλειδί (WIF συμπιεσμένο)",
+		"singletip1": "<b>Ένα πορτοφόλι Bitcoin</b> είναι τόσο απλό όσο ένα ζευγάρι μιας Διεύθυνσης Bitcoin με το αντίστοιχο Προσωπικό Κλειδί Bitcoin. Ένα τέτοιο πορτοφόλι έχει δημιουργηθεί για εσάς στο πρόγραμμα περιήγησης και εμφανίζεται παραπάνω.",
+		"singletip2": "<b>Για να προστατέψετε αυτό το πορτοφόλι</b> πρέπει να εκτυπώσετε ή να καταγράψετε με άλλο τρόπο τη Διεύθυνση Bitcoin και το Προσωπικό Κλειδί. Είναι σημαντικό να δημιουργήσετε αντίγραφο ασφαλείας του Προσωπικού Κλειδιού και να το αποθηκεύσετε σε ασφαλές μέρος. Ο ιστότοπος αυτός δεν έχει γνώση του Προσωπικού Κλειδιού σας. Εάν εγκαταλείψετε ή ανανεώσετε τον ιστότοπο ή πατήσετε το κουμπί Δημιουργία Νέας Διεύθυνσης, τότε θα δημιουργηθεί νέο Προσωπικό Κλειδί και το προηγουμένως εμφανιζόμενο δεν θα είναι ανακτήσιμο. Το Προσωπικό Κλειδί Bitcoin σας πρέπει να παραμείνει μυστικό. Όποιος γνωρίζει το Προσωπικό Κλειδί έχει πρόσβαση να ξοδέψει όλα τα bitcoins που σχετίζονται με αυτή τη διεύθυνση.",
+		"singletip3": "<b>Προσθέστε κεφάλαια</b> σε αυτό το πορτοφόλι υποδεικνύοντας σε άλλους να στείλουν bitcoins στη Διεύθυνση Bitcoin σας.",
+		"singletip4": "<b>Ελέγξτε το υπόλοιπό σας</b> στο blockchain.info ή blockexplorer.com εισάγοντας τη Διεύθυνση Bitcoin σας.",
+		"singletip5": "<b>Ξοδέψτε τα bitcoins σας</b> μεταβαίνοντας στο blockchain.info και μεταφέρτε το πλήρες υπόλοιπο του Προσωπικού Κλειδιού σας στο λογαριασμό σας εκεί. Μπορείτε επίσης να ξοδέψετε τα κεφάλαιά σας κατεβάζοντας ένα από τα δημοφιλή p2p πελατολόγια bitcoin και εισάγοντας το Προσωπικό Κλειδί σας. Ο Satoshi συμβούλευσε ότι δεν πρέπει ποτέ κανείς να διαγράφει ένα πορτοφόλι.",
+		"singleshare": "ΚΟΙΝΟΠΟΙΗΣΗ",
+		"singlesecret": "ΜΥΣΤΙΚΟ",
 
 		// paper wallet html
 		"paperlabelhideart": "Απόκρυψη γραφικού;",
@@ -88,8 +105,8 @@
 		"paperlabeladdressestogenerate": "Πλήθος διευθύνσεων:",
 		"papergenerate": "Δημιουργία",
 		"paperprint": "Εκτύπωση",
-		"paperlabelBIPpassphrase": "Passphrase:", //TODO: please translate
-		"paperlabelencrypt": "BIP38 Encrypt?", //TODO: please translate
+		"paperlabelBIPpassphrase": "Passphrase:",
+		"paperlabelencrypt": "Κρυπτογράφηση BIP38;",
 
 		// bulk wallet html
 		"bulklabelstartindex": "Ξεκίνημα δείκτη:",
@@ -140,6 +157,14 @@
 		"vanitylabelprivatekey": "Vanity Προσωπικό Κλειδί (WIF):",
 		"vanitylabelnotesprivatekey": "Παραπάνω είναι το Προσωπικό Κλειδί που θα φορτώσετε στο Πορτοφόλι σας. ",
 
+		// split wallet html
+		"splitlabelthreshold": "Ελάχιστο όριο μετοχών που απαιτείται για συνδυασμό",
+		"splitlabelshares": "Αριθμός μετοχών",
+		"splitview": "Δημιουργία",
+		"combinelabelentershares": "Εισάγετε τις διαθέσιμες μετοχές (διαχωρισμένες με κενό)",
+		"combineview": "Συνδυασμός Μετοχών",
+		"combinelabelprivatekey": "Συνδυασμένο Προσωπικό Κλειδί",
+
 		// detail wallet html
 		"detaillabelenterprivatekey": "Εισάγετε το Προσωπικό Κλειδί",
 		"detailkeyformats": "Key Formats: WIF, WIFC, HEX, B64, B6, MINI, BIP38",
@@ -147,8 +172,11 @@
 		"detailprint": "Εκτύπωση",
 		"detaillabelnote1": "Το Bitcoin Προσωπικό Κλειδί είναι ένας μοναδικός και μυστικός αριθμός που μόνο εσείς πρέπει να γνωρίζετε, ο οποίος μπορεί να κωδικοποιηθεί σε πολλές διαφορετικές μορφές. Εμφανίζουμε παρακάτω τη διεύθυνση Bitcoin και το Δημόσιο Κλειδί, μαζί με το Προσωπικό Κλειδί, στις πιο δημοφιλείς μορφές  (WIF, WIFC, HEX, B64).",
 		"detaillabelnote2": "Το Bitcoin v0.6+ αποθηκεύει τα Προσωπικά Κλειδιά σε συμπιεσμένη μορφή. Το πρόγραμμα υποστηρίζει επίσης εισαγωγή κι εξαγωγή των Προσωπικών Κλειδιών με τις εντολές importprivkey/dumpprivkey. Η μορφή του εξαγόμενου Προσωπικού Κλειδιού προσδιορίζεται από το αν η διεύθυνση δημιουργήθηκε σε ένα παλιό ή νέο πορτοφόλι.",
-		"detaillabelbitcoinaddress": "Διεύθυνση Bitcoin:",
-		"detaillabelbitcoinaddresscomp": "Συμπιεσμένη Διεύθυνση Bitcoin:",
+		"detaillabelbitcoinaddress": "Διεύθυνση Bitcoin (Legacy P2PKH)",
+		"detaillabelbitcoinaddresscomp": "Συμπιεσμένη Διεύθυνση Bitcoin (Legacy P2PKH)",
+		"detaillabelP2SH": "Διεύθυνση P2SH-P2WPKH (3…)",
+		"detaillabelSegwit": "Εγγενές SegWit P2WPKH (bc1q…)",
+		"detaillabelTaproot": "Taproot P2TR (bc1p…)",
 		"detaillabelpublickey": "Δημόσιο Κλειδί (130 χαρακτήρες [0-9A-F]):",
 		"detaillabelpublickeycomp": "Δημόσιο Κλειδί (Συμπιεσμένο, 66 χαρακτήρες [0-9A-F]):",
 		"detaillabelprivwif": "Προσωπικό Κλειδί WIF (51 χαρακτήρες base58, ξεκινάει με",
@@ -159,8 +187,8 @@
 		"detaillabelprivmini": "Προσωπικό Κλειδί Μορφή Mini (22, 26 ή 30 χαρακτήρες, ξεκινάει με 'S'):",
 		"detaillabelpassphrase": "BIP38 Κωδικός",
 		"detailbip38decryptbutton": "Αποκωδικοποίηση BIP38",
-		"detailbip38encryptbutton": "Encrypt BIP38", //TODO: please translate
-		"detaillabelq1": "How do I make a wallet using dice? What is B6?", //TODO: please translate
-		"detaila1": "An important part of creating a Bitcoin wallet is ensuring the random numbers used to create the wallet are truly random. Physical randomness is better than computer generated pseudo-randomness. The easiest way to generate physical randomness is with dice. To create a Bitcoin private key you only need one six sided die which you roll 99 times. Stopping each time to record the value of the die. When recording the values follow these rules: 1=1, 2=2, 3=3, 4=4, 5=5, 6=0. By doing this you are recording the big random number, your private key, in B6 or base 6 format. You can then enter the 99 character base 6 private key into the text field above and click View Details. You will then see the Bitcoin address associated with your private key. You should also make note of your private key in WIF format since it is more widely used." //TODO: please translate
+		"detailbip38encryptbutton": "Κωδικοποίηση BIP38",
+		"detaillabelq1": "Πώς δημιουργώ ένα πορτοφόλι χρησιμοποιώντας ζάρια; Τι είναι το B6;",
+		"detaila1": "Ένα σημαντικό μέρος της δημιουργίας ενός πορτοφολιού Bitcoin είναι η διασφάλιση ότι οι τυχαίοι αριθμοί που χρησιμοποιούνται για τη δημιουργία του πορτοφολιού είναι πραγματικά τυχαίοι. Η φυσική τυχαιότητα είναι καλύτερη από την ψευδοτυχαιότητα που παράγει ο υπολογιστής. Ο πιο εύκολος τρόπος για να δημιουργήσετε φυσική τυχαιότητα είναι με ζάρια. Για να δημιουργήσετε ένα Προσωπικό Κλειδί Bitcoin χρειάζεστε μόνο ένα εξάπλευρο ζάρι το οποίο θα ρίξετε 99 φορές. Σταματώντας κάθε φορά για να καταγράψετε την τιμή. Κατά την καταγραφή των τιμών ακολουθήστε αυτούς τους κανόνες: 1=1, 2=2, 3=3, 4=4, 5=5, 6=0. Κάνοντας αυτό καταγράφετε τον μεγάλο τυχαίο αριθμό, το Προσωπικό Κλειδί σας, σε μορφή B6 ή βάση 6. Μπορείτε στη συνέχεια να εισαγάγετε το Προσωπικό Κλειδί βάσης 6 των 99 χαρακτήρων στο πεδίο κειμένου παραπάνω και να κάνετε κλικ στο Προβολή Λεπτομερειών. Θα δείτε τότε τη Διεύθυνση Bitcoin που σχετίζεται με το Προσωπικό Κλειδί σας. Θα πρέπει επίσης να σημειώσετε το Προσωπικό Κλειδί σας σε μορφή WIF καθώς χρησιμοποιείται ευρύτερα."
 	};
 })(ninja.translator);
