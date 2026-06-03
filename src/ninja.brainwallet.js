@@ -15,6 +15,37 @@ ninja.wallets.brainwallet = {
 
 	minPassphraseLength: 15,
 
+	// Return address using the selected address type; SegWit/Taproot always use compressed key
+	getAddress: function (btcKey) {
+		var type = document.getElementById("brainaddrtype").value;
+		switch (type) {
+			case "p2sh":    btcKey.setCompressed(true); return btcKey.getP2SHAddress();
+			case "segwit":  btcKey.setCompressed(true); return btcKey.getSegwitAddress();
+			case "taproot": btcKey.setCompressed(true); return btcKey.getTaprootAddress();
+			default:        return btcKey.getBitcoinAddress();
+		}
+	},
+
+	// When address type changes, sync the compressed checkbox state
+	onAddressTypeChange: function (element) {
+		var isLegacy = (element.value === "legacy");
+		var compCheckbox = document.getElementById("braincompressed");
+		if (!isLegacy) {
+			compCheckbox.checked = true;
+			compCheckbox.disabled = true;
+		} else {
+			compCheckbox.disabled = false;
+		}
+	},
+
+	// When the compressed checkbox changes, reset address type to legacy if uncompressed
+	onCompressionChange: function (element) {
+		if (!element.checked) {
+			document.getElementById("brainaddrtype").value = "legacy";
+			document.getElementById("brainaddrtype").disabled = false;
+		}
+	},
+
 	view: function () {
 		var key = document.getElementById("brainpassphrase").value.toString()
 		document.getElementById("brainpassphrase").value = key;
@@ -28,7 +59,7 @@ ninja.wallets.brainwallet = {
 				var btcKey = new Bitcoin.ECKey(bytes);
 				var isCompressed = document.getElementById("braincompressed").checked;
 				btcKey.setCompressed(isCompressed);
-				var bitcoinAddress = btcKey.getBitcoinAddress();
+				var bitcoinAddress = ninja.wallets.brainwallet.getAddress(btcKey);
 				var privWif = btcKey.getBitcoinWalletImportFormat();
 				document.getElementById("brainbtcaddress").innerHTML = bitcoinAddress;
 				document.getElementById("brainbtcprivwif").innerHTML = privWif;

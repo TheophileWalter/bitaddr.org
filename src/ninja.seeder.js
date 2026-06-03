@@ -24,10 +24,13 @@
 			ninja.seeder.seedCount++;
 			ninja.seeder.seedingOver();
 		}
-			// seed mouse position X and Y when mouse movements are greater than 40ms apart.
+			// seed mouse position X and Y when mouse movements are greater than 40ms apart
 		else if ((ninja.seeder.seedCount < ninja.seeder.seedLimit) && evt && (timeStamp - ninja.seeder.lastInputTime) > 40) {
-			SecureRandom.seedTime();
+			SecureRandom.seedTime(); // includes performance.now() high-res timing
 			SecureRandom.seedInt16((evt.clientX * evt.clientY));
+			// Additional: seed individual coordinates for more entropy
+			SecureRandom.seedInt16(evt.clientX);
+			SecureRandom.seedInt16(evt.clientY);
 			ninja.seeder.showPoint(evt.clientX, evt.clientY);
 			ninja.seeder.seedCount++;
 			ninja.seeder.lastInputTime = new Date().getTime();
@@ -46,11 +49,11 @@
 			// seed key press character
 		else if ((ninja.seeder.seedCount < ninja.seeder.seedLimit) && evt.which) {
 			var timeStamp = new Date().getTime();
-			// seed a bunch (minimum seedLimit) of times
-			SecureRandom.seedTime();
+			SecureRandom.seedTime(); // includes performance.now() high-res timing
 			SecureRandom.seedInt8(evt.which);
 			var keyPressTimeDiff = timeStamp - ninja.seeder.lastInputTime;
-			SecureRandom.seedInt8(keyPressTimeDiff);
+			// Inter-keystroke timing carries ~6-8 bits of human-sourced entropy
+			SecureRandom.seedInt16(keyPressTimeDiff);
 			ninja.seeder.seedCount++;
 			ninja.seeder.lastInputTime = new Date().getTime();
 			ninja.seeder.showPool();

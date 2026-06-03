@@ -216,6 +216,59 @@ Bitcoin.ECKey = (function () {
 		return addr.toString();
 	};
 
+	// P2SH-P2WPKH address (starts with '3') — compressed key required
+	ECKey.prototype.getP2SHAddress = function () {
+		var savedComp = this.compressed;
+		this.setCompressed(true);
+		var pubKeyHash = Bitcoin.Util.sha256ripe160(this.getPub());
+		this.setCompressed(savedComp);
+		// Redeem script: OP_0 <20-byte pubkey hash>
+		var redeemScript = [0x00, 0x14].concat(pubKeyHash);
+		var scriptHash = Bitcoin.Util.sha256ripe160(redeemScript);
+		var addr = new Bitcoin.Address(scriptHash);
+		addr.version = 0x05;
+		return addr.toString();
+	};
+
+	// Native SegWit P2WPKH address (bc1q...) — compressed key required
+	ECKey.prototype.getSegwitAddress = function () {
+		var savedComp = this.compressed;
+		this.setCompressed(true);
+		var pubKeyHash = Bitcoin.Util.sha256ripe160(this.getPub());
+		this.setCompressed(savedComp);
+		return Bitcoin.Bech32.segwitAddress('bc', 0, pubKeyHash);
+	};
+
+	// Taproot P2TR address (bc1p...) — key-path spend, no script tree
+	ECKey.prototype.getTaprootAddress = function () {
+		var savedComp = this.compressed;
+		this.setCompressed(true);
+		var compPub = this.getPub().slice();
+		this.setCompressed(savedComp);
+
+		// lift_x: force even-Y variant by setting prefix to 0x02
+		compPub[0] = 0x02;
+		var P = ecparams.getCurve().decodePointHex(Crypto.util.bytesToHex(compPub).toUpperCase());
+
+		// x-only internal key (32 bytes, big-endian)
+		var xBytes = P.getX().toBigInteger().toByteArrayUnsigned();
+		while (xBytes.length < 32) xBytes.unshift(0);
+
+		// tagged_hash("TapTweak", xBytes) per BIP340
+		var tagHash = Crypto.SHA256("TapTweak", { asBytes: true });
+		var tweakBytes = Crypto.SHA256(tagHash.concat(tagHash).concat(xBytes), { asBytes: true });
+		var tweakInt = BigInteger.fromByteArrayUnsigned(tweakBytes);
+
+		// Output key Q = P + tweak*G
+		var Q = P.add(ecparams.getG().multiply(tweakInt));
+
+		// Witness program = x-coordinate of Q (32 bytes)
+		var qXBytes = Q.getX().toBigInteger().toByteArrayUnsigned();
+		while (qXBytes.length < 32) qXBytes.unshift(0);
+
+		return Bitcoin.Bech32.segwitAddress('bc', 1, qXBytes);
+	};
+
 	/*
 	* Takes a public point as a hex string or byte array
 	*/

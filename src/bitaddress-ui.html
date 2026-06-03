@@ -160,25 +160,42 @@
 					</div>
 				</div>
 				<div class="body">
-					<div id="keyarea" class="keyarea">
-						<div class="public">
-							<div class="pubaddress">
-								<span class="label" id="singlelabelbitcoinaddress">Bitcoin Address</span>
+					<div id="singlekeyarea">
+						<div id="singleaddresses">
+							<div class="singleaddrblock">
+								<span class="label" id="singlelabelbitcoinaddress">Bitcoin Address (Legacy P2PKH)</span>
+								<div class="singleaddrrow">
+									<div id="qrcode_public"></div>
+									<span class="output" id="btcaddress"></span>
+								</div>
 							</div>
-							<div id="qrcode_public" class="qrcode_public"></div>
-							<div class="pubaddress">
-								<span class="output" id="btcaddress"></span>
+							<div class="singleaddrblock">
+								<span class="label" id="singlelabelP2SH">P2SH-P2WPKH (3…)</span>
+								<div class="singleaddrrow">
+									<div id="qrcode_public_p2sh"></div>
+									<span class="output" id="btcaddressP2SH"></span>
+								</div>
+							</div>
+							<div class="singleaddrblock">
+								<span class="label" id="singlelabelSegwit">Native SegWit P2WPKH (bc1q…)</span>
+								<div class="singleaddrrow">
+									<div id="qrcode_public_segwit"></div>
+									<span class="output" id="btcaddressSegwit"></span>
+								</div>
+							</div>
+							<div class="singleaddrblock">
+								<span class="label" id="singlelabelTaproot">Taproot P2TR (bc1p…)</span>
+								<div class="singleaddrrow">
+									<div id="qrcode_public_taproot"></div>
+									<span class="output" id="btcaddressTaproot"></span>
+								</div>
 							</div>
 							<div id="singleshare">SHARE</div>
 						</div>
-						<div class="private">
-							<div class="privwif">
-								<span class="label" id="singlelabelprivatekey">Private Key</span>
-							</div>
-							<div id="qrcode_private" class="qrcode_private"></div>
-							<div class="privwif">
-								<span class="output" id="btcprivwif"></span>
-							</div>
+						<div id="singleprivate">
+							<span class="label" id="singlelabelprivatekey">Private Key (WIF compressed)</span>
+							<div id="qrcode_private"></div>
+							<span class="output" id="btcprivwif"></span>
 							<div id="singlesecret">SECRET</div>
 						</div>
 					</div>
@@ -202,6 +219,15 @@
 						<span class="print"><input type="button" name="print" value="Print" id="paperprint" onclick="window.print();" /></span>
 					</div>
 					<div id="paperadvancedcommands" class="row extra">
+						<span>
+							<label for="paperaddrtype">Address type:</label>
+							<select id="paperaddrtype" onchange="ninja.wallets.paperwallet.onAddressTypeChange(this);">
+								<option value="legacy">Legacy P2PKH (1…)</option>
+								<option value="p2sh">P2SH-P2WPKH (3…)</option>
+								<option value="segwit">Native SegWit (bc1q…)</option>
+								<option value="taproot">Taproot (bc1p…)</option>
+							</select>
+						</span>
 						<span><label id="paperlabelencrypt" for="paperencrypt">BIP38 Encrypt?</label> <input type="checkbox" id="paperencrypt" onchange="ninja.wallets.paperwallet.toggleEncrypt(this);" /></span>
 						<span><label id="paperlabelBIPpassphrase" for="paperpassphrase">Passphrase:</label> <input type="text" id="paperpassphrase" /></span>
 						<span><label id="paperlabeladdressesperpage" for="paperlimitperpage">Addresses per page:</label> <input type="text" id="paperlimitperpage" /></span>
@@ -220,6 +246,15 @@
 						<span class="print"><input type="button" name="print" id="bulkprint" value="Print" onclick="window.print();" /></span>
 					</div>
 					<div id="bulkadvancedcommands" class="row extra">
+						<span>
+							<label for="bulkaddrtype">Address type:</label>
+							<select id="bulkaddrtype" onchange="ninja.wallets.bulkwallet.onAddressTypeChange(this);">
+								<option value="legacy">Legacy P2PKH (1…)</option>
+								<option value="p2sh">P2SH-P2WPKH (3…)</option>
+								<option value="segwit">Native SegWit (bc1q…)</option>
+								<option value="taproot">Taproot (bc1p…)</option>
+							</select>
+						</span>
 						<span><label id="bulklabelencrypt" for="bulkencrypt">BIP38 Encrypt?</label> <input type="checkbox" id="bulkencrypt" onchange="ninja.wallets.bulkwallet.toggleEncrypt(this);" /></span>
 						<span><label id="bulklabelBIPpassphrase" for="bulkpassphrase">Passphrase:</label> <input type="text" id="bulkpassphrase" /></span>
 					</div>
@@ -269,7 +304,16 @@
 						<span id="brainalgorithm" class="notes right">Algorithm: SHA256(passphrase)</span>
 					</div>
 					<div class ="row extra">
-						<span><label tabindex="3" id="brainlabelcompressed" for="braincompressed">Compressed address?</label> <input type="checkbox" id="braincompressed" /></span>
+						<span><label tabindex="3" id="brainlabelcompressed" for="braincompressed">Compressed address?</label> <input type="checkbox" id="braincompressed" onchange="ninja.wallets.brainwallet.onCompressionChange(this);" /></span>
+						<span>
+							<label for="brainaddrtype">Address type:</label>
+							<select id="brainaddrtype" onchange="ninja.wallets.brainwallet.onAddressTypeChange(this);">
+								<option value="legacy">Legacy P2PKH (1…)</option>
+								<option value="p2sh">P2SH-P2WPKH (3…)</option>
+								<option value="segwit">Native SegWit (bc1q…)</option>
+								<option value="taproot">Taproot (bc1p…)</option>
+							</select>
+						</span>
 						<span><input tabindex="4" type="button" id="brainview" value="View" onclick="ninja.wallets.brainwallet.view();" /></span>
 					</div>
 					<div class="row extra"><span id="brainwarning"></span></div>
@@ -329,7 +373,16 @@
 						<label for="vanityradioadd" id="vanitylabelradioadd">Add</label> <input type="radio" id="vanityradioadd" name="vanityradio" value="add" checked />
 						<label for="vanityradiomultiply" id="vanitylabelradiomultiply">Multiply</label> <input type="radio" id="vanityradiomultiply" name="vanityradio" value="multiply" />
 					</div>
-					<div><input type="button" id="vanitycalc" value="Calculate Vanity Wallet" onclick="ninja.wallets.vanitywallet.addKeys();" /></div>
+					<div>
+						<label for="vanityaddrtype">Address type:</label>
+						<select id="vanityaddrtype">
+							<option value="legacy">Legacy P2PKH (1…)</option>
+							<option value="p2sh">P2SH-P2WPKH (3…)</option>
+							<option value="segwit">Native SegWit (bc1q…)</option>
+							<option value="taproot">Taproot (bc1p…)</option>
+						</select>
+						<input type="button" id="vanitycalc" value="Calculate Vanity Wallet" onclick="ninja.wallets.vanitywallet.addKeys();" />
+					</div>
 				</div>
 				<div id="vanitystep2area">
 					<div>
@@ -359,6 +412,14 @@
 					<br/>
 					<label id="splitlabelshares">Number of shares</label>
 					<input type="text" id="splitshares" value="3" size="4"/>
+					<br/>
+					<label for="splitaddrtype">Address type:</label>
+					<select id="splitaddrtype">
+						<option value="legacy">Legacy P2PKH (1…)</option>
+						<option value="p2sh">P2SH-P2WPKH (3…)</option>
+						<option value="segwit">Native SegWit (bc1q…)</option>
+						<option value="taproot">Taproot (bc1p…)</option>
+					</select>
 					<span><input type="button" id="splitview" value="Generate" onclick="ninja.wallets.splitwallet.splitKey();"></span>
 					<div id="splitstep1icon" class="more " onclick="ninja.wallets.splitwallet.openCloseStep(1);"></div>
 				</div>
@@ -406,14 +467,33 @@
 					</div>
 					<div class="pubqr">
 						<div class="item">
-							<span class="label" id="detaillabelbitcoinaddress">Bitcoin Address</span>
+							<span class="label" id="detaillabelbitcoinaddress">Bitcoin Address (Legacy P2PKH)</span>
 							<div id="detailqrcodepublic" class="qrcode_public"></div>
 							<span class="output" id="detailaddress"></span>
-						</div>					
+						</div>
 						<div class="item right">
-							<span class="label" id="detaillabelbitcoinaddresscomp">Bitcoin Address Compressed</span>
+							<span class="label" id="detaillabelbitcoinaddresscomp">Bitcoin Address Compressed (Legacy P2PKH)</span>
 							<div id="detailqrcodepubliccomp" class="qrcode_public"></div>
 							<span class="output" id="detailaddresscomp"></span>
+						</div>
+					</div>
+					<div class="pubqr" style="margin-top:10px;">
+						<div class="item">
+							<span class="label" id="detaillabelP2SH">P2SH-P2WPKH Address (3...)</span>
+							<div id="detailqrcodepublicP2SH" class="qrcode_public"></div>
+							<span class="output" id="detailaddressP2SH"></span>
+						</div>
+						<div class="item right">
+							<span class="label" id="detaillabelSegwit">Native SegWit P2WPKH (bc1q...)</span>
+							<div id="detailqrcodepublicSegwit" class="qrcode_public"></div>
+							<span class="output" id="detailaddressSegwit"></span>
+						</div>
+					</div>
+					<div class="pubqr" style="margin-top:10px;">
+						<div class="item">
+							<span class="label" id="detaillabelTaproot">Taproot P2TR (bc1p...)</span>
+							<div id="detailqrcodepublicTaproot" class="qrcode_public"></div>
+							<span class="output" id="detailaddressTaproot"></span>
 						</div>
 					</div>
 					<br /><br />

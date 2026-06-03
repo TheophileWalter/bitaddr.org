@@ -894,6 +894,74 @@
 					return false;
 				}
 				return true;
+			},
+
+			// ---- Bech32 / SegWit / Taproot address tests ----
+
+			// Known test vector: compressed WIF → P2WPKH (bc1q...)
+			// Private key: KwDiBf89QgGbjEhKnhXJuH7LrciVrZi3qYjgd9M7rFU73sVHnoWn
+			// Compressed pubkey: 0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798
+			// P2WPKH: bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4
+			testSegwitAddressFromWif: function () {
+				var key = "KwDiBf89QgGbjEhKnhXJuH7LrciVrZi3qYjgd9M7rFU73sVHnoWn";
+				var btcKey = new Bitcoin.ECKey(key);
+				var addr = btcKey.getSegwitAddress();
+				return addr === "bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4";
+			},
+
+			// Same key: P2SH-P2WPKH (3...)
+			// Expected: 3JvL6Ymt8MVWiCNHC7oWU6nLeHNJKLZGLN
+			testP2SHAddressFromWif: function () {
+				var key = "KwDiBf89QgGbjEhKnhXJuH7LrciVrZi3qYjgd9M7rFU73sVHnoWn";
+				var btcKey = new Bitcoin.ECKey(key);
+				var addr = btcKey.getP2SHAddress();
+				return addr === "3JvL6Ymt8MVWiCNHC7oWU6nLeHNJKLZGLN";
+			},
+
+			// Bech32 encoding round-trip: pubkey hash → bc1q address → starts with bc1q
+			testBech32EncodingP2WPKH: function () {
+				var key = "5J8QhiQtAiozKwyk3GCycAscg1tNaYhNdiiLey8vaDK8Bzm4znb";
+				var btcKey = new Bitcoin.ECKey(key);
+				var addr = btcKey.getSegwitAddress();
+				return (typeof addr === 'string' && addr.indexOf('bc1q') === 0 && addr.length === 42);
+			},
+
+			// Bech32m encoding: Taproot address starts with bc1p, correct length
+			testBech32mEncodingP2TR: function () {
+				var key = "5J8QhiQtAiozKwyk3GCycAscg1tNaYhNdiiLey8vaDK8Bzm4znb";
+				var btcKey = new Bitcoin.ECKey(key);
+				var addr = btcKey.getTaprootAddress();
+				return (typeof addr === 'string' && addr.indexOf('bc1p') === 0 && addr.length === 62);
+			},
+
+			// getSegwitAddressFromByteArray uses compressed pubkey bytes
+			testGetSegwitAddressFromByteArray: function () {
+				var key = "KwDiBf89QgGbjEhKnhXJuH7LrciVrZi3qYjgd9M7rFU73sVHnoWn";
+				var btcKey = new Bitcoin.ECKey(key);
+				btcKey.setCompressed(true);
+				var compPubBytes = btcKey.getPub();
+				var addr = ninja.publicKey.getSegwitAddressFromByteArray(compPubBytes);
+				return addr === "bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4";
+			},
+
+			// Taproot address is deterministic (same key → same address)
+			testTaprootAddressIsDeterministic: function () {
+				var key = "5J8QhiQtAiozKwyk3GCycAscg1tNaYhNdiiLey8vaDK8Bzm4znb";
+				var btcKey1 = new Bitcoin.ECKey(key);
+				var btcKey2 = new Bitcoin.ECKey(key);
+				return btcKey1.getTaprootAddress() === btcKey2.getTaprootAddress();
+			},
+
+			// All three SegWit-family addresses are distinct from the legacy address
+			testSegwitAddressesAreDistinctFromLegacy: function () {
+				var key = "5J8QhiQtAiozKwyk3GCycAscg1tNaYhNdiiLey8vaDK8Bzm4znb";
+				var btcKey = new Bitcoin.ECKey(key);
+				var legacy = btcKey.getBitcoinAddress();
+				var p2sh = btcKey.getP2SHAddress();
+				var segwit = btcKey.getSegwitAddress();
+				var taproot = btcKey.getTaprootAddress();
+				return (legacy !== p2sh && legacy !== segwit && legacy !== taproot &&
+				        p2sh !== segwit && p2sh !== taproot && segwit !== taproot);
 			}
 		},
 

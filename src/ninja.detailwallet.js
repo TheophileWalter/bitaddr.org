@@ -164,8 +164,9 @@
 
 		populateKeyDetails: function (btcKey) {
 			if (btcKey.priv != null) {
-				// get the original compression value and set it back later in this function
 				var originalCompression = btcKey.compressed;
+
+				// Uncompressed key
 				btcKey.setCompressed(false);
 				document.getElementById("detailprivhex").innerHTML = btcKey.toString().toUpperCase();
 				document.getElementById("detailprivb64").innerHTML = btcKey.toString("base64");
@@ -174,19 +175,33 @@
 				document.getElementById("detailpubkey").innerHTML = btcKey.getPubKeyHex();
 				document.getElementById("detailaddress").innerHTML = bitcoinAddress;
 				document.getElementById("detailprivwif").innerHTML = wif;
+
+				// Compressed key
 				btcKey.setCompressed(true);
 				var bitcoinAddressComp = btcKey.getBitcoinAddress();
-				var wifComp = btcKey.getBitcoinWalletImportFormat();			
+				var wifComp = btcKey.getBitcoinWalletImportFormat();
 				document.getElementById("detailpubkeycomp").innerHTML = btcKey.getPubKeyHex();
 				document.getElementById("detailaddresscomp").innerHTML = bitcoinAddressComp;
 				document.getElementById("detailprivwifcomp").innerHTML = wifComp;
-				btcKey.setCompressed(originalCompression); // to satisfy the key pool
-				var pool1 = new Bitcoin.ECKey(wif); // to satisfy the key pool
-				var pool2 = new Bitcoin.ECKey(wifComp); // to satisfy the key pool
+
+				// SegWit / Taproot addresses (all require compressed key)
+				var p2shAddress = btcKey.getP2SHAddress();
+				var segwitAddress = btcKey.getSegwitAddress();
+				var taprootAddress = btcKey.getTaprootAddress();
+				document.getElementById("detailaddressP2SH").innerHTML = p2shAddress;
+				document.getElementById("detailaddressSegwit").innerHTML = segwitAddress;
+				document.getElementById("detailaddressTaproot").innerHTML = taprootAddress;
+
+				btcKey.setCompressed(originalCompression);
+				var pool1 = new Bitcoin.ECKey(wif);
+				var pool2 = new Bitcoin.ECKey(wifComp);
 
 				qrCode.showQrCode({
 					"detailqrcodepublic": bitcoinAddress,
 					"detailqrcodepubliccomp": bitcoinAddressComp,
+					"detailqrcodepublicP2SH": p2shAddress,
+					"detailqrcodepublicSegwit": segwitAddress,
+					"detailqrcodepublicTaproot": taprootAddress,
 					"detailqrcodeprivate": wif,
 					"detailqrcodeprivatecomp": wifComp
 				}, 4);
@@ -219,6 +234,9 @@
 			document.getElementById("detailpubkeycomp").innerHTML = "";
 			document.getElementById("detailaddress").innerHTML = "";
 			document.getElementById("detailaddresscomp").innerHTML = "";
+			document.getElementById("detailaddressP2SH").innerHTML = "";
+			document.getElementById("detailaddressSegwit").innerHTML = "";
+			document.getElementById("detailaddressTaproot").innerHTML = "";
 			document.getElementById("detailprivwif").innerHTML = "";
 			document.getElementById("detailprivwifcomp").innerHTML = "";
 			document.getElementById("detailprivhex").innerHTML = "";
@@ -228,6 +246,9 @@
 			document.getElementById("detailprivbip38").innerHTML = "";
 			document.getElementById("detailqrcodepublic").innerHTML = "";
 			document.getElementById("detailqrcodepubliccomp").innerHTML = "";
+			document.getElementById("detailqrcodepublicP2SH").innerHTML = "";
+			document.getElementById("detailqrcodepublicSegwit").innerHTML = "";
+			document.getElementById("detailqrcodepublicTaproot").innerHTML = "";
 			document.getElementById("detailqrcodeprivate").innerHTML = "";
 			document.getElementById("detailqrcodeprivatecomp").innerHTML = "";
 			document.getElementById("detailb6").style.display = "none";

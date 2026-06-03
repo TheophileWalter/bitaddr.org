@@ -314,6 +314,36 @@ ninja.publicKey = {
 		var addr = new Bitcoin.Address(pubKeyHash);
 		return addr.toString();
 	},
+	// P2SH-P2WPKH address from a compressed public key byte array
+	getP2SHAddressFromByteArray: function (pubKeyByteArray) {
+		var pubKeyHash = Bitcoin.Util.sha256ripe160(pubKeyByteArray);
+		var redeemScript = [0x00, 0x14].concat(pubKeyHash);
+		var scriptHash = Bitcoin.Util.sha256ripe160(redeemScript);
+		var addr = new Bitcoin.Address(scriptHash);
+		addr.version = 0x05;
+		return addr.toString();
+	},
+	// Native SegWit P2WPKH address from a compressed public key byte array
+	getSegwitAddressFromByteArray: function (pubKeyByteArray) {
+		var pubKeyHash = Bitcoin.Util.sha256ripe160(pubKeyByteArray);
+		return Bitcoin.Bech32.segwitAddress('bc', 0, pubKeyHash);
+	},
+	// Taproot P2TR address from a compressed public key byte array
+	getTaprootAddressFromByteArray: function (pubKeyByteArray) {
+		var ecparams = EllipticCurve.getSECCurveByName("secp256k1");
+		var compPub = pubKeyByteArray.slice();
+		compPub[0] = 0x02; // lift_x: force even-Y
+		var P = ecparams.getCurve().decodePointHex(Crypto.util.bytesToHex(compPub).toUpperCase());
+		var xBytes = P.getX().toBigInteger().toByteArrayUnsigned();
+		while (xBytes.length < 32) xBytes.unshift(0);
+		var tagHash = Crypto.SHA256("TapTweak", { asBytes: true });
+		var tweakBytes = Crypto.SHA256(tagHash.concat(tagHash).concat(xBytes), { asBytes: true });
+		var tweakInt = BigInteger.fromByteArrayUnsigned(tweakBytes);
+		var Q = P.add(ecparams.getG().multiply(tweakInt));
+		var qXBytes = Q.getX().toBigInteger().toByteArrayUnsigned();
+		while (qXBytes.length < 32) qXBytes.unshift(0);
+		return Bitcoin.Bech32.segwitAddress('bc', 1, qXBytes);
+	},
 	getHexFromByteArray: function (pubKeyByteArray) {
 		return Crypto.util.bytesToHex(pubKeyByteArray).toString().toUpperCase();
 	},

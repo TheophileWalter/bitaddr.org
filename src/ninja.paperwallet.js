@@ -114,7 +114,7 @@ ninja.wallets.paperwallet = {
 		else {
 			var key = new Bitcoin.ECKey(false);
 			key.setCompressed(true);
-			var bitcoinAddress = key.getBitcoinAddress();
+			var bitcoinAddress = ninja.wallets.paperwallet.getAddress(key);
 			var privateKeyWif = key.getBitcoinWalletImportFormat();
 			if (ninja.wallets.paperwallet.useArtisticWallet) {
 				ninja.wallets.paperwallet.showArtisticWallet(idPostFix, bitcoinAddress, privateKeyWif);
@@ -217,10 +217,42 @@ ninja.wallets.paperwallet = {
 		ninja.wallets.paperwallet.resetLimits();
 	},
 
+	// Return address for the key according to the currently selected address type
+	getAddress: function (key) {
+		var type = document.getElementById("paperaddrtype").value;
+		switch (type) {
+			case "p2sh":    return key.getP2SHAddress();
+			case "segwit":  return key.getSegwitAddress();
+			case "taproot": return key.getTaprootAddress();
+			default:        return key.getBitcoinAddress();
+		}
+	},
+
+	// Called when the address type <select> changes
+	onAddressTypeChange: function (element) {
+		var isLegacy = (element.value === "legacy");
+		var encryptCheckbox = document.getElementById("paperencrypt");
+		if (!isLegacy && encryptCheckbox.checked) {
+			// BIP38 only supports legacy P2PKH — disable it
+			encryptCheckbox.checked = false;
+			document.getElementById("paperpassphrase").disabled = true;
+			ninja.wallets.paperwallet.encrypt = false;
+		}
+		// BIP38 checkbox available only for legacy addresses
+		encryptCheckbox.disabled = !isLegacy;
+	},
+
 	toggleEncrypt: function (element) {
 		// enable/disable passphrase textbox
 		document.getElementById("paperpassphrase").disabled = !element.checked;
 		ninja.wallets.paperwallet.encrypt = element.checked;
+		if (element.checked) {
+			// Force legacy address type — BIP38 requires it
+			document.getElementById("paperaddrtype").value = "legacy";
+			document.getElementById("paperaddrtype").disabled = true;
+		} else {
+			document.getElementById("paperaddrtype").disabled = false;
+		}
 		ninja.wallets.paperwallet.resetLimits();
 	},
 

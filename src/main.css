@@ -43,9 +43,19 @@ input[type=checkbox] { position: relative; z-index: 20; }
 #keyarea .private { width: 30%; display: table-cell; }
 #keyarea .public { width: 30%; display: table-cell; }
 #singlearea { font-size: 90%; }
-#singlesecret { position: relative; top: -130px; float: right; right: 200px; color: red; font-weight: bolder; font-size: 200%;  }
-#singleshare { position: relative; top: -110px; float: left; left: 160px; color: #009900; font-weight: bolder; font-size: 200%;  }
-#singlesafety { text-align: left; padding: 5px; border-top: 2px solid #009900; top: -25px; position: relative; }
+
+/* ── Single Wallet multi-address layout ─────────────────────────────── */
+#singlekeyarea { display: flex; align-items: flex-start; padding: 5px; text-align: left; }
+#singleaddresses { flex: 1; padding-right: 12px; }
+.singleaddrblock { margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px dotted #ccc; }
+.singleaddrblock:last-of-type { border-bottom: none; margin-bottom: 0; }
+.singleaddrrow { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+.singleaddrrow .output { font-family: monospace; font-size: 1.1em; word-break: break-all; flex: 1; }
+#singleprivate { width: 210px; flex-shrink: 0; text-align: right; }
+#singleprivate .output { font-family: monospace; font-size: 0.9em; word-break: break-all; display: block; margin-top: 4px; }
+#singlesecret { color: red; font-weight: bolder; font-size: 150%; margin-top: 10px; }
+#singleshare { color: #009900; font-weight: bolder; font-size: 150%; margin-top: 10px; }
+#singlesafety { text-align: left; padding: 5px; border-top: 2px solid #009900; }
 
 #main { position: relative; text-align: center; margin: 0px auto; width: 808px; }
 #logo { width: 578px; height: 80px; }

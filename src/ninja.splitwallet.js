@@ -43,13 +43,24 @@ ninja.wallets.splitwallet = {
 		return bytes;
 	},
 
+	// Return address for the key using the selected address type
+	getAddress: function (key) {
+		var type = document.getElementById("splitaddrtype").value;
+		switch (type) {
+			case "p2sh":    key.setCompressed(true); return key.getP2SHAddress();
+			case "segwit":  key.setCompressed(true); return key.getSegwitAddress();
+			case "taproot": key.setCompressed(true); return key.getTaprootAddress();
+			default:        return key.getBitcoinAddress();
+		}
+	},
+
 	// Split a private key and update information in the HTML
 	splitKey: function () {
 		try {
 			var numshares = parseInt(document.getElementById('splitshares').value);
 			var threshold = parseInt(document.getElementById('splitthreshold').value);
 			var key = new Bitcoin.ECKey(false);
-			var bitcoinAddress = key.getBitcoinAddress();
+			var bitcoinAddress = ninja.wallets.splitwallet.getAddress(key);
 			var shares = ninja.wallets.splitwallet.getFormattedShares(key.getBitcoinHexFormat(), numshares, threshold);
 
 			var output = document.createElement("div");

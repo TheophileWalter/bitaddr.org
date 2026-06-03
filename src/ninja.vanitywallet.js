@@ -25,6 +25,36 @@ ninja.wallets.vanitywallet = {
 		document.getElementById("vanitystep1area").style.display = "none";
 	},
 
+	// Get address from a public key byte array (compress first if needed for SegWit/Taproot)
+	getAddressFromPubKeyBytes: function (pubKeyByteArray) {
+		var type = document.getElementById("vanityaddrtype").value;
+		if (type === "legacy") return ninja.publicKey.getBitcoinAddressFromByteArray(pubKeyByteArray);
+		// SegWit / Taproot require a compressed public key (33 bytes)
+		var compBytes = pubKeyByteArray;
+		if (pubKeyByteArray.length !== 33) {
+			var ecparams = EllipticCurve.getSECCurveByName("secp256k1");
+			var pt = ecparams.getCurve().decodePointHex(Crypto.util.bytesToHex(pubKeyByteArray).toUpperCase());
+			compBytes = pt.getEncoded(1);
+		}
+		switch (type) {
+			case "p2sh":    return ninja.publicKey.getP2SHAddressFromByteArray(compBytes);
+			case "segwit":  return ninja.publicKey.getSegwitAddressFromByteArray(compBytes);
+			case "taproot": return ninja.publicKey.getTaprootAddressFromByteArray(compBytes);
+		}
+	},
+
+	// Get address from an ECKey (private key known)
+	getAddressFromECKey: function (ecKey) {
+		var type = document.getElementById("vanityaddrtype").value;
+		ecKey.setCompressed(type !== "legacy" || ecKey.compressed);
+		switch (type) {
+			case "p2sh":    return ecKey.getP2SHAddress();
+			case "segwit":  return ecKey.getSegwitAddress();
+			case "taproot": return ecKey.getTaprootAddress();
+			default:        return ecKey.getBitcoinAddress();
+		}
+	},
+
 	addKeys: function () {
 		var privateKeyWif = ninja.translator.get("vanityinvalidinputcouldnotcombinekeys");
 		var bitcoinAddress = ninja.translator.get("vanityinvalidinputcouldnotcombinekeys");
@@ -43,7 +73,7 @@ ninja.wallets.vanitywallet = {
 					}
 					else {
 						privateKeyWif = ninja.translator.get("vanityprivatekeyonlyavailable");
-						bitcoinAddress = ninja.publicKey.getBitcoinAddressFromByteArray(pubKeyByteArray);
+						bitcoinAddress = ninja.wallets.vanitywallet.getAddressFromPubKeyBytes(pubKeyByteArray);
 						publicKeyHex = ninja.publicKey.getHexFromByteArray(pubKeyByteArray);
 					}
 				}
@@ -58,7 +88,7 @@ ninja.wallets.vanitywallet = {
 				privateKeyWif = ninja.translator.get("vanityprivatekeyonlyavailable");
 				var pubKeyHex = (ninja.publicKey.isPublicKeyHexFormat(input1KeyString)) ? input1KeyString : input2KeyString;
 				var ecKey = (ninja.privateKey.isPrivateKey(input1KeyString)) ? new Bitcoin.ECKey(input1KeyString) : new Bitcoin.ECKey(input2KeyString);
-				// add 
+				// add
 				if (document.getElementById("vanityradioadd").checked) {
 					var pubKeyCombined = ninja.publicKey.getByteArrayFromAdding(pubKeyHex, ecKey.getPubKeyHex());
 				}
@@ -69,7 +99,7 @@ ninja.wallets.vanitywallet = {
 				if (pubKeyCombined == null) {
 					alert(ninja.translator.get("vanityalertinvalidinputpublickeysmatch"));
 				} else {
-					bitcoinAddress = ninja.publicKey.getBitcoinAddressFromByteArray(pubKeyCombined);
+					bitcoinAddress = ninja.wallets.vanitywallet.getAddressFromPubKeyBytes(pubKeyCombined);
 					publicKeyHex = ninja.publicKey.getHexFromByteArray(pubKeyCombined);
 				}
 			}
@@ -88,7 +118,7 @@ ninja.wallets.vanitywallet = {
 					alert(ninja.translator.get("vanityalertinvalidinputprivatekeysmatch"));
 				}
 				else {
-					bitcoinAddress = combinedPrivateKey.getBitcoinAddress();
+					bitcoinAddress = ninja.wallets.vanitywallet.getAddressFromECKey(combinedPrivateKey);
 					privateKeyWif = combinedPrivateKey.getBitcoinWalletImportFormat();
 					publicKeyHex = combinedPrivateKey.getPubKeyHex();
 				}
