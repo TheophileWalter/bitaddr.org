@@ -84,6 +84,7 @@
 		"bulklabelencrypt": "Chiffrement BIP38 ?",
 		"bulklabelBIPpassphrase": "Phrase de passe :",
 		"bulklabelq1": "Pourquoi utiliser un Porte-Monnaie En Vrac pour accepter les Bitcoins sur mon site ?",
+		"bulka1": "L'approche traditionnelle pour accepter des Bitcoins sur votre site requiert l'installation du daemon Bitcoin officiel (« bitcoind »). De nombreux hébergeurs ne supportent pas ce daemon. De plus, l'exécuter sur votre serveur web signifie que vos clés privées y sont stockées et pourraient être volées en cas de piratage. En utilisant un Porte-Monnaie En Vrac, vous n'uploadez que les adresses Bitcoin sur votre serveur, sans les clés privées. Votre porte-monnaie ne risque donc pas d'être volé même si le serveur est compromis.",
 		"bulklabelq2": "Comment utiliser le Porte-Monnaie En Vrac pour accepter les Bitcoins sur mon site ?",
 		"bulklabela2li1": "Utilisez l'onglet Porte-Monnaie En Vrac pour pré-générer un grand nombre d'adresses Bitcoin (10 000+). Copiez-collez les données CSV dans un fichier texte sécurisé. Sauvegardez ce fichier en lieu sûr.",
 		"bulklabela2li2": "Importez les adresses Bitcoin dans une base de données sur votre serveur web. (N'y mettez pas les clés privées — seulement les adresses visibles par les clients.)",
@@ -157,7 +158,7 @@
 		"detaillabelprivmini": "Clé Privée Format Mini (22, 26 ou 30 caractères, commence par « S ») :",
 		"detaillabelprivb6": "Clé Privée Format Base6 (99 caractères [0-5]) :",
 		"detaillabelq1": "Comment créer un porte-monnaie avec des dés ? Qu'est-ce que B6 ?",
-		"deaila1": "Une partie importante de la création d'un porte-monnaie Bitcoin consiste à s'assurer que les nombres aléatoires utilisés sont véritablement aléatoires. L'aléatoire physique est supérieur au pseudo-aléatoire informatique. Le moyen le plus simple est d'utiliser des dés. Pour créer une clé privée Bitcoin, lancez un dé à six faces 99 fois et notez chaque résultat selon la règle : 1=1, 2=2, 3=3, 4=4, 5=5, 6=0. Vous obtenez ainsi votre clé privée en format B6 (base 6). Saisissez ensuite les 99 caractères dans le champ ci-dessus et cliquez sur « Voir les Détails ».",
+		"detaila1": "Une partie importante de la création d'un porte-monnaie Bitcoin consiste à s'assurer que les nombres aléatoires utilisés sont véritablement aléatoires. L'aléatoire physique est supérieur au pseudo-aléatoire informatique. Le moyen le plus simple est d'utiliser des dés. Pour créer une clé privée Bitcoin, lancez un dé à six faces 99 fois et notez chaque résultat selon la règle : 1=1, 2=2, 3=3, 4=4, 5=5, 6=0. Vous obtenez ainsi votre clé privée en format B6 (base 6). Saisissez ensuite les 99 caractères dans le champ ci-dessus et cliquez sur « Voir les Détails ».",
 
 		// pied de page
 		"footerlabeldonations": "Dons :",

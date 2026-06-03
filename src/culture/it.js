@@ -189,6 +189,12 @@
 		"detailbip38decryptbutton": "Decifra BIP38",
 		"detailbip38encryptbutton": "Cifra BIP38",
 		"detaillabelq1": "Come creo un portafoglio usando i dadi? Cosa è B6?",
-		"detaila1": "Una parte importante nella creazione di un portafoglio Bitcoin è assicurarsi che i numeri casuali usati per crearlo siano veramente casuali. La casualità fisica è migliore della pseudo-casualità generata dal computer. Il modo più semplice per generare casualità fisica è con i dadi. Per creare una chiave privata Bitcoin hai bisogno solo di un dado a sei facce che lancerai 99 volte. Fermandoti ogni volta per registrare il valore del dado. Quando registri i valori segui queste regole: 1=1, 2=2, 3=3, 4=4, 5=5, 6=0. Facendo questo stai registrando il grande numero casuale, la tua chiave privata, in formato B6 o base 6. Puoi poi inserire la chiave privata in base 6 di 99 caratteri nel campo di testo sopra e cliccare su Mostra Dettagli. Vedrai quindi l'indirizzo Bitcoin associato alla tua chiave privata. Dovresti anche prendere nota della tua chiave privata in formato WIF poiché è più ampiamente utilizzato."
+		"detaila1": "Una parte importante nella creazione di un portafoglio Bitcoin è assicurarsi che i numeri casuali usati per crearlo siano veramente casuali. La casualità fisica è migliore della pseudo-casualità generata dal computer. Il modo più semplice per generare casualità fisica è con i dadi. Per creare una chiave privata Bitcoin hai bisogno solo di un dado a sei facce che lancerai 99 volte. Fermandoti ogni volta per registrare il valore del dado. Quando registri i valori segui queste regole: 1=1, 2=2, 3=3, 4=4, 5=5, 6=0. Facendo questo stai registrando il grande numero casuale, la tua chiave privata, in formato B6 o base 6. Puoi poi inserire la chiave privata in base 6 di 99 caratteri nel campo di testo sopra e cliccare su Mostra Dettagli. Vedrai quindi l'indirizzo Bitcoin associato alla tua chiave privata. Dovresti anche prendere nota della tua chiave privata in formato WIF poiché è più ampiamente utilizzato.",
+		"bulklabelencrypt": "Cifratura BIP38?",
+		"detaillabelencrypt": "Cifratura BIP38?",
+		"bulklabelBIPpassphrase": "Passphrase:",
+		"brainlabelcompressed": "Indirizzo compresso?",
+		"detailwifprefix": "'5'",
+		"detaillabelprivb6": "Chiave Privata Formato Base6 (99 caratteri [0-5]):"
 	};
 })(ninja.translator);

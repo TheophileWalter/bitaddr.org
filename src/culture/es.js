@@ -189,6 +189,12 @@
 		"detailbip38decryptbutton": "Descifrar BIP38",
 		"detailbip38encryptbutton": "Cifrar BIP38",
 		"detaillabelq1": "¿Cómo creo una cartera usando dados? ¿Qué es B6?",
-		"detaila1": "Una parte importante de crear una cartera Bitcoin es asegurarse de que los números aleatorios usados para crearla son verdaderamente aleatorios. La aleatoriedad física es mejor que la pseudo-aleatoriedad generada por ordenador. La manera más fácil de generar aleatoriedad física es con dados. Para crear una clave privada Bitcoin sólo necesitas un dado de seis caras que lanzarás 99 veces. Deteniéndote cada vez para registrar el valor del dado. Al registrar los valores sigue estas reglas: 1=1, 2=2, 3=3, 4=4, 5=5, 6=0. Al hacer esto estás registrando el gran número aleatorio, tu clave privada, en formato B6 o base 6. Puedes entonces introducir la clave privada en base 6 de 99 caracteres en el campo de texto de arriba y hacer clic en Ver Detalles. Entonces verás la dirección Bitcoin asociada con tu clave privada. También deberías anotar tu clave privada en formato WIF ya que es más ampliamente utilizado."
+		"detaila1": "Una parte importante de crear una cartera Bitcoin es asegurarse de que los números aleatorios usados para crearla son verdaderamente aleatorios. La aleatoriedad física es mejor que la pseudo-aleatoriedad generada por ordenador. La manera más fácil de generar aleatoriedad física es con dados. Para crear una clave privada Bitcoin sólo necesitas un dado de seis caras que lanzarás 99 veces. Deteniéndote cada vez para registrar el valor del dado. Al registrar los valores sigue estas reglas: 1=1, 2=2, 3=3, 4=4, 5=5, 6=0. Al hacer esto estás registrando el gran número aleatorio, tu clave privada, en formato B6 o base 6. Puedes entonces introducir la clave privada en base 6 de 99 caracteres en el campo de texto de arriba y hacer clic en Ver Detalles. Entonces verás la dirección Bitcoin asociada con tu clave privada. También deberías anotar tu clave privada en formato WIF ya que es más ampliamente utilizado.",
+		"bulklabelencrypt": "¿Cifrar con BIP38?",
+		"detaillabelencrypt": "¿Cifrar con BIP38?",
+		"bulklabelBIPpassphrase": "Contraseña:",
+		"brainlabelcompressed": "¿Dirección comprimida?",
+		"detailwifprefix": "'5'",
+		"detaillabelprivb6": "Clave privada en formato base6 (99 caracteres [0-5]):"
 	};
 })(ninja.translator);

@@ -8522,7 +8522,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 				"detaillabelprivmini": "Private Key Mini Format (22, 26 or 30 characters, starts with an 'S'):",
 				"detaillabelprivb6": "Private Key Base6 Format (99 characters [0-5]):",
 				"detaillabelq1": "How do I make a wallet using dice? What is B6?",
-				"deaila1": "An important part of creating a Bitcoin wallet is ensuring the random numbers used to create the wallet are truly random. Physical randomness is better than computer generated pseudo-randomness. The easiest way to generate physical randomness is with dice. To create a Bitcoin private key you only need one six sided die which you roll 99 times. Stopping each time to record the value of the die. When recording the values follow these rules: 1=1, 2=2, 3=3, 4=4, 5=5, 6=0. By doing this you are recording the big random number, your private key, in B6 or base 6 format. You can then enter the 99 character base 6 private key into the text field above and click View Details. You will then see the Bitcoin address associated with your private key. You should also make note of your private key in WIF format since it is more widely used.",
+				"detaila1": "An important part of creating a Bitcoin wallet is ensuring the random numbers used to create the wallet are truly random. Physical randomness is better than computer generated pseudo-randomness. The easiest way to generate physical randomness is with dice. To create a Bitcoin private key you only need one six sided die which you roll 99 times. Stopping each time to record the value of the die. When recording the values follow these rules: 1=1, 2=2, 3=3, 4=4, 5=5, 6=0. By doing this you are recording the big random number, your private key, in B6 or base 6 format. You can then enter the 99 character base 6 private key into the text field above and click View Details. You will then see the Bitcoin address associated with your private key. You should also make note of your private key in WIF format since it is more widely used.",
 
 				// footer
 				"footerlabeldonations": "Donations:",
@@ -8821,7 +8821,13 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"detailbip38decryptbutton": "Dešifrovat",
 		"detailbip38encryptbutton": "Šifrovat BIP38",
 		"detaillabelq1": "Jak si mohu vytvořit peněženku pomocí hrací kostky? Co je to B6?",
-		"detaila1": "Důležitá součást vytváření Bitcoin peněženky je jistota, že náhodná čísla použitá pro její tvorbu jsou opravdu náhodná. Fyzická náhoda je lepší než počítačem generovaná pseudonáhoda. Pomocí hrací kostky je možné jednoduše získat fyzicky náhodná čísla. Pro vytvoření soukromého klíče potřebujete pouze šestihrannou kostku, kterou 99x hodíte. Každý tento hod zaznamenejte. Při zapisování převeďte čísla takto: 1=1, 2=2, 3=3, 4=4, 5=5, 6=0. Pomocí této techniky zapisujete velké, opravdu náhodné číslo, svůj soukromý klíč v B6 nebo také base 6 formátu. Těchto 99 čísel napište do pole výše a klikněte na Zobrazit detail. Poté se vám zobrazí Bitcoin adresa přidružená k tomuto soukromému klíči. Soukromý klíč byste si měli zaznamenat také ve WIF formátu, který je široce používán."
+		"detaila1": "Důležitá součást vytváření Bitcoin peněženky je jistota, že náhodná čísla použitá pro její tvorbu jsou opravdu náhodná. Fyzická náhoda je lepší než počítačem generovaná pseudonáhoda. Pomocí hrací kostky je možné jednoduše získat fyzicky náhodná čísla. Pro vytvoření soukromého klíče potřebujete pouze šestihrannou kostku, kterou 99x hodíte. Každý tento hod zaznamenejte. Při zapisování převeďte čísla takto: 1=1, 2=2, 3=3, 4=4, 5=5, 6=0. Pomocí této techniky zapisujete velké, opravdu náhodné číslo, svůj soukromý klíč v B6 nebo také base 6 formátu. Těchto 99 čísel napište do pole výše a klikněte na Zobrazit detail. Poté se vám zobrazí Bitcoin adresa přidružená k tomuto soukromému klíči. Soukromý klíč byste si měli zaznamenat také ve WIF formátu, který je široce používán.",
+		"bulklabelencrypt": "Šifrovat BIP38?",
+		"detaillabelencrypt": "Šifrovat BIP38?",
+		"bulklabelBIPpassphrase": "Heslo:",
+		"brainlabelcompressed": "Komprimovaná adresa?",
+		"detailwifprefix": "'5'",
+		"detaillabelprivb6": "Soukromý klíč formát Base6 (99 znaků [0-5]):"
 	};
 })(ninja.translator);
 
@@ -9016,7 +9022,13 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"detailbip38decryptbutton": "BIP38 entschlüsseln",
 		"detailbip38encryptbutton": "BIP38 verschlüsseln",
 		"detaillabelq1": "Wie erstelle ich ein Wallet mithilfe eines Würfels? Was versteht man unter B6?",
-		"detaila1": "Beim Erstellen eines Bitcoin-Wallets sollten die dafür genutzten Zufallszahlen auch tatsächlich zufällig sein. Ein echter Würfel liefert wesentlich zufälligere Zahlen als ein Computer. Um einen privaten Schlüssel zu erstellen, sind lediglich 99 Würfe mit einem normalen Würfel nötig. Nach jedem Wurf solltest du die Augenzahl nach folgendem Muster aufschreiben: 1-\>1, 2-\>2, 3-\>3, 4-\>4, 5-\>5, 6-\>0. Die so entstandene Zufallszahl stellt deinen privaten Schlüssel in B6 bzw. zur Basis 6 dar. Diesen 99 Zeichen langen Basis-6-Schlüssel kannst du im obigen Eingabefeld eingeben und dir dann die zugehörigen Details anzeigen lassen. U.a. wird dir die zu deinem privaten Schlüssel gehörende Bitcoin-Adresse angezeigt. Es wäre ratsam, sich die ebenfalls berechnete WIF-Version des privaten Schlüssels zu notieren, weil sie häufiger genutzt wird."
+		"detaila1": "Beim Erstellen eines Bitcoin-Wallets sollten die dafür genutzten Zufallszahlen auch tatsächlich zufällig sein. Ein echter Würfel liefert wesentlich zufälligere Zahlen als ein Computer. Um einen privaten Schlüssel zu erstellen, sind lediglich 99 Würfe mit einem normalen Würfel nötig. Nach jedem Wurf solltest du die Augenzahl nach folgendem Muster aufschreiben: 1-\>1, 2-\>2, 3-\>3, 4-\>4, 5-\>5, 6-\>0. Die so entstandene Zufallszahl stellt deinen privaten Schlüssel in B6 bzw. zur Basis 6 dar. Diesen 99 Zeichen langen Basis-6-Schlüssel kannst du im obigen Eingabefeld eingeben und dir dann die zugehörigen Details anzeigen lassen. U.a. wird dir die zu deinem privaten Schlüssel gehörende Bitcoin-Adresse angezeigt. Es wäre ratsam, sich die ebenfalls berechnete WIF-Version des privaten Schlüssels zu notieren, weil sie häufiger genutzt wird.",
+		"bulklabelencrypt": "BIP38-Verschlüsselung?",
+		"detaillabelencrypt": "BIP38-Verschlüsselung?",
+		"bulklabelBIPpassphrase": "Passwort:",
+		"brainlabelcompressed": "Komprimierte Adresse?",
+		"detailwifprefix": "'5'",
+		"detaillabelprivb6": "Privater Schlüssel Base6-Format (99 Zeichen [0-5]):"
 	};
 })(ninja.translator);
 
@@ -9211,7 +9223,13 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"detailbip38decryptbutton": "Αποκωδικοποίηση BIP38",
 		"detailbip38encryptbutton": "Κωδικοποίηση BIP38",
 		"detaillabelq1": "Πώς δημιουργώ ένα πορτοφόλι χρησιμοποιώντας ζάρια; Τι είναι το B6;",
-		"detaila1": "Ένα σημαντικό μέρος της δημιουργίας ενός πορτοφολιού Bitcoin είναι η διασφάλιση ότι οι τυχαίοι αριθμοί που χρησιμοποιούνται για τη δημιουργία του πορτοφολιού είναι πραγματικά τυχαίοι. Η φυσική τυχαιότητα είναι καλύτερη από την ψευδοτυχαιότητα που παράγει ο υπολογιστής. Ο πιο εύκολος τρόπος για να δημιουργήσετε φυσική τυχαιότητα είναι με ζάρια. Για να δημιουργήσετε ένα Προσωπικό Κλειδί Bitcoin χρειάζεστε μόνο ένα εξάπλευρο ζάρι το οποίο θα ρίξετε 99 φορές. Σταματώντας κάθε φορά για να καταγράψετε την τιμή. Κατά την καταγραφή των τιμών ακολουθήστε αυτούς τους κανόνες: 1=1, 2=2, 3=3, 4=4, 5=5, 6=0. Κάνοντας αυτό καταγράφετε τον μεγάλο τυχαίο αριθμό, το Προσωπικό Κλειδί σας, σε μορφή B6 ή βάση 6. Μπορείτε στη συνέχεια να εισαγάγετε το Προσωπικό Κλειδί βάσης 6 των 99 χαρακτήρων στο πεδίο κειμένου παραπάνω και να κάνετε κλικ στο Προβολή Λεπτομερειών. Θα δείτε τότε τη Διεύθυνση Bitcoin που σχετίζεται με το Προσωπικό Κλειδί σας. Θα πρέπει επίσης να σημειώσετε το Προσωπικό Κλειδί σας σε μορφή WIF καθώς χρησιμοποιείται ευρύτερα."
+		"detaila1": "Ένα σημαντικό μέρος της δημιουργίας ενός πορτοφολιού Bitcoin είναι η διασφάλιση ότι οι τυχαίοι αριθμοί που χρησιμοποιούνται για τη δημιουργία του πορτοφολιού είναι πραγματικά τυχαίοι. Η φυσική τυχαιότητα είναι καλύτερη από την ψευδοτυχαιότητα που παράγει ο υπολογιστής. Ο πιο εύκολος τρόπος για να δημιουργήσετε φυσική τυχαιότητα είναι με ζάρια. Για να δημιουργήσετε ένα Προσωπικό Κλειδί Bitcoin χρειάζεστε μόνο ένα εξάπλευρο ζάρι το οποίο θα ρίξετε 99 φορές. Σταματώντας κάθε φορά για να καταγράψετε την τιμή. Κατά την καταγραφή των τιμών ακολουθήστε αυτούς τους κανόνες: 1=1, 2=2, 3=3, 4=4, 5=5, 6=0. Κάνοντας αυτό καταγράφετε τον μεγάλο τυχαίο αριθμό, το Προσωπικό Κλειδί σας, σε μορφή B6 ή βάση 6. Μπορείτε στη συνέχεια να εισαγάγετε το Προσωπικό Κλειδί βάσης 6 των 99 χαρακτήρων στο πεδίο κειμένου παραπάνω και να κάνετε κλικ στο Προβολή Λεπτομερειών. Θα δείτε τότε τη Διεύθυνση Bitcoin που σχετίζεται με το Προσωπικό Κλειδί σας. Θα πρέπει επίσης να σημειώσετε το Προσωπικό Κλειδί σας σε μορφή WIF καθώς χρησιμοποιείται ευρύτερα.",
+		"bulklabelencrypt": "Κρυπτογράφηση BIP38;",
+		"detaillabelencrypt": "Κρυπτογράφηση BIP38;",
+		"bulklabelBIPpassphrase": "Passphrase:",
+		"brainlabelcompressed": "Συμπιεσμένη διεύθυνση;",
+		"detailwifprefix": "'5'",
+		"detaillabelprivb6": "Ιδιωτικό κλειδί μορφή Base6 (99 χαρακτήρες [0-5]):"
 	};
 })(ninja.translator);
 
@@ -9406,7 +9424,13 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"detailbip38decryptbutton": "Descifrar BIP38",
 		"detailbip38encryptbutton": "Cifrar BIP38",
 		"detaillabelq1": "¿Cómo creo una cartera usando dados? ¿Qué es B6?",
-		"detaila1": "Una parte importante de crear una cartera Bitcoin es asegurarse de que los números aleatorios usados para crearla son verdaderamente aleatorios. La aleatoriedad física es mejor que la pseudo-aleatoriedad generada por ordenador. La manera más fácil de generar aleatoriedad física es con dados. Para crear una clave privada Bitcoin sólo necesitas un dado de seis caras que lanzarás 99 veces. Deteniéndote cada vez para registrar el valor del dado. Al registrar los valores sigue estas reglas: 1=1, 2=2, 3=3, 4=4, 5=5, 6=0. Al hacer esto estás registrando el gran número aleatorio, tu clave privada, en formato B6 o base 6. Puedes entonces introducir la clave privada en base 6 de 99 caracteres en el campo de texto de arriba y hacer clic en Ver Detalles. Entonces verás la dirección Bitcoin asociada con tu clave privada. También deberías anotar tu clave privada en formato WIF ya que es más ampliamente utilizado."
+		"detaila1": "Una parte importante de crear una cartera Bitcoin es asegurarse de que los números aleatorios usados para crearla son verdaderamente aleatorios. La aleatoriedad física es mejor que la pseudo-aleatoriedad generada por ordenador. La manera más fácil de generar aleatoriedad física es con dados. Para crear una clave privada Bitcoin sólo necesitas un dado de seis caras que lanzarás 99 veces. Deteniéndote cada vez para registrar el valor del dado. Al registrar los valores sigue estas reglas: 1=1, 2=2, 3=3, 4=4, 5=5, 6=0. Al hacer esto estás registrando el gran número aleatorio, tu clave privada, en formato B6 o base 6. Puedes entonces introducir la clave privada en base 6 de 99 caracteres en el campo de texto de arriba y hacer clic en Ver Detalles. Entonces verás la dirección Bitcoin asociada con tu clave privada. También deberías anotar tu clave privada en formato WIF ya que es más ampliamente utilizado.",
+		"bulklabelencrypt": "¿Cifrar con BIP38?",
+		"detaillabelencrypt": "¿Cifrar con BIP38?",
+		"bulklabelBIPpassphrase": "Contraseña:",
+		"brainlabelcompressed": "¿Dirección comprimida?",
+		"detailwifprefix": "'5'",
+		"detaillabelprivb6": "Clave privada en formato base6 (99 caracteres [0-5]):"
 	};
 })(ninja.translator);
 
@@ -9496,6 +9520,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"bulklabelencrypt": "Chiffrement BIP38 ?",
 		"bulklabelBIPpassphrase": "Phrase de passe :",
 		"bulklabelq1": "Pourquoi utiliser un Porte-Monnaie En Vrac pour accepter les Bitcoins sur mon site ?",
+		"bulka1": "L'approche traditionnelle pour accepter des Bitcoins sur votre site requiert l'installation du daemon Bitcoin officiel (« bitcoind »). De nombreux hébergeurs ne supportent pas ce daemon. De plus, l'exécuter sur votre serveur web signifie que vos clés privées y sont stockées et pourraient être volées en cas de piratage. En utilisant un Porte-Monnaie En Vrac, vous n'uploadez que les adresses Bitcoin sur votre serveur, sans les clés privées. Votre porte-monnaie ne risque donc pas d'être volé même si le serveur est compromis.",
 		"bulklabelq2": "Comment utiliser le Porte-Monnaie En Vrac pour accepter les Bitcoins sur mon site ?",
 		"bulklabela2li1": "Utilisez l'onglet Porte-Monnaie En Vrac pour pré-générer un grand nombre d'adresses Bitcoin (10 000+). Copiez-collez les données CSV dans un fichier texte sécurisé. Sauvegardez ce fichier en lieu sûr.",
 		"bulklabela2li2": "Importez les adresses Bitcoin dans une base de données sur votre serveur web. (N'y mettez pas les clés privées — seulement les adresses visibles par les clients.)",
@@ -9569,7 +9594,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"detaillabelprivmini": "Clé Privée Format Mini (22, 26 ou 30 caractères, commence par « S ») :",
 		"detaillabelprivb6": "Clé Privée Format Base6 (99 caractères [0-5]) :",
 		"detaillabelq1": "Comment créer un porte-monnaie avec des dés ? Qu'est-ce que B6 ?",
-		"deaila1": "Une partie importante de la création d'un porte-monnaie Bitcoin consiste à s'assurer que les nombres aléatoires utilisés sont véritablement aléatoires. L'aléatoire physique est supérieur au pseudo-aléatoire informatique. Le moyen le plus simple est d'utiliser des dés. Pour créer une clé privée Bitcoin, lancez un dé à six faces 99 fois et notez chaque résultat selon la règle : 1=1, 2=2, 3=3, 4=4, 5=5, 6=0. Vous obtenez ainsi votre clé privée en format B6 (base 6). Saisissez ensuite les 99 caractères dans le champ ci-dessus et cliquez sur « Voir les Détails ».",
+		"detaila1": "Une partie importante de la création d'un porte-monnaie Bitcoin consiste à s'assurer que les nombres aléatoires utilisés sont véritablement aléatoires. L'aléatoire physique est supérieur au pseudo-aléatoire informatique. Le moyen le plus simple est d'utiliser des dés. Pour créer une clé privée Bitcoin, lancez un dé à six faces 99 fois et notez chaque résultat selon la règle : 1=1, 2=2, 3=3, 4=4, 5=5, 6=0. Vous obtenez ainsi votre clé privée en format B6 (base 6). Saisissez ensuite les 99 caractères dans le champ ci-dessus et cliquez sur « Voir les Détails ».",
 
 		// pied de page
 		"footerlabeldonations": "Dons :",
@@ -9800,7 +9825,15 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"detailbip38decryptbutton": "BIP38 dekódolás",
 		"detailbip38encryptbutton": "BIP38 titkosítás",
 		"detaillabelq1": "Hogyan lehet dobókockával pénztárcát készíteni? Mit jelent a B6 formátum?",
-		"detaila1": "A Bitcoin pénztárca előállításakor nagyon fontos, hogy a felhasznált véletlen számok valóban véletlenek legyenek. A fizikai véletlen jobb, mint a számítógéppel előállított pszeudo-véletlen. Fizikai véletlen a legegyszerűbben egy dobókockával állítható elő. Ha szeretne egy Bitcoin privát címet előállítani, akkor csupán egy dobókockára van szüksége, mellyel 99-szer kell dobni. Jegyezze fel minden egyes dobása eredményét. Az eredmények feljegyzésekor a következő szabályokat kövesse: 1->1, 2->2, 3->3, 4->4, 5->5, 6->0. Ha így tesz, akkor a privát kulcshoz tartozó véletlen számot B6 formátumban, vagyis 6-os számrendszerben rögzíti. Írja be ezt a 99 karakterből álló 6-os számrendszerbeli privát kulcsot a fenti szövegmezőbe, majd nyomja meg a 'Részletek megjelenítése' gombot. Ekkor megjelenik az a Bitcoin cím, amely ehhez a privát kulcshoz tartozik. Érdemes felírni a WIF formátumú privát kulcsot is, mivel ezt szélesebb körben használják."
+		"detaila1": "A Bitcoin pénztárca előállításakor nagyon fontos, hogy a felhasznált véletlen számok valóban véletlenek legyenek. A fizikai véletlen jobb, mint a számítógéppel előállított pszeudo-véletlen. Fizikai véletlen a legegyszerűbben egy dobókockával állítható elő. Ha szeretne egy Bitcoin privát címet előállítani, akkor csupán egy dobókockára van szüksége, mellyel 99-szer kell dobni. Jegyezze fel minden egyes dobása eredményét. Az eredmények feljegyzésekor a következő szabályokat kövesse: 1->1, 2->2, 3->3, 4->4, 5->5, 6->0. Ha így tesz, akkor a privát kulcshoz tartozó véletlen számot B6 formátumban, vagyis 6-os számrendszerben rögzíti. Írja be ezt a 99 karakterből álló 6-os számrendszerbeli privát kulcsot a fenti szövegmezőbe, majd nyomja meg a 'Részletek megjelenítése' gombot. Ekkor megjelenik az a Bitcoin cím, amely ehhez a privát kulcshoz tartozik. Érdemes felírni a WIF formátumú privát kulcsot is, mivel ezt szélesebb körben használják.",
+		"bulklabelencrypt": "BIP38 titkosítás?",
+		"detaillabelencrypt": "BIP38 titkosítás?",
+		"bulklabelBIPpassphrase": "Jelmondat:",
+		"brainlabelcompressed": "Tömörített cím?",
+		"detailwifprefix": "'5'",
+		"detaillabelprivb6": "Privát kulcs Base6 formátum (99 karakter [0-5]):",
+		"singleshare": "MEGOSZTÁS",
+		"singlesecret": "TITKOS"
 	};
 })(ninja.translator);
 
@@ -9995,7 +10028,13 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"detailbip38decryptbutton": "Decifra BIP38",
 		"detailbip38encryptbutton": "Cifra BIP38",
 		"detaillabelq1": "Come creo un portafoglio usando i dadi? Cosa è B6?",
-		"detaila1": "Una parte importante nella creazione di un portafoglio Bitcoin è assicurarsi che i numeri casuali usati per crearlo siano veramente casuali. La casualità fisica è migliore della pseudo-casualità generata dal computer. Il modo più semplice per generare casualità fisica è con i dadi. Per creare una chiave privata Bitcoin hai bisogno solo di un dado a sei facce che lancerai 99 volte. Fermandoti ogni volta per registrare il valore del dado. Quando registri i valori segui queste regole: 1=1, 2=2, 3=3, 4=4, 5=5, 6=0. Facendo questo stai registrando il grande numero casuale, la tua chiave privata, in formato B6 o base 6. Puoi poi inserire la chiave privata in base 6 di 99 caratteri nel campo di testo sopra e cliccare su Mostra Dettagli. Vedrai quindi l'indirizzo Bitcoin associato alla tua chiave privata. Dovresti anche prendere nota della tua chiave privata in formato WIF poiché è più ampiamente utilizzato."
+		"detaila1": "Una parte importante nella creazione di un portafoglio Bitcoin è assicurarsi che i numeri casuali usati per crearlo siano veramente casuali. La casualità fisica è migliore della pseudo-casualità generata dal computer. Il modo più semplice per generare casualità fisica è con i dadi. Per creare una chiave privata Bitcoin hai bisogno solo di un dado a sei facce che lancerai 99 volte. Fermandoti ogni volta per registrare il valore del dado. Quando registri i valori segui queste regole: 1=1, 2=2, 3=3, 4=4, 5=5, 6=0. Facendo questo stai registrando il grande numero casuale, la tua chiave privata, in formato B6 o base 6. Puoi poi inserire la chiave privata in base 6 di 99 caratteri nel campo di testo sopra e cliccare su Mostra Dettagli. Vedrai quindi l'indirizzo Bitcoin associato alla tua chiave privata. Dovresti anche prendere nota della tua chiave privata in formato WIF poiché è più ampiamente utilizzato.",
+		"bulklabelencrypt": "Cifratura BIP38?",
+		"detaillabelencrypt": "Cifratura BIP38?",
+		"bulklabelBIPpassphrase": "Passphrase:",
+		"brainlabelcompressed": "Indirizzo compresso?",
+		"detailwifprefix": "'5'",
+		"detaillabelprivb6": "Chiave Privata Formato Base6 (99 caratteri [0-5]):"
 	};
 })(ninja.translator);
 
@@ -10188,7 +10227,15 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"detailbip38decryptbutton": "BIP38暗号を解除",
 		"detailbip38encryptbutton": "BIP38で暗号化",
 		"detaillabelq1": "サイコロを使ってどうやってアドレス作るのか？「B6」とは何か？",
-		"detaila1": "ビットコインのアドレスの生成には一番大事なことが、アドレス生成に使われている乱数が本当にランダムなのかというところです。自然界に起きる物理的なランダムさはパソコンが生成する(似非)ランダムさよりは優れている。物理的なランダムさを作る一番簡単な方法はサイコロを振ることです。ビットコインのプライベートキーを生成するには、6面のサイコロを99回振って、毎回結果を記載していきます。規則として1⇒1, 2⇒2, 3⇒3, 4⇒4, 5⇒5, 6⇒0というように、6が出る度に「0」と記載して下さい。99桁の6進数字列ができたら、上記の入力欄に入れて、「詳細を表示」ボタンを押して下さい。これでWIF形式のプライベートキーやそれと紐づくビットコインアドレスが表示されます。これらを記載し、通常生成されたビットコインアドレスと同じように保管しておいて下さい。"
+		"detaila1": "ビットコインのアドレスの生成には一番大事なことが、アドレス生成に使われている乱数が本当にランダムなのかというところです。自然界に起きる物理的なランダムさはパソコンが生成する(似非)ランダムさよりは優れている。物理的なランダムさを作る一番簡単な方法はサイコロを振ることです。ビットコインのプライベートキーを生成するには、6面のサイコロを99回振って、毎回結果を記載していきます。規則として1⇒1, 2⇒2, 3⇒3, 4⇒4, 5⇒5, 6⇒0というように、6が出る度に「0」と記載して下さい。99桁の6進数字列ができたら、上記の入力欄に入れて、「詳細を表示」ボタンを押して下さい。これでWIF形式のプライベートキーやそれと紐づくビットコインアドレスが表示されます。これらを記載し、通常生成されたビットコインアドレスと同じように保管しておいて下さい。",
+		"bulklabelencrypt": "BIP38で暗号化？",
+		"detaillabelencrypt": "BIP38で暗号化？",
+		"bulklabelBIPpassphrase": "パスワード",
+		"brainlabelcompressed": "アドレスを短縮する？",
+		"detaillabelprivb6": "秘密鍵 Base6形式 (99文字 [0-5]):",
+		"singleshare": "共有",
+		"singlesecret": "秘密",
+		"detaillabelprivmini": "秘密鍵 ミニ形式 (22, 26, または 30文字、'S'から始まる):"
 	};
 })(ninja.translator);
 
@@ -10383,7 +10430,13 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"detailbip38decryptbutton": "Descriptografar BIP38",
 		"detailbip38encryptbutton": "Criptografar em BIP38",
 		"detaillabelq1": "Como eu faço uma carteira usando um dado? O que é o formato B6?",
-		"detaila1": "Uma parte importante ao criar um carteira Bitcoin é se assegurar que os números aleatórios usados para criar a carteira sejam realmente aleatórios. A aleatoriedade física é melhor do que a pseudo-aleatoriedade gerada por computador. A maneira mais fácil de gerar aleatoriedade física é com dados. Para criar um chave privada Bitcoin você precisa de apenas um dado de seis lados, o qual você jogará 99 vezes. A cada jogada, anote o valor do dado. Ao anotar os valores, siga as seguintes regras: 1=1, 2=2, 3=3, 4=4, 5=5, 6=0. Ao fazer isso, você está anotando esse grande número aleatório, sua chave privada, no formato base 6 (B6). Você pode então digitar essa chave privada em base 6 contendo 99 caracteres no campo de texto acima e clicar em Ver Detalhes. Você então verá o endereço Bitcoin associado com sua chave privada. Você deve também anotar sua chave privada no formato WIF, já que ele é mais amplamente utilizado."
+		"detaila1": "Uma parte importante ao criar um carteira Bitcoin é se assegurar que os números aleatórios usados para criar a carteira sejam realmente aleatórios. A aleatoriedade física é melhor do que a pseudo-aleatoriedade gerada por computador. A maneira mais fácil de gerar aleatoriedade física é com dados. Para criar um chave privada Bitcoin você precisa de apenas um dado de seis lados, o qual você jogará 99 vezes. A cada jogada, anote o valor do dado. Ao anotar os valores, siga as seguintes regras: 1=1, 2=2, 3=3, 4=4, 5=5, 6=0. Ao fazer isso, você está anotando esse grande número aleatório, sua chave privada, no formato base 6 (B6). Você pode então digitar essa chave privada em base 6 contendo 99 caracteres no campo de texto acima e clicar em Ver Detalhes. Você então verá o endereço Bitcoin associado com sua chave privada. Você deve também anotar sua chave privada no formato WIF, já que ele é mais amplamente utilizado.",
+		"bulklabelencrypt": "Criptografar em BIP38?",
+		"detaillabelencrypt": "Criptografar em BIP38?",
+		"bulklabelBIPpassphrase": "Senha:",
+		"brainlabelcompressed": "Endereço comprimido?",
+		"detailwifprefix": "'5'",
+		"detaillabelprivb6": "Chave Privada Formato Base6 (99 caracteres [0-5]):"
 	};
 })(ninja.translator);
 
@@ -10577,7 +10630,14 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"detailbip38decryptbutton": "Расшифровать BIP38",
 		"detailbip38encryptbutton": "Зашифровать BIP38",
 		"detaillabelq1": "Как сделать кошелек используя игральный кости? Что такое B6?",
-		"detaila1": "Очень важно понимать, что при генерации биткоин кошелька используются действительно случайные числа. Физическая случайность лучше компьютерной псевдо-случайности. Самым простым способом генерации физической случайности является игральная кость. Для генерации Приватного Ключа Биткоин кошелька Вам нужна игральная кость с шестью сторонами, которую необходимо бросить 99 раз. Необходимо записать каждую цифру, выпавшую на игральной кости. Итоговый результат необходимо записать в таком виде: 1=1, 2=2, 3=3, 4=4, 5=5, 6=0. Таким образом Вы запишите большое случайное число - Ваш Приватный Ключ, в формате B6 или Base6. После этого Вы можете ввести 99 символов приватного ключа в формате Base6 в текстовое поле вверху страницы и получить детальную информацию о кошельке. После этого Вы сможете увидеть адрес Биткоин кошелька соответствующий полученному приватному ключу. Вам потребуется сделать запись приватного ключа в формате для импорта, так как он наиболее часто используется."
+		"detaila1": "Очень важно понимать, что при генерации биткоин кошелька используются действительно случайные числа. Физическая случайность лучше компьютерной псевдо-случайности. Самым простым способом генерации физической случайности является игральная кость. Для генерации Приватного Ключа Биткоин кошелька Вам нужна игральная кость с шестью сторонами, которую необходимо бросить 99 раз. Необходимо записать каждую цифру, выпавшую на игральной кости. Итоговый результат необходимо записать в таком виде: 1=1, 2=2, 3=3, 4=4, 5=5, 6=0. Таким образом Вы запишите большое случайное число - Ваш Приватный Ключ, в формате B6 или Base6. После этого Вы можете ввести 99 символов приватного ключа в формате Base6 в текстовое поле вверху страницы и получить детальную информацию о кошельке. После этого Вы сможете увидеть адрес Биткоин кошелька соответствующий полученному приватному ключу. Вам потребуется сделать запись приватного ключа в формате для импорта, так как он наиболее часто используется.",
+		"bulklabelencrypt": "Шифрование BIP38?",
+		"detaillabelencrypt": "Шифрование BIP38?",
+		"bulklabelBIPpassphrase": "Парольная фраза:",
+		"brainlabelcompressed": "Сжатый адрес?",
+		"detailwifprefix": "'5'",
+		"detaillabelprivb6": "Приватный ключ в формате Base6 (99 символов [0-5]):",
+		"paperlabeladdressestogenerate": "Адресов для генерации:"
 	};
 })(ninja.translator);
 
@@ -10770,7 +10830,15 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"detailbip38decryptbutton": "BIP38解码",
 		"detailbip38encryptbutton": "BIP38加密",
 		"detaillabelq1": "怎样用骰子生成私钥？B6是什么意思？",
-		"detaila1": "真正用随机数产生的钱包才是好钱包。物理产生的随机数可能会比计算机产生的随机数更优越（计算机的伪随机算法可能被识破，但是物理随机不太可能）。生成物理随机的最简单的办法是使用骰子，掷一枚六面骰99次，记录结果，将结果\"6\"记为\"0\"（或者将所有结果-1记录），这样你得到的记录将会是由0 1 2 3 4 5 组成的一串数字，称为\"Base6格式\"，简称\"B6\"。将它输入上面的文本框，点击\"显示详情\"按钮，得到你的私钥、地址。"
+		"detaila1": "真正用随机数产生的钱包才是好钱包。物理产生的随机数可能会比计算机产生的随机数更优越（计算机的伪随机算法可能被识破，但是物理随机不太可能）。生成物理随机的最简单的办法是使用骰子，掷一枚六面骰99次，记录结果，将结果\"6\"记为\"0\"（或者将所有结果-1记录），这样你得到的记录将会是由0 1 2 3 4 5 组成的一串数字，称为\"Base6格式\"，简称\"B6\"。将它输入上面的文本框，点击\"显示详情\"按钮，得到你的私钥、地址。",
+		"bulklabelencrypt": "BIP38加密？",
+		"detaillabelencrypt": "BIP38加密？",
+		"bulklabelBIPpassphrase": "密码",
+		"brainlabelcompressed": "使用压缩地址？",
+		"detaillabelprivb6": "私钥 Base6格式 (99个字符 [0-5]):",
+		"singleshare": "分享",
+		"singlesecret": "秘密",
+		"detaillabelprivmini": "私钥 Mini格式 (22、26或30个字符，以'S'开头):"
 	};
 })(ninja.translator);
 
