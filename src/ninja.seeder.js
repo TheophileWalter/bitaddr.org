@@ -75,14 +75,11 @@
 		var pct = Math.min(100, Math.round((ninja.seeder.seedCount / ninja.seeder.seedLimit) * 100));
 		var percentSeeded = pct + "%";
 		document.getElementById("mousemovelimit").innerHTML = percentSeeded;
-		// Drive the visual progress bar
+		// Drive the visual progress bar via scaleX (avoids sub-pixel clip issues)
 		var fill = document.getElementById("entropyprogressfill");
 		if (fill) {
-			fill.style.width = percentSeeded;
+			fill.style.transform = "scaleX(" + (pct / 100) + ")";
 			document.getElementById("entropyprogressbar").setAttribute("aria-valuenow", pct);
-		}
-		for (var wIndex in ninja.seeder.seederDependentWallets) {
-			document.getElementById(ninja.seeder.seederDependentWallets[wIndex]).innerHTML = percentSeeded;
 		}
 	},
 
@@ -114,8 +111,8 @@
 			ninja.tab.select(walletType)
 		}
 		document.getElementById("generate").style.display = "none";
-		// update labels for dependent wallets
-		var culture = (ninja.getQueryString()["culture"] == null ? "en" : ninja.getQueryString()["culture"]);
+		// restore labels in the active language (URL param > current culture already set at load time)
+		var culture = ninja.getQueryString()["culture"] || ninja.translator.currentCulture;
 		ninja.translator.translate(culture);
 		ninja.seeder.removePoints();
 	}

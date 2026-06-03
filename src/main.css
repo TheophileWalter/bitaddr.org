@@ -49,10 +49,17 @@
 }
 
 /* ── Theme toggle button ──────────────────────────────────────────────── */
+/* Top-right controls: language + theme, in the normal flow */
+#topcontrols {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 0 4px;
+    z-index: 50;
+}
 #themetoggle {
-    position: absolute;
-    top: 10px;
-    right: 16px;
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 20px;
@@ -64,8 +71,8 @@
     align-items: center;
     gap: 6px;
     transition: background var(--transition), color var(--transition), border-color var(--transition);
-    z-index: 50;
     user-select: none;
+    white-space: nowrap;
 }
 #themetoggle:hover { background: var(--bg-hover); color: var(--text); border-color: var(--accent); }
 #themetoggle .theme-icon { font-size: 1.1em; line-height: 1; }
@@ -130,11 +137,20 @@ hr { margin: 20px 0; border: none; border-top: 1px solid var(--border); }
 #tagline { color: var(--text-muted); font-size: 0.9em; margin-bottom: 16px; letter-spacing: 0.02em; }
 
 /* ── Culture Menu ─────────────────────────────────────────────────────── */
-#culturemenu { font-size: 0.8em; padding: 4px 0 12px; color: var(--text-muted); }
-#culturemenu a { color: var(--text-muted); padding: 2px 4px; }
-#culturemenu a:hover { color: var(--text); }
-#culturemenu .selected { color: var(--accent); text-decoration: none; font-weight: 600; }
-.culturemenurow { padding: 2px 0; }
+#culturemenu { display: flex; }
+#langselect {
+    background: var(--bg-card);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 0.8em;
+    cursor: pointer;
+    outline: none;
+    transition: border-color var(--transition), background var(--transition);
+}
+#langselect:hover { border-color: var(--text-muted); background: var(--bg-hover); }
+#langselect:focus { border-color: var(--accent); }
 
 /* ── Entropy Seeder ───────────────────────────────────────────────────── */
 #seedpoolarea { display: none; }
@@ -167,24 +183,24 @@ hr { margin: 20px 0; border: none; border-top: 1px solid var(--border); }
 #entropyprogressbar {
     width: 100%; height: 10px;
     background: var(--bg-hover);
-    border: 1px solid var(--border);
     border-radius: 6px;
     overflow: hidden;
     position: relative;
 }
 #entropyprogressfill {
-    height: 100%; width: 0%;
+    /* Always full width — we scale it; avoids sub-pixel clip artifacts at 100% */
+    height: 100%; width: 100%;
     background: linear-gradient(90deg, var(--accent) 0%, #ffb347 100%);
-    border-radius: 6px;
-    transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 0 10px rgba(247,147,26,.45);
-    position: relative;
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
 }
-/* Shimmer animation on fill */
+/* Shimmer overlay */
 #entropyprogressfill::after {
     content: '';
     position: absolute; inset: 0;
-    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.25) 50%, transparent 100%);
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.22) 50%, transparent 100%);
     background-size: 200% 100%;
     animation: shimmer 1.6s linear infinite;
 }

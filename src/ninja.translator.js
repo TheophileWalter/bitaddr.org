@@ -20,15 +20,9 @@
 				translator.currentCulture = culture;
 				// persist chosen language across sessions
 				try { localStorage.setItem('bitaddress-lang', culture); } catch(e) {}
-				// update menu UI
-				for (var cult in translator.translations) {
-					var cultureElement = document.getElementById("culture" + cult);
-					if (cultureElement != null) {
-						cultureElement.setAttribute("class", "");
-					}
-				}
-				var activeEl = document.getElementById("culture" + culture);
-				if (activeEl) activeEl.setAttribute("class", "selected");
+				// sync the language dropdown
+				var langSel = document.getElementById("langselect");
+				if (langSel) langSel.value = culture;
 
 				// apply translations
 				for (var id in dict) {
