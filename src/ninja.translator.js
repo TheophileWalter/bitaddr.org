@@ -18,6 +18,8 @@
 			if (dict) {
 				// set current culture
 				translator.currentCulture = culture;
+				// persist chosen language across sessions
+				try { localStorage.setItem('bitaddress-lang', culture); } catch(e) {}
 				// update menu UI
 				for (var cult in translator.translations) {
 					var cultureElement = document.getElementById("culture" + cult);
