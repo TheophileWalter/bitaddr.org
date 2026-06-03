@@ -157,9 +157,18 @@
 		</ul>
 		
 		<div id="generate">
-			<span id="generatelabelbitcoinaddress">Generating Bitcoin Address...</span><br />
-			<span id="generatelabelmovemouse">MOVE your mouse around to add some extra randomness... </span><span id="mousemovelimit"></span><br />
-			<span id="generatelabelkeypress">OR type some random characters into this textbox</span> <input type="text" id="generatekeyinput" onkeydown="ninja.seeder.seedKeyPress(event);" /><br />
+			<div id="generatetitle"><span id="generatelabelbitcoinaddress">Generating Bitcoin Address...</span></div>
+			<div id="entropylabelrow">
+				<span id="generatelabelmovemouse">MOVE your mouse around to add some extra randomness...</span>
+				<span id="mousemovelimit">0%</span>
+			</div>
+			<div id="entropyprogressbar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+				<div id="entropyprogressfill"></div>
+			</div>
+			<div id="entropykeyrow">
+				<span id="generatelabelkeypress">OR type some random characters into this textbox</span>
+				<input type="text" id="generatekeyinput" onkeydown="ninja.seeder.seedKeyPress(event);" />
+			</div>
 			<div id="seedpooldisplay"></div>
 		</div>
 

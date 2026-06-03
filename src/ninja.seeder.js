@@ -72,8 +72,15 @@
 			document.getElementById("seedpool").innerHTML = poolHex;
 			document.getElementById("seedpooldisplay").innerHTML = poolHex;
 		}
-		var percentSeeded = Math.round((ninja.seeder.seedCount / ninja.seeder.seedLimit) * 100) + "%";
+		var pct = Math.min(100, Math.round((ninja.seeder.seedCount / ninja.seeder.seedLimit) * 100));
+		var percentSeeded = pct + "%";
 		document.getElementById("mousemovelimit").innerHTML = percentSeeded;
+		// Drive the visual progress bar
+		var fill = document.getElementById("entropyprogressfill");
+		if (fill) {
+			fill.style.width = percentSeeded;
+			document.getElementById("entropyprogressbar").setAttribute("aria-valuenow", pct);
+		}
 		for (var wIndex in ninja.seeder.seederDependentWallets) {
 			document.getElementById(ninja.seeder.seederDependentWallets[wIndex]).innerHTML = percentSeeded;
 		}
