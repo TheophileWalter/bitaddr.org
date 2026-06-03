@@ -108,6 +108,7 @@
 		// Return the address for a key using the selected address type
 		getAddress: function (key) {
 			var type = document.getElementById("bulkaddrtype").value;
+			key.setAddressType(type);
 			switch (type) {
 				case "p2sh":    key.setCompressed(true); return key.getP2SHAddress();
 				case "segwit":  key.setCompressed(true); return key.getSegwitAddress();

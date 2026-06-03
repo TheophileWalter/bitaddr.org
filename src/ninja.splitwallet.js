@@ -46,6 +46,7 @@ ninja.wallets.splitwallet = {
 	// Return address for the key using the selected address type
 	getAddress: function (key) {
 		var type = document.getElementById("splitaddrtype").value;
+		key.setAddressType(type);
 		switch (type) {
 			case "p2sh":    key.setCompressed(true); return key.getP2SHAddress();
 			case "segwit":  key.setCompressed(true); return key.getSegwitAddress();

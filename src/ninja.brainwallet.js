@@ -18,6 +18,7 @@ ninja.wallets.brainwallet = {
 	// Return address using the selected address type; SegWit/Taproot always use compressed key
 	getAddress: function (btcKey) {
 		var type = document.getElementById("brainaddrtype").value;
+		btcKey.setAddressType(type);
 		switch (type) {
 			case "p2sh":    btcKey.setCompressed(true); return btcKey.getP2SHAddress();
 			case "segwit":  btcKey.setCompressed(true); return btcKey.getSegwitAddress();

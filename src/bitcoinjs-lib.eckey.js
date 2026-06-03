@@ -40,7 +40,9 @@ Bitcoin.KeyPool = (function () {
 				var item = pool[index];
 				if (Bitcoin.Util.hasMethods(item, 'getBitcoinAddress', 'toString')) {
 					if (item != null) {
-						keyPoolString += "\"" + item.getBitcoinAddress() + "\"" + ", \"" + item.toString("wif") + "\"\n";
+						// Use getDisplayAddress() when available (respects addressType set at generation time)
+						var addr = item.getDisplayAddress ? item.getDisplayAddress() : item.getBitcoinAddress();
+						keyPoolString += "\"" + addr + "\"" + ", \"" + item.toString("wif") + "\"\n";
 					}
 				}
 			}
@@ -214,6 +216,23 @@ Bitcoin.ECKey = (function () {
 		var hash = this.getPubKeyHash();
 		var addr = new Bitcoin.Address(hash);
 		return addr.toString();
+	};
+
+	// Address type tracked at generation time so the key pool log shows the correct format
+	ECKey.prototype.addressType = "legacy";
+
+	ECKey.prototype.setAddressType = function (type) {
+		this.addressType = type || "legacy";
+		return this;
+	};
+
+	ECKey.prototype.getDisplayAddress = function () {
+		switch (this.addressType) {
+			case "p2sh":    return this.getP2SHAddress();
+			case "segwit":  return this.getSegwitAddress();
+			case "taproot": return this.getTaprootAddress();
+			default:        return this.getBitcoinAddress();
+		}
 	};
 
 	// P2SH-P2WPKH address (starts with '3') — compressed key required

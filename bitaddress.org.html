@@ -5664,7 +5664,9 @@ Bitcoin.KeyPool = (function () {
 				var item = pool[index];
 				if (Bitcoin.Util.hasMethods(item, 'getBitcoinAddress', 'toString')) {
 					if (item != null) {
-						keyPoolString += "\"" + item.getBitcoinAddress() + "\"" + ", \"" + item.toString("wif") + "\"\n";
+						// Use getDisplayAddress() when available (respects addressType set at generation time)
+						var addr = item.getDisplayAddress ? item.getDisplayAddress() : item.getBitcoinAddress();
+						keyPoolString += "\"" + addr + "\"" + ", \"" + item.toString("wif") + "\"\n";
 					}
 				}
 			}
@@ -5838,6 +5840,23 @@ Bitcoin.ECKey = (function () {
 		var hash = this.getPubKeyHash();
 		var addr = new Bitcoin.Address(hash);
 		return addr.toString();
+	};
+
+	// Address type tracked at generation time so the key pool log shows the correct format
+	ECKey.prototype.addressType = "legacy";
+
+	ECKey.prototype.setAddressType = function (type) {
+		this.addressType = type || "legacy";
+		return this;
+	};
+
+	ECKey.prototype.getDisplayAddress = function () {
+		switch (this.addressType) {
+			case "p2sh":    return this.getP2SHAddress();
+			case "segwit":  return this.getSegwitAddress();
+			case "taproot": return this.getTaprootAddress();
+			default:        return this.getBitcoinAddress();
+		}
 	};
 
 	// P2SH-P2WPKH address (starts with '3') — compressed key required
@@ -10779,6 +10798,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 			try {
 				var key = new Bitcoin.ECKey(false);
 				key.setCompressed(true);
+				key.setAddressType("segwit"); // log the native SegWit address as primary
 
 				// Legacy P2PKH (1...)
 				var legacyAddress = key.getBitcoinAddress();
@@ -11044,6 +11064,7 @@ ninja.wallets.paperwallet = {
 	// Return address for the key according to the currently selected address type
 	getAddress: function (key) {
 		var type = document.getElementById("paperaddrtype").value;
+		key.setAddressType(type);
 		switch (type) {
 			case "p2sh":    return key.getP2SHAddress();
 			case "segwit":  return key.getSegwitAddress();
@@ -11217,6 +11238,7 @@ ninja.wallets.paperwallet = {
 		// Return the address for a key using the selected address type
 		getAddress: function (key) {
 			var type = document.getElementById("bulkaddrtype").value;
+			key.setAddressType(type);
 			switch (type) {
 				case "p2sh":    key.setCompressed(true); return key.getP2SHAddress();
 				case "segwit":  key.setCompressed(true); return key.getSegwitAddress();
@@ -11278,6 +11300,7 @@ ninja.wallets.brainwallet = {
 	// Return address using the selected address type; SegWit/Taproot always use compressed key
 	getAddress: function (btcKey) {
 		var type = document.getElementById("brainaddrtype").value;
+		btcKey.setAddressType(type);
 		switch (type) {
 			case "p2sh":    btcKey.setCompressed(true); return btcKey.getP2SHAddress();
 			case "segwit":  btcKey.setCompressed(true); return btcKey.getSegwitAddress();
@@ -11407,6 +11430,7 @@ ninja.wallets.vanitywallet = {
 	// Get address from an ECKey (private key known)
 	getAddressFromECKey: function (ecKey) {
 		var type = document.getElementById("vanityaddrtype").value;
+		ecKey.setAddressType(type);
 		ecKey.setCompressed(type !== "legacy" || ecKey.compressed);
 		switch (type) {
 			case "p2sh":    return ecKey.getP2SHAddress();
@@ -11856,6 +11880,7 @@ ninja.wallets.splitwallet = {
 	// Return address for the key using the selected address type
 	getAddress: function (key) {
 		var type = document.getElementById("splitaddrtype").value;
+		key.setAddressType(type);
 		switch (type) {
 			case "p2sh":    key.setCompressed(true); return key.getP2SHAddress();
 			case "segwit":  key.setCompressed(true); return key.getSegwitAddress();

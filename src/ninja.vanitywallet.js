@@ -46,6 +46,7 @@ ninja.wallets.vanitywallet = {
 	// Get address from an ECKey (private key known)
 	getAddressFromECKey: function (ecKey) {
 		var type = document.getElementById("vanityaddrtype").value;
+		ecKey.setAddressType(type);
 		ecKey.setCompressed(type !== "legacy" || ecKey.compressed);
 		switch (type) {
 			case "p2sh":    return ecKey.getP2SHAddress();

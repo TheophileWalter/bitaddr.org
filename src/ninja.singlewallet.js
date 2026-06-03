@@ -20,6 +20,7 @@
 			try {
 				var key = new Bitcoin.ECKey(false);
 				key.setCompressed(true);
+				key.setAddressType("segwit"); // log the native SegWit address as primary
 
 				// Legacy P2PKH (1...)
 				var legacyAddress = key.getBitcoinAddress();

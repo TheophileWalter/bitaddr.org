@@ -220,6 +220,7 @@ ninja.wallets.paperwallet = {
 	// Return address for the key according to the currently selected address type
 	getAddress: function (key) {
 		var type = document.getElementById("paperaddrtype").value;
+		key.setAddressType(type);
 		switch (type) {
 			case "p2sh":    return key.getP2SHAddress();
 			case "segwit":  return key.getSegwitAddress();
