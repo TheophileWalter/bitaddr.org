@@ -117,17 +117,8 @@ ninja.tab = {
                 document.getElementById(wType).className = "tab";
                 ninja.wallets[wType].close();
             }
-            
-            // don't open tab if entropy still being collected
-            // exceptions: brainwallet detailwallet
-            if (ninja.seeder.isStillSeeding == false || walletType == "brainwallet" || walletType == "detailwallet") {
-            	walletTab.className += " selected";
-            	document.getElementById("generate").style.display = "none";
-                ninja.wallets[walletTab.getAttribute("id")].open();
-            }
-            else if (ninja.seeder.isStillSeeding == true && !(walletType == "brainwallet" || walletType == "detailwallet")) {
-                document.getElementById("generate").style.display = "block";
-            }
+            walletTab.className += " selected";
+            ninja.wallets[walletTab.getAttribute("id")].open();
         }
     },
 

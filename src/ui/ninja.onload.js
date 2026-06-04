@@ -1,3 +1,6 @@
+// All scripts loaded — start immediately (CSPRNG is available from page load)
+ninja.seeder.seedingOver();
+
 // sync theme toggle button with the theme applied by the inline head script
 ninja.theme.init();
 // run unit tests
@@ -32,6 +35,4 @@ if (ninja.getQueryString()["testnet"] == "true" || ninja.getQueryString()["testn
 	Bitcoin.ECKey.privateKeyPrefix = 0xEF; // testnet
 	ninja.testnetMode = true;
 }
-if (ninja.getQueryString()["showseedpool"] == "true" || ninja.getQueryString()["showseedpool"] == "1") {
-	document.getElementById("seedpoolarea").style.display = "block";
-}
+// showseedpool URL parameter removed — the entropy pool is never exposed in the UI

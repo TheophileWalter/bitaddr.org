@@ -105,10 +105,15 @@ if (typeof Crypto == "undefined" || !Crypto.util) {
 
 			},
 
-			// Generate an array of any length of random bytes
+			// Generate an array of any length of random bytes via CSPRNG
 			randomBytes: function (n) {
-				for (var bytes = []; n > 0; n--)
-					bytes.push(Math.floor(Math.random() * 256));
+				if (!window.crypto || !window.crypto.getRandomValues) {
+					throw new Error('CSPRNG unavailable: window.crypto.getRandomValues is required.');
+				}
+				var ua = new Uint8Array(n);
+				window.crypto.getRandomValues(ua);
+				var bytes = [];
+				for (var i = 0; i < n; i++) bytes.push(ua[i]);
 				return bytes;
 			},
 
@@ -456,6 +461,13 @@ if (typeof Crypto == "undefined" || !Crypto.util) {
 * http://code.google.com/p/crypto-js/
 * Copyright (c) 2009-2013, Jeff Mott. All rights reserved.
 * http://code.google.com/p/crypto-js/wiki/License
+*
+* SECURITY NOTE — AES-ECB mode is used exclusively for BIP38 key encryption/decryption.
+* BIP38 (https://github.com/bitcoin/bips/blob/master/bip-0038.mediawiki) mandates raw
+* AES-256-ECB on exactly 16-byte blocks that have been XOR-mixed with scrypt-derived key
+* material.  This is a protocol requirement; replacing ECB with an AEAD mode would break
+* interoperability with all BIP38 implementations.
+* AES-ECB is NOT used anywhere else in this application for user data.
 */
 (function () {
 
@@ -979,8 +991,10 @@ if (typeof Crypto == "undefined" || !Crypto.util) {
 	C_pad.iso10126 = {
 		pad: function (cipher, message) {
 			var reqd = _requiredPadding(cipher, message);
-			for (var i = 1; i < reqd; i++) {
-				message.push(Math.floor(Math.random() * 256));
+			if (reqd > 1) {
+				var randBytes = new Uint8Array(reqd - 1);
+				window.crypto.getRandomValues(randBytes);
+				for (var i = 0; i < reqd - 1; i++) message.push(randBytes[i]);
 			}
 			message.push(reqd);
 		},
@@ -1438,170 +1452,1284 @@ if (typeof Crypto == "undefined" || !Crypto.util) {
 })();
 	</script>
 	<script type="text/javascript">
+"use strict";
+var nobleSecp256k1 = (() => {
+  var __getOwnPropNames = Object.getOwnPropertyNames;
+  var __commonJS = (cb, mod) => function __require() {
+    return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+  };
+
+  // (disabled):crypto
+  var require_crypto = __commonJS({
+    "(disabled):crypto"() {
+    }
+  });
+
+  // node_modules/@noble/secp256k1/lib/index.js
+  var require_index = __commonJS({
+    "node_modules/@noble/secp256k1/lib/index.js"(exports) {
+      Object.defineProperty(exports, "__esModule", { value: true });
+      exports.utils = exports.schnorr = exports.verify = exports.signSync = exports.sign = exports.getSharedSecret = exports.recoverPublicKey = exports.getPublicKey = exports.Signature = exports.Point = exports.CURVE = void 0;
+      var nodeCrypto = require_crypto();
+      var _0n = BigInt(0);
+      var _1n = BigInt(1);
+      var _2n = BigInt(2);
+      var _3n = BigInt(3);
+      var _8n = BigInt(8);
+      var CURVE = Object.freeze({
+        a: _0n,
+        b: BigInt(7),
+        P: BigInt("0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f"),
+        n: BigInt("0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141"),
+        h: _1n,
+        Gx: BigInt("55066263022277343669578718895168534326250603453777594175500187360389116729240"),
+        Gy: BigInt("32670510020758816978083085130507043184471273380659243275938904335757337482424"),
+        beta: BigInt("0x7ae96a2b657c07106e64479eac3434e99cf0497512f58995c1396c28719501ee")
+      });
+      exports.CURVE = CURVE;
+      var divNearest = (a, b) => (a + b / _2n) / b;
+      var endo = {
+        beta: BigInt("0x7ae96a2b657c07106e64479eac3434e99cf0497512f58995c1396c28719501ee"),
+        splitScalar(k) {
+          const { n } = CURVE;
+          const a1 = BigInt("0x3086d221a7d46bcde86c90e49284eb15");
+          const b1 = -_1n * BigInt("0xe4437ed6010e88286f547fa90abfe4c3");
+          const a2 = BigInt("0x114ca50f7a8e2f3f657c1108d9d44cfd8");
+          const b2 = a1;
+          const POW_2_128 = BigInt("0x100000000000000000000000000000000");
+          const c1 = divNearest(b2 * k, n);
+          const c2 = divNearest(-b1 * k, n);
+          let k1 = mod(k - c1 * a1 - c2 * a2, n);
+          let k2 = mod(-c1 * b1 - c2 * b2, n);
+          const k1neg = k1 > POW_2_128;
+          const k2neg = k2 > POW_2_128;
+          if (k1neg)
+            k1 = n - k1;
+          if (k2neg)
+            k2 = n - k2;
+          if (k1 > POW_2_128 || k2 > POW_2_128) {
+            throw new Error("splitScalarEndo: Endomorphism failed, k=" + k);
+          }
+          return { k1neg, k1, k2neg, k2 };
+        }
+      };
+      var fieldLen = 32;
+      var groupLen = 32;
+      var hashLen = 32;
+      var compressedLen = fieldLen + 1;
+      var uncompressedLen = 2 * fieldLen + 1;
+      function weierstrass(x) {
+        const { a, b } = CURVE;
+        const x2 = mod(x * x);
+        const x3 = mod(x2 * x);
+        return mod(x3 + a * x + b);
+      }
+      var USE_ENDOMORPHISM = CURVE.a === _0n;
+      var ShaError = class extends Error {
+        constructor(message) {
+          super(message);
+        }
+      };
+      function assertJacPoint(other) {
+        if (!(other instanceof JacobianPoint))
+          throw new TypeError("JacobianPoint expected");
+      }
+      var JacobianPoint = class _JacobianPoint {
+        constructor(x, y, z) {
+          this.x = x;
+          this.y = y;
+          this.z = z;
+        }
+        static fromAffine(p) {
+          if (!(p instanceof Point)) {
+            throw new TypeError("JacobianPoint#fromAffine: expected Point");
+          }
+          if (p.equals(Point.ZERO))
+            return _JacobianPoint.ZERO;
+          return new _JacobianPoint(p.x, p.y, _1n);
+        }
+        static toAffineBatch(points) {
+          const toInv = invertBatch(points.map((p) => p.z));
+          return points.map((p, i) => p.toAffine(toInv[i]));
+        }
+        static normalizeZ(points) {
+          return _JacobianPoint.toAffineBatch(points).map(_JacobianPoint.fromAffine);
+        }
+        equals(other) {
+          assertJacPoint(other);
+          const { x: X1, y: Y1, z: Z1 } = this;
+          const { x: X2, y: Y2, z: Z2 } = other;
+          const Z1Z1 = mod(Z1 * Z1);
+          const Z2Z2 = mod(Z2 * Z2);
+          const U1 = mod(X1 * Z2Z2);
+          const U2 = mod(X2 * Z1Z1);
+          const S1 = mod(mod(Y1 * Z2) * Z2Z2);
+          const S2 = mod(mod(Y2 * Z1) * Z1Z1);
+          return U1 === U2 && S1 === S2;
+        }
+        negate() {
+          return new _JacobianPoint(this.x, mod(-this.y), this.z);
+        }
+        double() {
+          const { x: X1, y: Y1, z: Z1 } = this;
+          const A = mod(X1 * X1);
+          const B = mod(Y1 * Y1);
+          const C = mod(B * B);
+          const x1b = X1 + B;
+          const D = mod(_2n * (mod(x1b * x1b) - A - C));
+          const E = mod(_3n * A);
+          const F = mod(E * E);
+          const X3 = mod(F - _2n * D);
+          const Y3 = mod(E * (D - X3) - _8n * C);
+          const Z3 = mod(_2n * Y1 * Z1);
+          return new _JacobianPoint(X3, Y3, Z3);
+        }
+        add(other) {
+          assertJacPoint(other);
+          const { x: X1, y: Y1, z: Z1 } = this;
+          const { x: X2, y: Y2, z: Z2 } = other;
+          if (X2 === _0n || Y2 === _0n)
+            return this;
+          if (X1 === _0n || Y1 === _0n)
+            return other;
+          const Z1Z1 = mod(Z1 * Z1);
+          const Z2Z2 = mod(Z2 * Z2);
+          const U1 = mod(X1 * Z2Z2);
+          const U2 = mod(X2 * Z1Z1);
+          const S1 = mod(mod(Y1 * Z2) * Z2Z2);
+          const S2 = mod(mod(Y2 * Z1) * Z1Z1);
+          const H = mod(U2 - U1);
+          const r = mod(S2 - S1);
+          if (H === _0n) {
+            if (r === _0n) {
+              return this.double();
+            } else {
+              return _JacobianPoint.ZERO;
+            }
+          }
+          const HH = mod(H * H);
+          const HHH = mod(H * HH);
+          const V = mod(U1 * HH);
+          const X3 = mod(r * r - HHH - _2n * V);
+          const Y3 = mod(r * (V - X3) - S1 * HHH);
+          const Z3 = mod(Z1 * Z2 * H);
+          return new _JacobianPoint(X3, Y3, Z3);
+        }
+        subtract(other) {
+          return this.add(other.negate());
+        }
+        multiplyUnsafe(scalar) {
+          const P0 = _JacobianPoint.ZERO;
+          if (typeof scalar === "bigint" && scalar === _0n)
+            return P0;
+          let n = normalizeScalar(scalar);
+          if (n === _1n)
+            return this;
+          if (!USE_ENDOMORPHISM) {
+            let p = P0;
+            let d2 = this;
+            while (n > _0n) {
+              if (n & _1n)
+                p = p.add(d2);
+              d2 = d2.double();
+              n >>= _1n;
+            }
+            return p;
+          }
+          let { k1neg, k1, k2neg, k2 } = endo.splitScalar(n);
+          let k1p = P0;
+          let k2p = P0;
+          let d = this;
+          while (k1 > _0n || k2 > _0n) {
+            if (k1 & _1n)
+              k1p = k1p.add(d);
+            if (k2 & _1n)
+              k2p = k2p.add(d);
+            d = d.double();
+            k1 >>= _1n;
+            k2 >>= _1n;
+          }
+          if (k1neg)
+            k1p = k1p.negate();
+          if (k2neg)
+            k2p = k2p.negate();
+          k2p = new _JacobianPoint(mod(k2p.x * endo.beta), k2p.y, k2p.z);
+          return k1p.add(k2p);
+        }
+        precomputeWindow(W) {
+          const windows = USE_ENDOMORPHISM ? 128 / W + 1 : 256 / W + 1;
+          const points = [];
+          let p = this;
+          let base = p;
+          for (let window = 0; window < windows; window++) {
+            base = p;
+            points.push(base);
+            for (let i = 1; i < 2 ** (W - 1); i++) {
+              base = base.add(p);
+              points.push(base);
+            }
+            p = base.double();
+          }
+          return points;
+        }
+        wNAF(n, affinePoint) {
+          if (!affinePoint && this.equals(_JacobianPoint.BASE))
+            affinePoint = Point.BASE;
+          const W = affinePoint && affinePoint._WINDOW_SIZE || 1;
+          if (256 % W) {
+            throw new Error("Point#wNAF: Invalid precomputation window, must be power of 2");
+          }
+          let precomputes = affinePoint && pointPrecomputes.get(affinePoint);
+          if (!precomputes) {
+            precomputes = this.precomputeWindow(W);
+            if (affinePoint && W !== 1) {
+              precomputes = _JacobianPoint.normalizeZ(precomputes);
+              pointPrecomputes.set(affinePoint, precomputes);
+            }
+          }
+          let p = _JacobianPoint.ZERO;
+          let f = _JacobianPoint.BASE;
+          const windows = 1 + (USE_ENDOMORPHISM ? 128 / W : 256 / W);
+          const windowSize = 2 ** (W - 1);
+          const mask = BigInt(2 ** W - 1);
+          const maxNumber = 2 ** W;
+          const shiftBy = BigInt(W);
+          for (let window = 0; window < windows; window++) {
+            const offset = window * windowSize;
+            let wbits = Number(n & mask);
+            n >>= shiftBy;
+            if (wbits > windowSize) {
+              wbits -= maxNumber;
+              n += _1n;
+            }
+            const offset1 = offset;
+            const offset2 = offset + Math.abs(wbits) - 1;
+            const cond1 = window % 2 !== 0;
+            const cond2 = wbits < 0;
+            if (wbits === 0) {
+              f = f.add(constTimeNegate(cond1, precomputes[offset1]));
+            } else {
+              p = p.add(constTimeNegate(cond2, precomputes[offset2]));
+            }
+          }
+          return { p, f };
+        }
+        multiply(scalar, affinePoint) {
+          let n = normalizeScalar(scalar);
+          let point;
+          let fake;
+          if (USE_ENDOMORPHISM) {
+            const { k1neg, k1, k2neg, k2 } = endo.splitScalar(n);
+            let { p: k1p, f: f1p } = this.wNAF(k1, affinePoint);
+            let { p: k2p, f: f2p } = this.wNAF(k2, affinePoint);
+            k1p = constTimeNegate(k1neg, k1p);
+            k2p = constTimeNegate(k2neg, k2p);
+            k2p = new _JacobianPoint(mod(k2p.x * endo.beta), k2p.y, k2p.z);
+            point = k1p.add(k2p);
+            fake = f1p.add(f2p);
+          } else {
+            const { p, f } = this.wNAF(n, affinePoint);
+            point = p;
+            fake = f;
+          }
+          return _JacobianPoint.normalizeZ([point, fake])[0];
+        }
+        toAffine(invZ) {
+          const { x, y, z } = this;
+          const is0 = this.equals(_JacobianPoint.ZERO);
+          if (invZ == null)
+            invZ = is0 ? _8n : invert(z);
+          const iz1 = invZ;
+          const iz2 = mod(iz1 * iz1);
+          const iz3 = mod(iz2 * iz1);
+          const ax = mod(x * iz2);
+          const ay = mod(y * iz3);
+          const zz = mod(z * iz1);
+          if (is0)
+            return Point.ZERO;
+          if (zz !== _1n)
+            throw new Error("invZ was invalid");
+          return new Point(ax, ay);
+        }
+      };
+      JacobianPoint.BASE = new JacobianPoint(CURVE.Gx, CURVE.Gy, _1n);
+      JacobianPoint.ZERO = new JacobianPoint(_0n, _1n, _0n);
+      function constTimeNegate(condition, item) {
+        const neg = item.negate();
+        return condition ? neg : item;
+      }
+      var pointPrecomputes = /* @__PURE__ */ new WeakMap();
+      var Point = class _Point {
+        constructor(x, y) {
+          this.x = x;
+          this.y = y;
+        }
+        _setWindowSize(windowSize) {
+          this._WINDOW_SIZE = windowSize;
+          pointPrecomputes.delete(this);
+        }
+        hasEvenY() {
+          return this.y % _2n === _0n;
+        }
+        static fromCompressedHex(bytes) {
+          const isShort = bytes.length === 32;
+          const x = bytesToNumber(isShort ? bytes : bytes.subarray(1));
+          if (!isValidFieldElement(x))
+            throw new Error("Point is not on curve");
+          const y2 = weierstrass(x);
+          let y = sqrtMod(y2);
+          const isYOdd = (y & _1n) === _1n;
+          if (isShort) {
+            if (isYOdd)
+              y = mod(-y);
+          } else {
+            const isFirstByteOdd = (bytes[0] & 1) === 1;
+            if (isFirstByteOdd !== isYOdd)
+              y = mod(-y);
+          }
+          const point = new _Point(x, y);
+          point.assertValidity();
+          return point;
+        }
+        static fromUncompressedHex(bytes) {
+          const x = bytesToNumber(bytes.subarray(1, fieldLen + 1));
+          const y = bytesToNumber(bytes.subarray(fieldLen + 1, fieldLen * 2 + 1));
+          const point = new _Point(x, y);
+          point.assertValidity();
+          return point;
+        }
+        static fromHex(hex) {
+          const bytes = ensureBytes(hex);
+          const len = bytes.length;
+          const header = bytes[0];
+          if (len === fieldLen)
+            return this.fromCompressedHex(bytes);
+          if (len === compressedLen && (header === 2 || header === 3)) {
+            return this.fromCompressedHex(bytes);
+          }
+          if (len === uncompressedLen && header === 4)
+            return this.fromUncompressedHex(bytes);
+          throw new Error(`Point.fromHex: received invalid point. Expected 32-${compressedLen} compressed bytes or ${uncompressedLen} uncompressed bytes, not ${len}`);
+        }
+        static fromPrivateKey(privateKey) {
+          return _Point.BASE.multiply(normalizePrivateKey(privateKey));
+        }
+        static fromSignature(msgHash, signature, recovery) {
+          const { r, s } = normalizeSignature(signature);
+          if (![0, 1, 2, 3].includes(recovery))
+            throw new Error("Cannot recover: invalid recovery bit");
+          const h = truncateHash(ensureBytes(msgHash));
+          const { n } = CURVE;
+          const radj = recovery === 2 || recovery === 3 ? r + n : r;
+          const rinv = invert(radj, n);
+          const u1 = mod(-h * rinv, n);
+          const u2 = mod(s * rinv, n);
+          const prefix = recovery & 1 ? "03" : "02";
+          const R = _Point.fromHex(prefix + numTo32bStr(radj));
+          const Q = _Point.BASE.multiplyAndAddUnsafe(R, u1, u2);
+          if (!Q)
+            throw new Error("Cannot recover signature: point at infinify");
+          Q.assertValidity();
+          return Q;
+        }
+        toRawBytes(isCompressed = false) {
+          return hexToBytes(this.toHex(isCompressed));
+        }
+        toHex(isCompressed = false) {
+          const x = numTo32bStr(this.x);
+          if (isCompressed) {
+            const prefix = this.hasEvenY() ? "02" : "03";
+            return `${prefix}${x}`;
+          } else {
+            return `04${x}${numTo32bStr(this.y)}`;
+          }
+        }
+        toHexX() {
+          return this.toHex(true).slice(2);
+        }
+        toRawX() {
+          return this.toRawBytes(true).slice(1);
+        }
+        assertValidity() {
+          const msg = "Point is not on elliptic curve";
+          const { x, y } = this;
+          if (!isValidFieldElement(x) || !isValidFieldElement(y))
+            throw new Error(msg);
+          const left = mod(y * y);
+          const right = weierstrass(x);
+          if (mod(left - right) !== _0n)
+            throw new Error(msg);
+        }
+        equals(other) {
+          return this.x === other.x && this.y === other.y;
+        }
+        negate() {
+          return new _Point(this.x, mod(-this.y));
+        }
+        double() {
+          return JacobianPoint.fromAffine(this).double().toAffine();
+        }
+        add(other) {
+          return JacobianPoint.fromAffine(this).add(JacobianPoint.fromAffine(other)).toAffine();
+        }
+        subtract(other) {
+          return this.add(other.negate());
+        }
+        multiply(scalar) {
+          return JacobianPoint.fromAffine(this).multiply(scalar, this).toAffine();
+        }
+        multiplyAndAddUnsafe(Q, a, b) {
+          const P = JacobianPoint.fromAffine(this);
+          const aP = a === _0n || a === _1n || this !== _Point.BASE ? P.multiplyUnsafe(a) : P.multiply(a);
+          const bQ = JacobianPoint.fromAffine(Q).multiplyUnsafe(b);
+          const sum = aP.add(bQ);
+          return sum.equals(JacobianPoint.ZERO) ? void 0 : sum.toAffine();
+        }
+      };
+      exports.Point = Point;
+      Point.BASE = new Point(CURVE.Gx, CURVE.Gy);
+      Point.ZERO = new Point(_0n, _0n);
+      function sliceDER(s) {
+        return Number.parseInt(s[0], 16) >= 8 ? "00" + s : s;
+      }
+      function parseDERInt(data) {
+        if (data.length < 2 || data[0] !== 2) {
+          throw new Error(`Invalid signature integer tag: ${bytesToHex(data)}`);
+        }
+        const len = data[1];
+        const res = data.subarray(2, len + 2);
+        if (!len || res.length !== len) {
+          throw new Error(`Invalid signature integer: wrong length`);
+        }
+        if (res[0] === 0 && res[1] <= 127) {
+          throw new Error("Invalid signature integer: trailing length");
+        }
+        return { data: bytesToNumber(res), left: data.subarray(len + 2) };
+      }
+      function parseDERSignature(data) {
+        if (data.length < 2 || data[0] != 48) {
+          throw new Error(`Invalid signature tag: ${bytesToHex(data)}`);
+        }
+        if (data[1] !== data.length - 2) {
+          throw new Error("Invalid signature: incorrect length");
+        }
+        const { data: r, left: sBytes } = parseDERInt(data.subarray(2));
+        const { data: s, left: rBytesLeft } = parseDERInt(sBytes);
+        if (rBytesLeft.length) {
+          throw new Error(`Invalid signature: left bytes after parsing: ${bytesToHex(rBytesLeft)}`);
+        }
+        return { r, s };
+      }
+      var Signature = class _Signature {
+        constructor(r, s) {
+          this.r = r;
+          this.s = s;
+          this.assertValidity();
+        }
+        static fromCompact(hex) {
+          const arr = hex instanceof Uint8Array;
+          const name = "Signature.fromCompact";
+          if (typeof hex !== "string" && !arr)
+            throw new TypeError(`${name}: Expected string or Uint8Array`);
+          const str = arr ? bytesToHex(hex) : hex;
+          if (str.length !== 128)
+            throw new Error(`${name}: Expected 64-byte hex`);
+          return new _Signature(hexToNumber(str.slice(0, 64)), hexToNumber(str.slice(64, 128)));
+        }
+        static fromDER(hex) {
+          const arr = hex instanceof Uint8Array;
+          if (typeof hex !== "string" && !arr)
+            throw new TypeError(`Signature.fromDER: Expected string or Uint8Array`);
+          const { r, s } = parseDERSignature(arr ? hex : hexToBytes(hex));
+          return new _Signature(r, s);
+        }
+        static fromHex(hex) {
+          return this.fromDER(hex);
+        }
+        assertValidity() {
+          const { r, s } = this;
+          if (!isWithinCurveOrder(r))
+            throw new Error("Invalid Signature: r must be 0 < r < n");
+          if (!isWithinCurveOrder(s))
+            throw new Error("Invalid Signature: s must be 0 < s < n");
+        }
+        hasHighS() {
+          const HALF = CURVE.n >> _1n;
+          return this.s > HALF;
+        }
+        normalizeS() {
+          return this.hasHighS() ? new _Signature(this.r, mod(-this.s, CURVE.n)) : this;
+        }
+        toDERRawBytes() {
+          return hexToBytes(this.toDERHex());
+        }
+        toDERHex() {
+          const sHex = sliceDER(numberToHexUnpadded(this.s));
+          const rHex = sliceDER(numberToHexUnpadded(this.r));
+          const sHexL = sHex.length / 2;
+          const rHexL = rHex.length / 2;
+          const sLen = numberToHexUnpadded(sHexL);
+          const rLen = numberToHexUnpadded(rHexL);
+          const length = numberToHexUnpadded(rHexL + sHexL + 4);
+          return `30${length}02${rLen}${rHex}02${sLen}${sHex}`;
+        }
+        toRawBytes() {
+          return this.toDERRawBytes();
+        }
+        toHex() {
+          return this.toDERHex();
+        }
+        toCompactRawBytes() {
+          return hexToBytes(this.toCompactHex());
+        }
+        toCompactHex() {
+          return numTo32bStr(this.r) + numTo32bStr(this.s);
+        }
+      };
+      exports.Signature = Signature;
+      function concatBytes(...arrays) {
+        if (!arrays.every((b) => b instanceof Uint8Array))
+          throw new Error("Uint8Array list expected");
+        if (arrays.length === 1)
+          return arrays[0];
+        const length = arrays.reduce((a, arr) => a + arr.length, 0);
+        const result = new Uint8Array(length);
+        for (let i = 0, pad = 0; i < arrays.length; i++) {
+          const arr = arrays[i];
+          result.set(arr, pad);
+          pad += arr.length;
+        }
+        return result;
+      }
+      var hexes = Array.from({ length: 256 }, (v, i) => i.toString(16).padStart(2, "0"));
+      function bytesToHex(uint8a) {
+        if (!(uint8a instanceof Uint8Array))
+          throw new Error("Expected Uint8Array");
+        let hex = "";
+        for (let i = 0; i < uint8a.length; i++) {
+          hex += hexes[uint8a[i]];
+        }
+        return hex;
+      }
+      var POW_2_256 = BigInt("0x10000000000000000000000000000000000000000000000000000000000000000");
+      function numTo32bStr(num) {
+        if (typeof num !== "bigint")
+          throw new Error("Expected bigint");
+        if (!(_0n <= num && num < POW_2_256))
+          throw new Error("Expected number 0 <= n < 2^256");
+        return num.toString(16).padStart(64, "0");
+      }
+      function numTo32b(num) {
+        const b = hexToBytes(numTo32bStr(num));
+        if (b.length !== 32)
+          throw new Error("Error: expected 32 bytes");
+        return b;
+      }
+      function numberToHexUnpadded(num) {
+        const hex = num.toString(16);
+        return hex.length & 1 ? `0${hex}` : hex;
+      }
+      function hexToNumber(hex) {
+        if (typeof hex !== "string") {
+          throw new TypeError("hexToNumber: expected string, got " + typeof hex);
+        }
+        return BigInt(`0x${hex}`);
+      }
+      function hexToBytes(hex) {
+        if (typeof hex !== "string") {
+          throw new TypeError("hexToBytes: expected string, got " + typeof hex);
+        }
+        if (hex.length % 2)
+          throw new Error("hexToBytes: received invalid unpadded hex" + hex.length);
+        const array = new Uint8Array(hex.length / 2);
+        for (let i = 0; i < array.length; i++) {
+          const j = i * 2;
+          const hexByte = hex.slice(j, j + 2);
+          const byte = Number.parseInt(hexByte, 16);
+          if (Number.isNaN(byte) || byte < 0)
+            throw new Error("Invalid byte sequence");
+          array[i] = byte;
+        }
+        return array;
+      }
+      function bytesToNumber(bytes) {
+        return hexToNumber(bytesToHex(bytes));
+      }
+      function ensureBytes(hex) {
+        return hex instanceof Uint8Array ? Uint8Array.from(hex) : hexToBytes(hex);
+      }
+      function normalizeScalar(num) {
+        if (typeof num === "number" && Number.isSafeInteger(num) && num > 0)
+          return BigInt(num);
+        if (typeof num === "bigint" && isWithinCurveOrder(num))
+          return num;
+        throw new TypeError("Expected valid private scalar: 0 < scalar < curve.n");
+      }
+      function mod(a, b = CURVE.P) {
+        const result = a % b;
+        return result >= _0n ? result : b + result;
+      }
+      function pow2(x, power) {
+        const { P } = CURVE;
+        let res = x;
+        while (power-- > _0n) {
+          res *= res;
+          res %= P;
+        }
+        return res;
+      }
+      function sqrtMod(x) {
+        const { P } = CURVE;
+        const _6n = BigInt(6);
+        const _11n = BigInt(11);
+        const _22n = BigInt(22);
+        const _23n = BigInt(23);
+        const _44n = BigInt(44);
+        const _88n = BigInt(88);
+        const b2 = x * x * x % P;
+        const b3 = b2 * b2 * x % P;
+        const b6 = pow2(b3, _3n) * b3 % P;
+        const b9 = pow2(b6, _3n) * b3 % P;
+        const b11 = pow2(b9, _2n) * b2 % P;
+        const b22 = pow2(b11, _11n) * b11 % P;
+        const b44 = pow2(b22, _22n) * b22 % P;
+        const b88 = pow2(b44, _44n) * b44 % P;
+        const b176 = pow2(b88, _88n) * b88 % P;
+        const b220 = pow2(b176, _44n) * b44 % P;
+        const b223 = pow2(b220, _3n) * b3 % P;
+        const t1 = pow2(b223, _23n) * b22 % P;
+        const t2 = pow2(t1, _6n) * b2 % P;
+        const rt = pow2(t2, _2n);
+        const xc = rt * rt % P;
+        if (xc !== x)
+          throw new Error("Cannot find square root");
+        return rt;
+      }
+      function invert(number, modulo = CURVE.P) {
+        if (number === _0n || modulo <= _0n) {
+          throw new Error(`invert: expected positive integers, got n=${number} mod=${modulo}`);
+        }
+        let a = mod(number, modulo);
+        let b = modulo;
+        let x = _0n, y = _1n, u = _1n, v = _0n;
+        while (a !== _0n) {
+          const q = b / a;
+          const r = b % a;
+          const m = x - u * q;
+          const n = y - v * q;
+          b = a, a = r, x = u, y = v, u = m, v = n;
+        }
+        const gcd = b;
+        if (gcd !== _1n)
+          throw new Error("invert: does not exist");
+        return mod(x, modulo);
+      }
+      function invertBatch(nums, p = CURVE.P) {
+        const scratch = new Array(nums.length);
+        const lastMultiplied = nums.reduce((acc, num, i) => {
+          if (num === _0n)
+            return acc;
+          scratch[i] = acc;
+          return mod(acc * num, p);
+        }, _1n);
+        const inverted = invert(lastMultiplied, p);
+        nums.reduceRight((acc, num, i) => {
+          if (num === _0n)
+            return acc;
+          scratch[i] = mod(acc * scratch[i], p);
+          return mod(acc * num, p);
+        }, inverted);
+        return scratch;
+      }
+      function bits2int_2(bytes) {
+        const delta = bytes.length * 8 - groupLen * 8;
+        const num = bytesToNumber(bytes);
+        return delta > 0 ? num >> BigInt(delta) : num;
+      }
+      function truncateHash(hash, truncateOnly = false) {
+        const h = bits2int_2(hash);
+        if (truncateOnly)
+          return h;
+        const { n } = CURVE;
+        return h >= n ? h - n : h;
+      }
+      var _sha256Sync;
+      var _hmacSha256Sync;
+      var HmacDrbg = class {
+        constructor(hashLen2, qByteLen) {
+          this.hashLen = hashLen2;
+          this.qByteLen = qByteLen;
+          if (typeof hashLen2 !== "number" || hashLen2 < 2)
+            throw new Error("hashLen must be a number");
+          if (typeof qByteLen !== "number" || qByteLen < 2)
+            throw new Error("qByteLen must be a number");
+          this.v = new Uint8Array(hashLen2).fill(1);
+          this.k = new Uint8Array(hashLen2).fill(0);
+          this.counter = 0;
+        }
+        hmac(...values) {
+          return exports.utils.hmacSha256(this.k, ...values);
+        }
+        hmacSync(...values) {
+          return _hmacSha256Sync(this.k, ...values);
+        }
+        checkSync() {
+          if (typeof _hmacSha256Sync !== "function")
+            throw new ShaError("hmacSha256Sync needs to be set");
+        }
+        incr() {
+          if (this.counter >= 1e3)
+            throw new Error("Tried 1,000 k values for sign(), all were invalid");
+          this.counter += 1;
+        }
+        async reseed(seed = new Uint8Array()) {
+          this.k = await this.hmac(this.v, Uint8Array.from([0]), seed);
+          this.v = await this.hmac(this.v);
+          if (seed.length === 0)
+            return;
+          this.k = await this.hmac(this.v, Uint8Array.from([1]), seed);
+          this.v = await this.hmac(this.v);
+        }
+        reseedSync(seed = new Uint8Array()) {
+          this.checkSync();
+          this.k = this.hmacSync(this.v, Uint8Array.from([0]), seed);
+          this.v = this.hmacSync(this.v);
+          if (seed.length === 0)
+            return;
+          this.k = this.hmacSync(this.v, Uint8Array.from([1]), seed);
+          this.v = this.hmacSync(this.v);
+        }
+        async generate() {
+          this.incr();
+          let len = 0;
+          const out = [];
+          while (len < this.qByteLen) {
+            this.v = await this.hmac(this.v);
+            const sl = this.v.slice();
+            out.push(sl);
+            len += this.v.length;
+          }
+          return concatBytes(...out);
+        }
+        generateSync() {
+          this.checkSync();
+          this.incr();
+          let len = 0;
+          const out = [];
+          while (len < this.qByteLen) {
+            this.v = this.hmacSync(this.v);
+            const sl = this.v.slice();
+            out.push(sl);
+            len += this.v.length;
+          }
+          return concatBytes(...out);
+        }
+      };
+      function isWithinCurveOrder(num) {
+        return _0n < num && num < CURVE.n;
+      }
+      function isValidFieldElement(num) {
+        return _0n < num && num < CURVE.P;
+      }
+      function kmdToSig(kBytes, m, d, lowS = true) {
+        const { n } = CURVE;
+        const k = truncateHash(kBytes, true);
+        if (!isWithinCurveOrder(k))
+          return;
+        const kinv = invert(k, n);
+        const q = Point.BASE.multiply(k);
+        const r = mod(q.x, n);
+        if (r === _0n)
+          return;
+        const s = mod(kinv * mod(m + d * r, n), n);
+        if (s === _0n)
+          return;
+        let sig = new Signature(r, s);
+        let recovery = (q.x === sig.r ? 0 : 2) | Number(q.y & _1n);
+        if (lowS && sig.hasHighS()) {
+          sig = sig.normalizeS();
+          recovery ^= 1;
+        }
+        return { sig, recovery };
+      }
+      function normalizePrivateKey(key) {
+        let num;
+        if (typeof key === "bigint") {
+          num = key;
+        } else if (typeof key === "number" && Number.isSafeInteger(key) && key > 0) {
+          num = BigInt(key);
+        } else if (typeof key === "string") {
+          if (key.length !== 2 * groupLen)
+            throw new Error("Expected 32 bytes of private key");
+          num = hexToNumber(key);
+        } else if (key instanceof Uint8Array) {
+          if (key.length !== groupLen)
+            throw new Error("Expected 32 bytes of private key");
+          num = bytesToNumber(key);
+        } else {
+          throw new TypeError("Expected valid private key");
+        }
+        if (!isWithinCurveOrder(num))
+          throw new Error("Expected private key: 0 < key < n");
+        return num;
+      }
+      function normalizePublicKey(publicKey) {
+        if (publicKey instanceof Point) {
+          publicKey.assertValidity();
+          return publicKey;
+        } else {
+          return Point.fromHex(publicKey);
+        }
+      }
+      function normalizeSignature(signature) {
+        if (signature instanceof Signature) {
+          signature.assertValidity();
+          return signature;
+        }
+        try {
+          return Signature.fromDER(signature);
+        } catch (error) {
+          return Signature.fromCompact(signature);
+        }
+      }
+      function getPublicKey(privateKey, isCompressed = false) {
+        return Point.fromPrivateKey(privateKey).toRawBytes(isCompressed);
+      }
+      exports.getPublicKey = getPublicKey;
+      function recoverPublicKey(msgHash, signature, recovery, isCompressed = false) {
+        return Point.fromSignature(msgHash, signature, recovery).toRawBytes(isCompressed);
+      }
+      exports.recoverPublicKey = recoverPublicKey;
+      function isProbPub(item) {
+        const arr = item instanceof Uint8Array;
+        const str = typeof item === "string";
+        const len = (arr || str) && item.length;
+        if (arr)
+          return len === compressedLen || len === uncompressedLen;
+        if (str)
+          return len === compressedLen * 2 || len === uncompressedLen * 2;
+        if (item instanceof Point)
+          return true;
+        return false;
+      }
+      function getSharedSecret(privateA, publicB, isCompressed = false) {
+        if (isProbPub(privateA))
+          throw new TypeError("getSharedSecret: first arg must be private key");
+        if (!isProbPub(publicB))
+          throw new TypeError("getSharedSecret: second arg must be public key");
+        const b = normalizePublicKey(publicB);
+        b.assertValidity();
+        return b.multiply(normalizePrivateKey(privateA)).toRawBytes(isCompressed);
+      }
+      exports.getSharedSecret = getSharedSecret;
+      function bits2int(bytes) {
+        const slice = bytes.length > fieldLen ? bytes.slice(0, fieldLen) : bytes;
+        return bytesToNumber(slice);
+      }
+      function bits2octets(bytes) {
+        const z1 = bits2int(bytes);
+        const z2 = mod(z1, CURVE.n);
+        return int2octets(z2 < _0n ? z1 : z2);
+      }
+      function int2octets(num) {
+        return numTo32b(num);
+      }
+      function initSigArgs(msgHash, privateKey, extraEntropy) {
+        if (msgHash == null)
+          throw new Error(`sign: expected valid message hash, not "${msgHash}"`);
+        const h1 = ensureBytes(msgHash);
+        const d = normalizePrivateKey(privateKey);
+        const seedArgs = [int2octets(d), bits2octets(h1)];
+        if (extraEntropy != null) {
+          if (extraEntropy === true)
+            extraEntropy = exports.utils.randomBytes(fieldLen);
+          const e = ensureBytes(extraEntropy);
+          if (e.length !== fieldLen)
+            throw new Error(`sign: Expected ${fieldLen} bytes of extra data`);
+          seedArgs.push(e);
+        }
+        const seed = concatBytes(...seedArgs);
+        const m = bits2int(h1);
+        return { seed, m, d };
+      }
+      function finalizeSig(recSig, opts) {
+        const { sig, recovery } = recSig;
+        const { der, recovered } = Object.assign({ canonical: true, der: true }, opts);
+        const hashed = der ? sig.toDERRawBytes() : sig.toCompactRawBytes();
+        return recovered ? [hashed, recovery] : hashed;
+      }
+      async function sign(msgHash, privKey, opts = {}) {
+        const { seed, m, d } = initSigArgs(msgHash, privKey, opts.extraEntropy);
+        const drbg = new HmacDrbg(hashLen, groupLen);
+        await drbg.reseed(seed);
+        let sig;
+        while (!(sig = kmdToSig(await drbg.generate(), m, d, opts.canonical)))
+          await drbg.reseed();
+        return finalizeSig(sig, opts);
+      }
+      exports.sign = sign;
+      function signSync(msgHash, privKey, opts = {}) {
+        const { seed, m, d } = initSigArgs(msgHash, privKey, opts.extraEntropy);
+        const drbg = new HmacDrbg(hashLen, groupLen);
+        drbg.reseedSync(seed);
+        let sig;
+        while (!(sig = kmdToSig(drbg.generateSync(), m, d, opts.canonical)))
+          drbg.reseedSync();
+        return finalizeSig(sig, opts);
+      }
+      exports.signSync = signSync;
+      var vopts = { strict: true };
+      function verify(signature, msgHash, publicKey, opts = vopts) {
+        let sig;
+        try {
+          sig = normalizeSignature(signature);
+          msgHash = ensureBytes(msgHash);
+        } catch (error) {
+          return false;
+        }
+        const { r, s } = sig;
+        if (opts.strict && sig.hasHighS())
+          return false;
+        const h = truncateHash(msgHash);
+        let P;
+        try {
+          P = normalizePublicKey(publicKey);
+        } catch (error) {
+          return false;
+        }
+        const { n } = CURVE;
+        const sinv = invert(s, n);
+        const u1 = mod(h * sinv, n);
+        const u2 = mod(r * sinv, n);
+        const R = Point.BASE.multiplyAndAddUnsafe(P, u1, u2);
+        if (!R)
+          return false;
+        const v = mod(R.x, n);
+        return v === r;
+      }
+      exports.verify = verify;
+      function schnorrChallengeFinalize(ch) {
+        return mod(bytesToNumber(ch), CURVE.n);
+      }
+      var SchnorrSignature = class _SchnorrSignature {
+        constructor(r, s) {
+          this.r = r;
+          this.s = s;
+          this.assertValidity();
+        }
+        static fromHex(hex) {
+          const bytes = ensureBytes(hex);
+          if (bytes.length !== 64)
+            throw new TypeError(`SchnorrSignature.fromHex: expected 64 bytes, not ${bytes.length}`);
+          const r = bytesToNumber(bytes.subarray(0, 32));
+          const s = bytesToNumber(bytes.subarray(32, 64));
+          return new _SchnorrSignature(r, s);
+        }
+        assertValidity() {
+          const { r, s } = this;
+          if (!isValidFieldElement(r) || !isWithinCurveOrder(s))
+            throw new Error("Invalid signature");
+        }
+        toHex() {
+          return numTo32bStr(this.r) + numTo32bStr(this.s);
+        }
+        toRawBytes() {
+          return hexToBytes(this.toHex());
+        }
+      };
+      function schnorrGetPublicKey(privateKey) {
+        return Point.fromPrivateKey(privateKey).toRawX();
+      }
+      var InternalSchnorrSignature = class {
+        constructor(message, privateKey, auxRand = exports.utils.randomBytes()) {
+          if (message == null)
+            throw new TypeError(`sign: Expected valid message, not "${message}"`);
+          this.m = ensureBytes(message);
+          const { x, scalar } = this.getScalar(normalizePrivateKey(privateKey));
+          this.px = x;
+          this.d = scalar;
+          this.rand = ensureBytes(auxRand);
+          if (this.rand.length !== 32)
+            throw new TypeError("sign: Expected 32 bytes of aux randomness");
+        }
+        getScalar(priv) {
+          const point = Point.fromPrivateKey(priv);
+          const scalar = point.hasEvenY() ? priv : CURVE.n - priv;
+          return { point, scalar, x: point.toRawX() };
+        }
+        initNonce(d, t0h) {
+          return numTo32b(d ^ bytesToNumber(t0h));
+        }
+        finalizeNonce(k0h) {
+          const k0 = mod(bytesToNumber(k0h), CURVE.n);
+          if (k0 === _0n)
+            throw new Error("sign: Creation of signature failed. k is zero");
+          const { point: R, x: rx, scalar: k } = this.getScalar(k0);
+          return { R, rx, k };
+        }
+        finalizeSig(R, k, e, d) {
+          return new SchnorrSignature(R.x, mod(k + e * d, CURVE.n)).toRawBytes();
+        }
+        error() {
+          throw new Error("sign: Invalid signature produced");
+        }
+        async calc() {
+          const { m, d, px, rand } = this;
+          const tag = exports.utils.taggedHash;
+          const t = this.initNonce(d, await tag(TAGS.aux, rand));
+          const { R, rx, k } = this.finalizeNonce(await tag(TAGS.nonce, t, px, m));
+          const e = schnorrChallengeFinalize(await tag(TAGS.challenge, rx, px, m));
+          const sig = this.finalizeSig(R, k, e, d);
+          if (!await schnorrVerify(sig, m, px))
+            this.error();
+          return sig;
+        }
+        calcSync() {
+          const { m, d, px, rand } = this;
+          const tag = exports.utils.taggedHashSync;
+          const t = this.initNonce(d, tag(TAGS.aux, rand));
+          const { R, rx, k } = this.finalizeNonce(tag(TAGS.nonce, t, px, m));
+          const e = schnorrChallengeFinalize(tag(TAGS.challenge, rx, px, m));
+          const sig = this.finalizeSig(R, k, e, d);
+          if (!schnorrVerifySync(sig, m, px))
+            this.error();
+          return sig;
+        }
+      };
+      async function schnorrSign(msg, privKey, auxRand) {
+        return new InternalSchnorrSignature(msg, privKey, auxRand).calc();
+      }
+      function schnorrSignSync(msg, privKey, auxRand) {
+        return new InternalSchnorrSignature(msg, privKey, auxRand).calcSync();
+      }
+      function initSchnorrVerify(signature, message, publicKey) {
+        const raw = signature instanceof SchnorrSignature;
+        const sig = raw ? signature : SchnorrSignature.fromHex(signature);
+        if (raw)
+          sig.assertValidity();
+        return {
+          ...sig,
+          m: ensureBytes(message),
+          P: normalizePublicKey(publicKey)
+        };
+      }
+      function finalizeSchnorrVerify(r, P, s, e) {
+        const R = Point.BASE.multiplyAndAddUnsafe(P, normalizePrivateKey(s), mod(-e, CURVE.n));
+        if (!R || !R.hasEvenY() || R.x !== r)
+          return false;
+        return true;
+      }
+      async function schnorrVerify(signature, message, publicKey) {
+        try {
+          const { r, s, m, P } = initSchnorrVerify(signature, message, publicKey);
+          const e = schnorrChallengeFinalize(await exports.utils.taggedHash(TAGS.challenge, numTo32b(r), P.toRawX(), m));
+          return finalizeSchnorrVerify(r, P, s, e);
+        } catch (error) {
+          return false;
+        }
+      }
+      function schnorrVerifySync(signature, message, publicKey) {
+        try {
+          const { r, s, m, P } = initSchnorrVerify(signature, message, publicKey);
+          const e = schnorrChallengeFinalize(exports.utils.taggedHashSync(TAGS.challenge, numTo32b(r), P.toRawX(), m));
+          return finalizeSchnorrVerify(r, P, s, e);
+        } catch (error) {
+          if (error instanceof ShaError)
+            throw error;
+          return false;
+        }
+      }
+      exports.schnorr = {
+        Signature: SchnorrSignature,
+        getPublicKey: schnorrGetPublicKey,
+        sign: schnorrSign,
+        verify: schnorrVerify,
+        signSync: schnorrSignSync,
+        verifySync: schnorrVerifySync
+      };
+      Point.BASE._setWindowSize(8);
+      var crypto = {
+        node: nodeCrypto,
+        web: typeof self === "object" && "crypto" in self ? self.crypto : void 0
+      };
+      var TAGS = {
+        challenge: "BIP0340/challenge",
+        aux: "BIP0340/aux",
+        nonce: "BIP0340/nonce"
+      };
+      var TAGGED_HASH_PREFIXES = {};
+      exports.utils = {
+        bytesToHex,
+        hexToBytes,
+        concatBytes,
+        mod,
+        invert,
+        isValidPrivateKey(privateKey) {
+          try {
+            normalizePrivateKey(privateKey);
+            return true;
+          } catch (error) {
+            return false;
+          }
+        },
+        _bigintTo32Bytes: numTo32b,
+        _normalizePrivateKey: normalizePrivateKey,
+        hashToPrivateKey: (hash) => {
+          hash = ensureBytes(hash);
+          const minLen = groupLen + 8;
+          if (hash.length < minLen || hash.length > 1024) {
+            throw new Error(`Expected valid bytes of private key as per FIPS 186`);
+          }
+          const num = mod(bytesToNumber(hash), CURVE.n - _1n) + _1n;
+          return numTo32b(num);
+        },
+        randomBytes: (bytesLength = 32) => {
+          if (crypto.web) {
+            return crypto.web.getRandomValues(new Uint8Array(bytesLength));
+          } else if (crypto.node) {
+            const { randomBytes } = crypto.node;
+            return Uint8Array.from(randomBytes(bytesLength));
+          } else {
+            throw new Error("The environment doesn't have randomBytes function");
+          }
+        },
+        randomPrivateKey: () => exports.utils.hashToPrivateKey(exports.utils.randomBytes(groupLen + 8)),
+        precompute(windowSize = 8, point = Point.BASE) {
+          const cached = point === Point.BASE ? point : new Point(point.x, point.y);
+          cached._setWindowSize(windowSize);
+          cached.multiply(_3n);
+          return cached;
+        },
+        sha256: async (...messages) => {
+          if (crypto.web) {
+            const buffer = await crypto.web.subtle.digest("SHA-256", concatBytes(...messages));
+            return new Uint8Array(buffer);
+          } else if (crypto.node) {
+            const { createHash } = crypto.node;
+            const hash = createHash("sha256");
+            messages.forEach((m) => hash.update(m));
+            return Uint8Array.from(hash.digest());
+          } else {
+            throw new Error("The environment doesn't have sha256 function");
+          }
+        },
+        hmacSha256: async (key, ...messages) => {
+          if (crypto.web) {
+            const ckey = await crypto.web.subtle.importKey("raw", key, { name: "HMAC", hash: { name: "SHA-256" } }, false, ["sign"]);
+            const message = concatBytes(...messages);
+            const buffer = await crypto.web.subtle.sign("HMAC", ckey, message);
+            return new Uint8Array(buffer);
+          } else if (crypto.node) {
+            const { createHmac } = crypto.node;
+            const hash = createHmac("sha256", key);
+            messages.forEach((m) => hash.update(m));
+            return Uint8Array.from(hash.digest());
+          } else {
+            throw new Error("The environment doesn't have hmac-sha256 function");
+          }
+        },
+        sha256Sync: void 0,
+        hmacSha256Sync: void 0,
+        taggedHash: async (tag, ...messages) => {
+          let tagP = TAGGED_HASH_PREFIXES[tag];
+          if (tagP === void 0) {
+            const tagH = await exports.utils.sha256(Uint8Array.from(tag, (c) => c.charCodeAt(0)));
+            tagP = concatBytes(tagH, tagH);
+            TAGGED_HASH_PREFIXES[tag] = tagP;
+          }
+          return exports.utils.sha256(tagP, ...messages);
+        },
+        taggedHashSync: (tag, ...messages) => {
+          if (typeof _sha256Sync !== "function")
+            throw new ShaError("sha256Sync is undefined, you need to set it");
+          let tagP = TAGGED_HASH_PREFIXES[tag];
+          if (tagP === void 0) {
+            const tagH = _sha256Sync(Uint8Array.from(tag, (c) => c.charCodeAt(0)));
+            tagP = concatBytes(tagH, tagH);
+            TAGGED_HASH_PREFIXES[tag] = tagP;
+          }
+          return _sha256Sync(tagP, ...messages);
+        },
+        _JacobianPoint: JacobianPoint
+      };
+      Object.defineProperties(exports.utils, {
+        sha256Sync: {
+          configurable: false,
+          get() {
+            return _sha256Sync;
+          },
+          set(val) {
+            if (!_sha256Sync)
+              _sha256Sync = val;
+          }
+        },
+        hmacSha256Sync: {
+          configurable: false,
+          get() {
+            return _hmacSha256Sync;
+          },
+          set(val) {
+            if (!_hmacSha256Sync)
+              _hmacSha256Sync = val;
+          }
+        }
+      });
+    }
+  });
+  return require_index();
+})();
+/*! Bundled license information:
+
+@noble/secp256k1/lib/index.js:
+  (*! noble-secp256k1 - MIT License (c) 2019 Paul Miller (paulmillr.com) *)
+*/
+
+	</script>
+	<script type="text/javascript">
 /*!
 * Cryptographically Secure Random Number Generator
 *
-* Architecture:
-*   Primary source  : window.crypto.getRandomValues (OS CSPRNG — NIST SP 800-90A)
-*   Defense-in-depth: SHA-256 hash of accumulated environmental entropy XOR'd
-*                     into the CSPRNG output, so even a compromised CSPRNG
-*                     cannot produce predictable keys without also knowing the
-*                     accumulated pool state.
-*
-* Entropy pool contributions:
-*   - OS CSPRNG (initial fill)
-*   - Screen geometry, colour depth, timezone
-*   - navigator.userAgent, language, history length
-*   - High-resolution timing via performance.now()
-*   - Mouse position & timing (via ninja.seeder)
-*   - Keyboard timing (via ninja.seeder)
-*   - Web Audio API frequency-bin noise (if available)
+* Sole source: window.crypto.getRandomValues (OS CSPRNG, NIST SP 800-90A).
+* No user-interaction seeding, no environmental entropy accumulation.
+* The OS CSPRNG is the only legitimate source; all other signals are
+* weaker, harder to audit, and increase attack surface without benefit.
 *
 * Copyright Tom Wu, bitaddr.org  BSD License.
 * http://www-cs-students.stanford.edu/~tjw/jsbn/LICENSE
 */
 (function () {
 
-	// Constructor of the global SecureRandom object
 	var sr = window.SecureRandom = function () { };
 
-	// ---- Pool ---------------------------------------------------------------
-
-	sr.poolSize = 256;
-	sr.pool = [];          // plain array for compatibility with bytesToHex
-	sr.pptr = 0;
-	sr.poolCopyOnInit = null;
-
-	// Fill the pool from window.crypto first, then fall back to Math.random
-	(function initPool() {
-		if (window.crypto && window.crypto.getRandomValues && window.Uint8Array) {
-			try {
-				var ua = new Uint8Array(sr.poolSize);
-				window.crypto.getRandomValues(ua);
-				for (var i = 0; i < sr.poolSize; i++) sr.pool.push(ua[i]);
-			} catch (e) { }
-		}
-		while (sr.pool.length < sr.poolSize) {
-			var t = Math.floor(65536 * Math.random());
-			sr.pool.push(t >>> 8);
-			sr.pool.push(t & 255);
+	// Fail loudly on startup if the CSPRNG is absent
+	(function checkCSPRNG() {
+		if (!window.crypto || !window.crypto.getRandomValues || !window.Uint8Array) {
+			throw new Error(
+				'CSPRNG unavailable: window.crypto.getRandomValues is required. ' +
+				'Bitcoin key generation cannot proceed without a cryptographically secure RNG.'
+			);
 		}
 	})();
 
-	// ---- Seeding helpers (kept for API compatibility with ninja.seeder) -----
-
-	sr.seedInt8 = function (x) {
-		sr.pool[sr.pptr] ^= (x & 0xFF);
-		sr.pptr = (sr.pptr + 1) % sr.poolSize;
-	};
-
-	sr.seedInt16 = function (x) {
-		sr.seedInt8(x);
-		sr.seedInt8(x >> 8);
-	};
-
-	sr.seedInt = function (x) {
-		sr.seedInt8(x);
-		sr.seedInt8(x >> 8);
-		sr.seedInt8(x >> 16);
-		sr.seedInt8(x >> 24);
-	};
-
-	// Seed current time with high-resolution timing when available
-	sr.seedTime = function () {
-		sr.seedInt(new Date().getTime());
-		if (window.performance && window.performance.now) {
-			// performance.now() has sub-millisecond precision — ~20 bits of entropy
-			sr.seedInt(Math.floor(window.performance.now() * 1000));
-		}
-	};
-
-	// ---- Output generation --------------------------------------------------
-
+	// Fill byte array ba[] with CSPRNG bytes
 	sr.prototype.nextBytes = function (ba) {
-		// Capture pool state the first time bytes are generated (for entropy audit display)
-		if (sr.poolCopyOnInit === null) {
-			sr.poolCopyOnInit = sr.pool.slice();
+		if (!window.crypto || !window.crypto.getRandomValues) {
+			throw new Error(
+				'CSPRNG unavailable: window.crypto.getRandomValues is required. ' +
+				'Key generation aborted.'
+			);
 		}
-
-		if (window.crypto && window.crypto.getRandomValues && window.Uint8Array) {
-			try {
-				// Step 1 – fresh OS CSPRNG bytes (primary source)
-				var cspBytes = new Uint8Array(ba.length);
-				window.crypto.getRandomValues(cspBytes);
-
-				// Step 2 – SHA-256 of accumulated pool (defense-in-depth)
-				var poolHash = Crypto.SHA256(sr.pool, { asBytes: true });
-
-				// Step 3 – XOR both sources; neither alone can predict the output
-				for (var i = 0; i < ba.length; i++) {
-					ba[i] = cspBytes[i] ^ poolHash[i % 32];
-				}
-
-				// Advance pool pointer so repeated calls produce different hashes
-				sr.seedTime();
-				return;
-			} catch (e) { }
-		}
-
-		// Fallback (no CSPRNG): derive output purely from pool hash
-		var poolHash = Crypto.SHA256(sr.pool, { asBytes: true });
-		for (var i = 0; i < ba.length; i++) {
-			ba[i] = poolHash[i % 32];
-		}
-		sr.seedTime();
+		var ua = new Uint8Array(ba.length);
+		window.crypto.getRandomValues(ua);
+		for (var i = 0; i < ua.length; i++) ba[i] = ua[i];
 	};
 
-	// Legacy static helper used internally by some older callers
+	// Static single-byte helper used by some internal callers
 	sr.getByte = function () {
 		var b = [0];
 		(new sr()).nextBytes(b);
 		return b[0];
 	};
-
-	// ---- Collect initial environmental entropy ------------------------------
-
-	(function collectEnvironmentEntropy() {
-		sr.seedTime();
-
-		var s = "";
-		s += (window.screen.height * window.screen.width * window.screen.colorDepth);
-		s += (window.screen.availHeight * window.screen.availWidth * window.screen.pixelDepth);
-		s += new Date().getTimezoneOffset();
-		s += navigator.userAgent;
-		s += (navigator.language || navigator.userLanguage || "");
-		s += window.history.length;
-		s += (window.location && window.location.href ? window.location.href : "");
-		if (window.performance && window.performance.now) {
-			s += window.performance.now().toString();
-		}
-
-		var envBytes = Crypto.SHA256(s, { asBytes: true });
-		for (var i = 0; i < envBytes.length; i++) sr.seedInt8(envBytes[i]);
-
-		// Web Audio API – ADC noise leaks a few bits of true physical randomness
-		try {
-			var AudioCtx = window.AudioContext || window.webkitAudioContext;
-			if (AudioCtx) {
-				var ctx = new AudioCtx();
-				var analyser = ctx.createAnalyser();
-				var osc = ctx.createOscillator();
-				var gain = ctx.createGain();
-				gain.gain.value = 0;          // silent
-				osc.connect(analyser);
-				analyser.connect(gain);
-				gain.connect(ctx.destination);
-				osc.start(0);
-				var bins = new Uint8Array(analyser.frequencyBinCount);
-				analyser.getByteFrequencyData(bins);
-				osc.stop();
-				if (ctx.close) ctx.close();
-				for (var i = 0; i < bins.length; i++) sr.seedInt8(bins[i]);
-			}
-		} catch (e) { }
-
-		// poolCopyOnInit stays null here; it is assigned on first key generation (see nextBytes)
-	})();
 
 })();
 
@@ -1627,8 +2755,9 @@ if (typeof Crypto == "undefined" || !Crypto.util) {
 	// q instanceof BigInteger
 	// x instanceof BigInteger
 	ec.FieldElementFp = function (q, x) {
-		this.x = x;
-		// TODO if(x.compareTo(q) >= 0) error
+		// Normalise x into [0, q) — handles both negative values and x ≥ q that
+		// can arise from intermediate arithmetic (e.g. q.subtract(0) == q).
+		this.x = (x.signum() < 0 || x.compareTo(q) >= 0) ? x.mod(q) : x;
 		this.q = q;
 	};
 
@@ -1667,106 +2796,6 @@ if (typeof Crypto == "undefined" || !Crypto.util) {
 
 	ec.FieldElementFp.prototype.getByteLength = function () {
 		return Math.floor((this.toBigInteger().bitLength() + 7) / 8);
-	};
-
-	// D.1.4 91
-	/**
-	* return a sqrt root - the routine verifies that the calculation
-	* returns the right value - if none exists it returns null.
-	* 
-	* Copyright (c) 2000 - 2011 The Legion Of The Bouncy Castle (http://www.bouncycastle.org)
-	* Ported to JavaScript by bitaddr.org
-	*/
-	ec.FieldElementFp.prototype.sqrt = function () {
-		if (!this.q.testBit(0)) throw new Error("even value of q");
-
-		// p mod 4 == 3
-		if (this.q.testBit(1)) {
-			// z = g^(u+1) + p, p = 4u + 3
-			var z = new ec.FieldElementFp(this.q, this.x.modPow(this.q.shiftRight(2).add(BigInteger.ONE), this.q));
-			return z.square().equals(this) ? z : null;
-		}
-
-		// p mod 4 == 1
-		var qMinusOne = this.q.subtract(BigInteger.ONE);
-		var legendreExponent = qMinusOne.shiftRight(1);
-		if (!(this.x.modPow(legendreExponent, this.q).equals(BigInteger.ONE))) return null;
-		var u = qMinusOne.shiftRight(2);
-		var k = u.shiftLeft(1).add(BigInteger.ONE);
-		var Q = this.x;
-		var fourQ = Q.shiftLeft(2).mod(this.q);
-		var U, V;
-
-		do {
-			var rand = new SecureRandom();
-			var P;
-			do {
-				P = new BigInteger(this.q.bitLength(), rand);
-			}
-			while (P.compareTo(this.q) >= 0 || !(P.multiply(P).subtract(fourQ).modPow(legendreExponent, this.q).equals(qMinusOne)));
-
-			var result = ec.FieldElementFp.fastLucasSequence(this.q, P, Q, k);
-
-			U = result[0];
-			V = result[1];
-			if (V.multiply(V).mod(this.q).equals(fourQ)) {
-				// Integer division by 2, mod q
-				if (V.testBit(0)) {
-					V = V.add(this.q);
-				}
-				V = V.shiftRight(1);
-				return new ec.FieldElementFp(this.q, V);
-			}
-		}
-		while (U.equals(BigInteger.ONE) || U.equals(qMinusOne));
-
-		return null;
-	};
-
-	/*
-	* Copyright (c) 2000 - 2011 The Legion Of The Bouncy Castle (http://www.bouncycastle.org)
-	* Ported to JavaScript by bitaddr.org
-	*/
-	ec.FieldElementFp.fastLucasSequence = function (p, P, Q, k) {
-		// TODO Research and apply "common-multiplicand multiplication here"
-
-		var n = k.bitLength();
-		var s = k.getLowestSetBit();
-		var Uh = BigInteger.ONE;
-		var Vl = BigInteger.TWO;
-		var Vh = P;
-		var Ql = BigInteger.ONE;
-		var Qh = BigInteger.ONE;
-
-		for (var j = n - 1; j >= s + 1; --j) {
-			Ql = Ql.multiply(Qh).mod(p);
-			if (k.testBit(j)) {
-				Qh = Ql.multiply(Q).mod(p);
-				Uh = Uh.multiply(Vh).mod(p);
-				Vl = Vh.multiply(Vl).subtract(P.multiply(Ql)).mod(p);
-				Vh = Vh.multiply(Vh).subtract(Qh.shiftLeft(1)).mod(p);
-			}
-			else {
-				Qh = Ql;
-				Uh = Uh.multiply(Vl).subtract(Ql).mod(p);
-				Vh = Vh.multiply(Vl).subtract(P.multiply(Ql)).mod(p);
-				Vl = Vl.multiply(Vl).subtract(Ql.shiftLeft(1)).mod(p);
-			}
-		}
-
-		Ql = Ql.multiply(Qh).mod(p);
-		Qh = Ql.multiply(Q).mod(p);
-		Uh = Uh.multiply(Vl).subtract(Ql).mod(p);
-		Vl = Vh.multiply(Vl).subtract(P.multiply(Ql)).mod(p);
-		Ql = Ql.multiply(Qh).mod(p);
-
-		for (var j = 1; j <= s; ++j) {
-			Uh = Uh.multiply(Vl).mod(p);
-			Vl = Vl.multiply(Vl).subtract(Ql.shiftLeft(1)).mod(p);
-			Ql = Ql.multiply(Ql).mod(p);
-		}
-
-		return [Uh, Vl];
 	};
 
 	// ----------------
@@ -1923,37 +2952,6 @@ if (typeof Crypto == "undefined" || !Crypto.util) {
 		return R;
 	};
 
-	// Compute this*j + x*k (simultaneous multiplication)
-	ec.PointFp.prototype.multiplyTwo = function (j, x, k) {
-		var i;
-		if (j.bitLength() > k.bitLength())
-			i = j.bitLength() - 1;
-		else
-			i = k.bitLength() - 1;
-
-		var R = this.curve.getInfinity();
-		var both = this.add(x);
-		while (i >= 0) {
-			R = R.twice();
-			if (j.testBit(i)) {
-				if (k.testBit(i)) {
-					R = R.add(both);
-				}
-				else {
-					R = R.add(this);
-				}
-			}
-			else {
-				if (k.testBit(i)) {
-					R = R.add(x);
-				}
-			}
-			--i;
-		}
-
-		return R;
-	};
-
 	// patched by bitaddr.org and Casascius for use with Bitcoin.ECKey
 	// patched by coretechs to support compressed public keys
 	ec.PointFp.prototype.getEncoded = function (compressed) {
@@ -1998,83 +2996,6 @@ if (typeof Crypto == "undefined" || !Crypto.util) {
 		return new ec.PointFp(curve, curve.fromBigInteger(x), curve.fromBigInteger(y));
 	};
 
-	ec.PointFp.prototype.add2D = function (b) {
-		if (this.isInfinity()) return b;
-		if (b.isInfinity()) return this;
-
-		if (this.x.equals(b.x)) {
-			if (this.y.equals(b.y)) {
-				// this = b, i.e. this must be doubled
-				return this.twice();
-			}
-			// this = -b, i.e. the result is the point at infinity
-			return this.curve.getInfinity();
-		}
-
-		var x_x = b.x.subtract(this.x);
-		var y_y = b.y.subtract(this.y);
-		var gamma = y_y.divide(x_x);
-
-		var x3 = gamma.square().subtract(this.x).subtract(b.x);
-		var y3 = gamma.multiply(this.x.subtract(x3)).subtract(this.y);
-
-		return new ec.PointFp(this.curve, x3, y3);
-	};
-
-	ec.PointFp.prototype.twice2D = function () {
-		if (this.isInfinity()) return this;
-		if (this.y.toBigInteger().signum() == 0) {
-			// if y1 == 0, then (x1, y1) == (x1, -y1)
-			// and hence this = -this and thus 2(x1, y1) == infinity
-			return this.curve.getInfinity();
-		}
-
-		var TWO = this.curve.fromBigInteger(BigInteger.valueOf(2));
-		var THREE = this.curve.fromBigInteger(BigInteger.valueOf(3));
-		var gamma = this.x.square().multiply(THREE).add(this.curve.a).divide(this.y.multiply(TWO));
-
-		var x3 = gamma.square().subtract(this.x.multiply(TWO));
-		var y3 = gamma.multiply(this.x.subtract(x3)).subtract(this.y);
-
-		return new ec.PointFp(this.curve, x3, y3);
-	};
-
-	ec.PointFp.prototype.multiply2D = function (k) {
-		if (this.isInfinity()) return this;
-		if (k.signum() == 0) return this.curve.getInfinity();
-
-		var e = k;
-		var h = e.multiply(new BigInteger("3"));
-
-		var neg = this.negate();
-		var R = this;
-
-		var i;
-		for (i = h.bitLength() - 2; i > 0; --i) {
-			R = R.twice();
-
-			var hBit = h.testBit(i);
-			var eBit = e.testBit(i);
-
-			if (hBit != eBit) {
-				R = R.add2D(hBit ? this : neg);
-			}
-		}
-
-		return R;
-	};
-
-	ec.PointFp.prototype.isOnCurve = function () {
-		var x = this.getX().toBigInteger();
-		var y = this.getY().toBigInteger();
-		var a = this.curve.getA().toBigInteger();
-		var b = this.curve.getB().toBigInteger();
-		var n = this.curve.getQ();
-		var lhs = y.multiply(y).mod(n);
-		var rhs = x.multiply(x).multiply(x).add(a.multiply(x)).add(b).mod(n);
-		return lhs.equals(rhs);
-	};
-
 	ec.PointFp.prototype.toString = function () {
 		return '(' + this.getX().toBigInteger().toString() + ',' + this.getY().toBigInteger().toString() + ')';
 	};
@@ -2084,35 +3005,24 @@ if (typeof Crypto == "undefined" || !Crypto.util) {
 	*
 	* See SEC 1, section 3.2.2.1: Elliptic Curve Public Key Validation Primitive
 	*/
+	/*
+	 * Validate a public key point.
+	 * Delegates to noble-secp256k1 which enforces:
+	 *   - prefix byte canonical (02/03/04)
+	 *   - coordinates in [0, p)
+	 *   - point satisfies y² ≡ x³ + 7 (mod p)
+	 *   - point is not at infinity
+	 * For secp256k1 (cofactor h=1) every point on the curve is in the
+	 * prime-order subgroup, so no separate nQ=O check is needed.
+	 */
 	ec.PointFp.prototype.validate = function () {
-		var n = this.curve.getQ();
-
-		// Check Q != O
 		if (this.isInfinity()) {
 			throw new Error("Point is at infinity.");
 		}
-
-		// Check coordinate bounds
-		var x = this.getX().toBigInteger();
-		var y = this.getY().toBigInteger();
-		if (x.compareTo(BigInteger.ONE) < 0 || x.compareTo(n.subtract(BigInteger.ONE)) > 0) {
-			throw new Error('x coordinate out of bounds');
-		}
-		if (y.compareTo(BigInteger.ONE) < 0 || y.compareTo(n.subtract(BigInteger.ONE)) > 0) {
-			throw new Error('y coordinate out of bounds');
-		}
-
-		// Check y^2 = x^3 + ax + b (mod n)
-		if (!this.isOnCurve()) {
-			throw new Error("Point is not on the curve.");
-		}
-
-		// Check nQ = 0 (Q is a scalar multiple of G)
-		if (this.multiply(n).isInfinity()) {
-			// TODO: This check doesn't work - fix.
-			throw new Error("Point is not a scalar multiple of G.");
-		}
-
+		// Encode to compressed bytes and let noble do the authoritative check
+		var encoded = this.getEncoded(1);
+		var hex = Crypto.util.bytesToHex(encoded).toUpperCase();
+		nobleSecp256k1.Point.fromHex(hex); // throws on any invalid input
 		return true;
 	};
 
@@ -2158,33 +3068,19 @@ if (typeof Crypto == "undefined" || !Crypto.util) {
 		this.reducer.reduce(x);
 	};
 
-	// for now, work with hex strings because they're easier in JS
-	// compressed support added by bitaddr.org
+	// Decode a hex-encoded public key point.
+	// noble-secp256k1 is the authoritative decoder for all cases:
+	// decompression (02/03), uncompressed validation (04), and on-curve check.
+	// Hybrid encoding (06/07) is rejected by noble automatically.
 	ec.CurveFp.prototype.decodePointHex = function (s) {
 		var firstByte = parseInt(s.substr(0, 2), 16);
-		switch (firstByte) { // first byte
-			case 0:
-				return this.infinity;
-			case 2: // compressed
-			case 3: // compressed
-				var yTilde = firstByte & 1;
-				var xHex = s.substr(2, s.length - 2);
-				var X1 = new BigInteger(xHex, 16);
-				return this.decompressPoint(yTilde, X1);
-			case 4: // uncompressed
-			case 6: // hybrid
-			case 7: // hybrid
-				var len = (s.length - 2) / 2;
-				var xHex = s.substr(2, len);
-				var yHex = s.substr(len + 2, len);
-
-				return new ec.PointFp(this,
-					this.fromBigInteger(new BigInteger(xHex, 16)),
-					this.fromBigInteger(new BigInteger(yHex, 16)));
-
-			default: // unsupported
-				return null;
-		}
+		if (firstByte === 0) return this.infinity;
+		// Delegate to noble: handles 02/03/04, validates on-curve, rejects 06/07
+		var np = nobleSecp256k1.Point.fromHex(s.toUpperCase());
+		var xBig = new BigInteger(np.x.toString(16), 16);
+		var yBig = new BigInteger(np.y.toString(16), 16);
+		var compressed = (firstByte === 2 || firstByte === 3);
+		return new ec.PointFp(this, this.fromBigInteger(xBig), this.fromBigInteger(yBig), null, compressed);
 	};
 
 	ec.CurveFp.prototype.encodePointHex = function (p) {
@@ -2201,29 +3097,6 @@ if (typeof Crypto == "undefined" || !Crypto.util) {
 		}
 		return "04" + xHex + yHex;
 	};
-
-	/*
-	* Copyright (c) 2000 - 2011 The Legion Of The Bouncy Castle (http://www.bouncycastle.org)
-	* Ported to JavaScript by bitaddr.org
-	*
-	* Number yTilde
-	* BigInteger X1
-	*/
-	ec.CurveFp.prototype.decompressPoint = function (yTilde, X1) {
-		var x = this.fromBigInteger(X1);
-		var alpha = x.multiply(x.square().add(this.getA())).add(this.getB());
-		var beta = alpha.sqrt();
-		// if we can't find a sqrt we haven't got a point on the curve - run!
-		if (beta == null) throw new Error("Invalid point compression");
-		var betaValue = beta.toBigInteger();
-		var bit0 = betaValue.testBit(0) ? 1 : 0;
-		if (bit0 != yTilde) {
-			// Use the other root
-			beta = this.fromBigInteger(this.getQ().subtract(betaValue));
-		}
-		return new ec.PointFp(this, x, beta, null, true);
-	};
-
 
 	ec.fromHex = function (s) { return new BigInteger(s, 16); };
 
@@ -2288,14 +3161,11 @@ var defaults = {
 	
 	bytesPerChar: 2,
 	maxBytesPerChar: 6, // Math.pow(256,7) > Math.pow(2,53)
-		
+
 	// Primitive polynomials (in decimal form) for Galois Fields GF(2^n), for 2 <= n <= 30
 	// The index of each term in the array corresponds to the n for that polynomial
 	// i.e. to get the polynomial for n=16, use primitivePolynomials[16]
-	primitivePolynomials: [null,null,1,3,3,5,3,3,29,17,9,5,83,27,43,3,45,9,39,39,9,5,3,33,27,9,71,39,9,5,83],
-	
-	// warning for insecure PRNG
-	warning: 'WARNING:\nA secure random number generator was not found.\nUsing Math.random(), which is NOT cryptographically strong!'
+	primitivePolynomials: [null,null,1,3,3,5,3,3,29,17,9,5,83,27,43,3,45,9,39,39,9,5,3,33,27,9,71,39,9,5,83]
 };
 
 // Protected settings object
@@ -2318,6 +3188,7 @@ function init(bits){
 	config.bits = bits || defaults.bits;
 	config.size = Math.pow(2, config.bits);
 	config.max = config.size - 1;
+	config.unsafePRNG = false;
 	
 	// Construct the exp and log tables for multiplication.	
 	var logs = [], exps = [], x = 1, primitive = defaults.primitivePolynomials[config.bits];
@@ -2396,34 +3267,12 @@ function getRNG(){
 		}
 	}
 
-	// A totally insecure RNG!!! (except in Safari)
-	// Will produce a warning every time it is called.
-	config.unsafePRNG = true;
-	warn();
-	
-	var bitsPerNum = 32;
-	var max = Math.pow(2,bitsPerNum)-1;
-	return function(bits){
-		var elems = Math.ceil(bits/bitsPerNum);
-		var arr = [], str=null;
-		while(str===null){
-			for(var i=0; i<elems; i++){
-				arr[i] = Math.floor(Math.random() * max + 1); 
-			}
-			str = construct(bits, arr, 10, bitsPerNum);
-		}
-		return str;
-	};
+	// No CSPRNG available — abort rather than fall back to Math.random
+	throw new Error(
+		'secrets.js: No cryptographically secure RNG found. ' +
+		'Key splitting requires window.crypto.getRandomValues (browser) or crypto.randomBytes (Node.js).'
+	);
 };
-
-// Warn about using insecure rng.
-// Called when Math.random() is being used.
-function warn(){
-	global['console']['warn'](defaults.warning);
-	if(typeof global['alert'] === 'function' && config.alert){
-		global['alert'](defaults.warning);
-	}
-}
 
 // Set the PRNG to use. If no RNG function is supplied, pick a default using getRNG()
 /** @expose **/
@@ -2431,7 +3280,7 @@ exports.setRNG = function(rng, alert){
 	if(!isInited()){
 		this.init();
 	}
-	config.unsafePRNG=false;
+	config.unsafePRNG = false;
 	rng = rng || getRNG();
 	
 	// test the RNG (5 times)
@@ -2460,9 +3309,6 @@ exports.random = function(bits){
 		throw new Error('Number of bits must be an integer greater than 1.')
 	}
 	
-	if(config.unsafePRNG){
-		warn();
-	}
 	return bin2hex(config.rng(bits));
 }
 
@@ -2500,10 +3346,6 @@ exports.share = function(secret, numShares, threshold, padLength, withoutPrefix)
 	}
 	if(typeof padLength !== 'number' || padLength%1 !== 0 ){
 		throw new Error('Zero-pad length must be an integer greater than 1.');
-	}
-	
-	if(config.unsafePRNG){
-		warn();
 	}
 	
 	secret = '1' + hex2bin(secret); // append a 1 so that we can preserve the correct number of leading zeros in our secret
@@ -3542,9 +4384,11 @@ exports.init();
 		t = (t + 1) >> 1;
 		if (t > lowprimes.length) t = lowprimes.length;
 		var a = nbi();
+		var _mrBuf = new Uint8Array(1);
 		for (var i = 0; i < t; ++i) {
-			//Pick bases at random, instead of starting at 2
-			a.fromInt(lowprimes[Math.floor(Math.random() * lowprimes.length)]);
+			// Pick a random base for Miller-Rabin using CSPRNG
+			window.crypto.getRandomValues(_mrBuf);
+			a.fromInt(lowprimes[_mrBuf[0] % lowprimes.length]);
 			var y = a.modPow(r, this);
 			if (y.compareTo(BigInteger.ONE) != 0 && y.compareTo(n1) != 0) {
 				var j = 1;
@@ -5342,274 +6186,161 @@ Bitcoin.Bech32 = (function () {
 })();
 	</script>
 	<script type="text/javascript">
-//https://raw.github.com/bitcoinjs/bitcoinjs-lib/e90780d3d3b8fc0d027d2bcb38b80479902f223e/src/ecdsa.js
+/*
+ * Bitcoin ECDSA — backed by noble-secp256k1 (MIT, audited)
+ * https://github.com/paulmillr/noble-secp256k1
+ *
+ * Note: signSync() requires a synchronous HMAC-SHA256 implementation for RFC 6979
+ * nonce generation.  We bridge noble to CryptoJS (loaded before this script) below.
+ */
+
+// Bridge: provide noble with a synchronous HMAC-SHA256 using CryptoJS
+// This is required for signSync() to work (RFC 6979 deterministic nonce).
+(function () {
+	if (typeof nobleSecp256k1 !== 'undefined' && typeof Crypto !== 'undefined') {
+		nobleSecp256k1.utils.hmacSha256Sync = function (key) {
+			var msgs = Array.prototype.slice.call(arguments, 1);
+			var keyArr = Array.from(key);
+			var data = [];
+			for (var i = 0; i < msgs.length; i++) {
+				var m = msgs[i];
+				for (var j = 0; j < m.length; j++) data.push(m[j]);
+			}
+			var result = Crypto.HMAC(Crypto.SHA256, keyArr, data, { asBytes: true });
+			return new Uint8Array(result);
+		};
+	}
+})();
+
 Bitcoin.ECDSA = (function () {
 	var ecparams = EllipticCurve.getSECCurveByName("secp256k1");
-	var rng = new SecureRandom();
 
-	var P_OVER_FOUR = null;
+	// BigInteger private key → 32-byte Uint8Array
+	function privToBytes(bi) {
+		var bytes = bi.toByteArrayUnsigned();
+		while (bytes.length < 32) bytes.unshift(0);
+		var ua = new Uint8Array(32);
+		for (var i = 0; i < 32; i++) ua[i] = bytes[i];
+		return ua;
+	}
 
-	function implShamirsTrick(P, k, Q, l) {
-		var m = Math.max(k.bitLength(), l.bitLength());
-		var Z = P.add2D(Q);
-		var R = P.curve.getInfinity();
+	// Plain byte array or Uint8Array → Uint8Array
+	function toUint8Array(arr) {
+		if (arr instanceof Uint8Array) return arr;
+		var ua = new Uint8Array(arr.length);
+		for (var i = 0; i < arr.length; i++) ua[i] = arr[i];
+		return ua;
+	}
 
-		for (var i = m - 1; i >= 0; --i) {
-			R = R.twice2D();
-
-			R.z = BigInteger.ONE;
-
-			if (k.testBit(i)) {
-				if (l.testBit(i)) {
-					R = R.add2D(Z);
-				} else {
-					R = R.add2D(P);
-				}
-			} else {
-				if (l.testBit(i)) {
-					R = R.add2D(Q);
-				}
-			}
-		}
-
-		return R;
-	};
+	// Byte array → upper-case hex string
+	function toHex(arr) {
+		return Crypto.util.bytesToHex(arr instanceof Uint8Array ? Array.from(arr) : arr).toUpperCase();
+	}
 
 	var ECDSA = {
-		getBigRandom: function (limit) {
-			return new BigInteger(limit.bitLength(), rng)
-				.mod(limit.subtract(BigInteger.ONE))
-				.add(BigInteger.ONE);
-		},
+
+		/*
+		 * Sign a hash with a private key.
+		 * Uses noble signSync: deterministic RFC 6979 nonce, constant-time scalar
+		 * multiplication, low-s normalisation (canonical = true).
+		 * der:false requests the compact 64-byte (r||s) format for consistent parsing.
+		 */
 		sign: function (hash, priv) {
-			var d = priv;
-			var n = ecparams.getN();
-			var e = BigInteger.fromByteArrayUnsigned(hash);
-
-			do {
-				var k = ECDSA.getBigRandom(n);
-				var G = ecparams.getG();
-				var Q = G.multiply(k);
-				var r = Q.getX().toBigInteger().mod(n);
-			} while (r.compareTo(BigInteger.ZERO) <= 0);
-
-			var s = k.modInverse(n).multiply(e.add(d.multiply(r))).mod(n);
-
+			var privBytes = privToBytes(priv);
+			var hashBytes = toUint8Array(hash);
+			var compact = nobleSecp256k1.signSync(hashBytes, privBytes, { canonical: true, der: false });
+			var rArr = Array.from(compact.slice(0, 32));
+			var sArr = Array.from(compact.slice(32, 64));
+			var r = BigInteger.fromByteArrayUnsigned(rArr);
+			var s = BigInteger.fromByteArrayUnsigned(sArr);
 			return ECDSA.serializeSig(r, s);
 		},
 
+		/*
+		 * Verify a DER or compact signature against a hash and a public key.
+		 * Noble validates the public key (prefix, coordinates, on-curve) before
+		 * verifying — prevents invalid-curve and point-at-infinity attacks.
+		 */
 		verify: function (hash, sig, pubkey) {
-			var r, s;
+			var sigBytes, pubBytes;
+
 			if (Bitcoin.Util.isArray(sig)) {
-				var obj = ECDSA.parseSig(sig);
-				r = obj.r;
-				s = obj.s;
+				sigBytes = sig;
 			} else if ("object" === typeof sig && sig.r && sig.s) {
-				r = sig.r;
-				s = sig.s;
+				sigBytes = ECDSA.serializeSig(sig.r, sig.s);
 			} else {
 				throw "Invalid value for signature";
 			}
 
-			var Q;
-			if (pubkey instanceof ec.PointFp) {
-				Q = pubkey;
+			if (pubkey instanceof EllipticCurve.PointFp) {
+				pubBytes = pubkey.getEncoded(pubkey.compressed ? 1 : 0);
 			} else if (Bitcoin.Util.isArray(pubkey)) {
-				Q = EllipticCurve.PointFp.decodeFrom(ecparams.getCurve(), pubkey);
+				pubBytes = pubkey;
 			} else {
 				throw "Invalid format for pubkey value, must be byte array or ec.PointFp";
 			}
-			var e = BigInteger.fromByteArrayUnsigned(hash);
 
-			return ECDSA.verifyRaw(e, r, s, Q);
+			try {
+				return nobleSecp256k1.verify(toHex(sigBytes), toHex(hash), toHex(pubBytes));
+			} catch (e) {
+				return false;
+			}
 		},
 
-		verifyRaw: function (e, r, s, Q) {
-			var n = ecparams.getN();
-			var G = ecparams.getG();
-
-			if (r.compareTo(BigInteger.ONE) < 0 ||
-          r.compareTo(n) >= 0)
-				return false;
-
-			if (s.compareTo(BigInteger.ONE) < 0 ||
-          s.compareTo(n) >= 0)
-				return false;
-
-			var c = s.modInverse(n);
-
-			var u1 = e.multiply(c).mod(n);
-			var u2 = r.multiply(c).mod(n);
-
-			// TODO(!!!): For some reason Shamir's trick isn't working with
-			// signed message verification!? Probably an implementation
-			// error!
-			//var point = implShamirsTrick(G, u1, Q, u2);
-			var point = G.multiply(u1).add(Q.multiply(u2));
-
-			var v = point.getX().toBigInteger().mod(n);
-
-			return v.equals(r);
-		},
-
-		/**
-		* Serialize a signature into DER format.
-		*
-		* Takes two BigIntegers representing r and s and returns a byte array.
-		*/
+		/*
+		 * Serialize (r, s) BigIntegers into a DER-encoded byte array.
+		 */
 		serializeSig: function (r, s) {
 			var rBa = r.toByteArraySigned();
 			var sBa = s.toByteArraySigned();
 
 			var sequence = [];
-			sequence.push(0x02); // INTEGER
+			sequence.push(0x02);
 			sequence.push(rBa.length);
 			sequence = sequence.concat(rBa);
 
-			sequence.push(0x02); // INTEGER
+			sequence.push(0x02);
 			sequence.push(sBa.length);
 			sequence = sequence.concat(sBa);
 
 			sequence.unshift(sequence.length);
 			sequence.unshift(0x30); // SEQUENCE
-
 			return sequence;
 		},
 
-		/**
-		* Parses a byte array containing a DER-encoded signature.
-		*
-		* This function will return an object of the form:
-		* 
-		* {
-		*   r: BigInteger,
-		*   s: BigInteger
-		* }
-		*/
+		/*
+		 * Parse a DER-encoded signature byte array into {r, s} BigIntegers.
+		 */
 		parseSig: function (sig) {
-			var cursor;
-			if (sig[0] != 0x30)
-				throw new Error("Signature not a valid DERSequence");
-
-			cursor = 2;
-			if (sig[cursor] != 0x02)
-				throw new Error("First element in signature must be a DERInteger"); ;
-			var rBa = sig.slice(cursor + 2, cursor + 2 + sig[cursor + 1]);
-
-			cursor += 2 + sig[cursor + 1];
-			if (sig[cursor] != 0x02)
-				throw new Error("Second element in signature must be a DERInteger");
-			var sBa = sig.slice(cursor + 2, cursor + 2 + sig[cursor + 1]);
-
-			cursor += 2 + sig[cursor + 1];
-
-			//if (cursor != sig.length)
-			//	throw new Error("Extra bytes in signature");
-
-			var r = BigInteger.fromByteArrayUnsigned(rBa);
-			var s = BigInteger.fromByteArrayUnsigned(sBa);
-
-			return { r: r, s: s };
+			if (sig[0] !== 0x30) throw new Error("Signature not a valid DERSequence");
+			var cursor = 2;
+			if (sig[cursor] !== 0x02) throw new Error("First element in signature must be a DERInteger");
+			var rLen = sig[cursor + 1];
+			var rBa = sig.slice(cursor + 2, cursor + 2 + rLen);
+			cursor += 2 + rLen;
+			if (sig[cursor] !== 0x02) throw new Error("Second element in signature must be a DERInteger");
+			var sLen = sig[cursor + 1];
+			var sBa = sig.slice(cursor + 2, cursor + 2 + sLen);
+			return {
+				r: BigInteger.fromByteArrayUnsigned(rBa),
+				s: BigInteger.fromByteArrayUnsigned(sBa)
+			};
 		},
 
-		parseSigCompact: function (sig) {
-			if (sig.length !== 65) {
-				throw "Signature has the wrong length";
-			}
-
-			// Signature is prefixed with a type byte storing three bits of
-			// information.
-			var i = sig[0] - 27;
-			if (i < 0 || i > 7) {
-				throw "Invalid signature type";
-			}
-
-			var n = ecparams.getN();
-			var r = BigInteger.fromByteArrayUnsigned(sig.slice(1, 33)).mod(n);
-			var s = BigInteger.fromByteArrayUnsigned(sig.slice(33, 65)).mod(n);
-
-			return { r: r, s: s, i: i };
-		},
-
-		/**
-		* Recover a public key from a signature.
-		*
-		* See SEC 1: Elliptic Curve Cryptography, section 4.1.6, "Public
-		* Key Recovery Operation".
-		*
-		* http://www.secg.org/download/aid-780/sec1-v2.pdf
-		*/
+		/*
+		 * Recover a public key from an ECDSA signature (SEC 1 §4.1.6).
+		 * Delegates to noble-secp256k1 for the actual recovery and validation.
+		 */
 		recoverPubKey: function (r, s, hash, i) {
-			// The recovery parameter i has two bits.
-			i = i & 3;
-
-			// The less significant bit specifies whether the y coordinate
-			// of the compressed point is even or not.
-			var isYEven = i & 1;
-
-			// The more significant bit specifies whether we should use the
-			// first or second candidate key.
-			var isSecondKey = i >> 1;
-
-			var n = ecparams.getN();
-			var G = ecparams.getG();
-			var curve = ecparams.getCurve();
-			var p = curve.getQ();
-			var a = curve.getA().toBigInteger();
-			var b = curve.getB().toBigInteger();
-
-			// We precalculate (p + 1) / 4 where p is if the field order
-			if (!P_OVER_FOUR) {
-				P_OVER_FOUR = p.add(BigInteger.ONE).divide(BigInteger.valueOf(4));
-			}
-
-			// 1.1 Compute x
-			var x = isSecondKey ? r.add(n) : r;
-
-			// 1.3 Convert x to point
-			var alpha = x.multiply(x).multiply(x).add(a.multiply(x)).add(b).mod(p);
-			var beta = alpha.modPow(P_OVER_FOUR, p);
-
-			var xorOdd = beta.isEven() ? (i % 2) : ((i + 1) % 2);
-			// If beta is even, but y isn't or vice versa, then convert it,
-			// otherwise we're done and y == beta.
-			var y = (beta.isEven() ? !isYEven : isYEven) ? beta : p.subtract(beta);
-
-			// 1.4 Check that nR is at infinity
-			var R = new EllipticCurve.PointFp(curve,
-                            curve.fromBigInteger(x),
-                            curve.fromBigInteger(y));
-			R.validate();
-
-			// 1.5 Compute e from M
-			var e = BigInteger.fromByteArrayUnsigned(hash);
-			var eNeg = BigInteger.ZERO.subtract(e).mod(n);
-
-			// 1.6 Compute Q = r^-1 (sR - eG)
-			var rInv = r.modInverse(n);
-			var Q = implShamirsTrick(R, s, G, eNeg).multiply(rInv);
-
-			Q.validate();
-			if (!ECDSA.verifyRaw(e, r, s, Q)) {
-				throw "Pubkey recovery unsuccessful";
-			}
-
+			var recovery = i & 3;
+			var sigBytes = ECDSA.serializeSig(r, s);
+			var pubBytes = nobleSecp256k1.recoverPublicKey(toHex(hash), toHex(sigBytes), recovery, false);
+			if (!pubBytes) throw "Pubkey recovery unsuccessful";
 			var pubKey = new Bitcoin.ECKey();
-			pubKey.pub = Q;
+			pubKey.pub = ecparams.getCurve().decodePointHex(toHex(Array.from(pubBytes)));
 			return pubKey;
 		},
 
-		/**
-		* Calculate pubkey extraction parameter.
-		*
-		* When extracting a pubkey from a signature, we have to
-		* distinguish four different cases. Rather than putting this
-		* burden on the verifier, Bitcoin includes a 2-bit value with the
-		* signature.
-		*
-		* This function simply tries all four cases and returns the value
-		* that resulted in a successful pubkey recovery.
-		*/
 		calcPubkeyRecoveryParam: function (address, r, s, hash) {
 			for (var i = 0; i < 4; i++) {
 				try {
@@ -5625,6 +6356,7 @@ Bitcoin.ECDSA = (function () {
 
 	return ECDSA;
 })();
+
 	</script>
 	<script type="text/javascript">
 Bitcoin.KeyPool = (function () {
@@ -5724,9 +6456,11 @@ Bitcoin.ECKey = (function () {
 
 	var ECKey = function (input) {
 		if (!input) {
-			// Generate new key
-			var n = ecparams.getN();
-			this.priv = ECDSA.getBigRandom(n);
+			// Generate a new random private key using noble-secp256k1.
+			// utils.randomPrivateKey() uses window.crypto.getRandomValues and
+			// rejects values outside [1, n-1] — no BigInteger RNG needed.
+			var privBytes = nobleSecp256k1.utils.randomPrivateKey();
+			this.priv = BigInteger.fromByteArrayUnsigned(Array.from(privBytes));
 		} else if (input instanceof BigInteger) {
 			// Input is a private key value
 			this.priv = input;
@@ -5735,26 +6469,20 @@ Bitcoin.ECKey = (function () {
 			this.priv = BigInteger.fromByteArrayUnsigned(input);
 		} else if ("string" == typeof input) {
 			var bytes = null;
-			try{
+			try {
 				if (ECKey.isWalletImportFormat(input)) {
 					bytes = ECKey.decodeWalletImportFormat(input);
 				} else if (ECKey.isCompressedWalletImportFormat(input)) {
 					bytes = ECKey.decodeCompressedWalletImportFormat(input);
 					this.compressed = true;
-				} else if (ECKey.isMiniFormat(input)) {
-					bytes = Crypto.SHA256(input, { asBytes: true });
 				} else if (ECKey.isHexFormat(input)) {
 					bytes = Crypto.util.hexToBytes(input);
-				} else if (ECKey.isBase64Format(input)) {
-					bytes = Crypto.util.base64ToBytes(input);
 				}
 			} catch (exc1) {
 				this.setError(exc1);
 			}
 
-			if (ECKey.isBase6Format(input)) {
-				this.priv = new BigInteger(input, 6);
-			} else if (bytes == null || bytes.length != 32) {
+			if (bytes == null || bytes.length != 32) {
 				this.priv = null;
 			} else {
 				// Prepend zero byte to prevent interpretation as negative integer
@@ -5764,14 +6492,16 @@ Bitcoin.ECKey = (function () {
 
 		this.compressed = (this.compressed == undefined) ? !!ECKey.compressByDefault : this.compressed;
 		try {
-			// check not zero
-			if (this.priv != null && BigInteger.ZERO.compareTo(this.priv) == 0) this.setError("Error: BigInteger equal to zero.");
-			// valid range [0x1, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364140])
-			var hexKeyRangeLimit = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364140";
-			var rangeLimitBytes = Crypto.util.hexToBytes(hexKeyRangeLimit);
-			var limitBigInt = BigInteger.fromByteArrayUnsigned(rangeLimitBytes);
-			if (this.priv != null && limitBigInt.compareTo(this.priv) < 0) this.setError("Error: BigInteger outside of curve range.")
-
+			if (this.priv != null) {
+				// Validate using noble: checks 0 < k < n (secp256k1 order)
+				var privBytes = this.priv.toByteArrayUnsigned();
+				while (privBytes.length < 32) privBytes.unshift(0);
+				var ua = new Uint8Array(32);
+				for (var i = 0; i < 32; i++) ua[i] = privBytes[i];
+				if (!nobleSecp256k1.utils.isValidPrivateKey(ua)) {
+					this.setError("Error: private key is outside the valid secp256k1 range [1, n-1].");
+				}
+			}
 			if (this.priv != null) {
 				KeyPool.push(this);
 			}
@@ -5809,50 +6539,37 @@ Bitcoin.ECKey = (function () {
 	* Return public key as a byte array in DER encoding
 	*/
 	ECKey.prototype.getPub = function () {
-		if (this.compressed) {
-			if (this.pubComp) return this.pubComp;
-			return this.pubComp = this.getPubPoint().getEncoded(1);
-		} else {
-			if (this.pubUncomp) return this.pubUncomp;
-			return this.pubUncomp = this.getPubPoint().getEncoded(0);
-		}
+		return this.getPubPoint().getEncoded(this.compressed ? 1 : 0);
 	};
 
 	/**
 	* Return public point as ECPoint object.
+	* Uses noble-secp256k1 for point multiplication (precomputed, window-based,
+	* constant-time) and reconstructs an EllipticCurve.PointFp for API compatibility.
 	*/
 	ECKey.prototype.getPubPoint = function () {
 		if (!this.pubPoint) {
-			this.pubPoint = ecparams.getG().multiply(this.priv);
+			// Derive public key bytes via noble (compressed = true for the Point constructor)
+			var privBytes = this.priv.toByteArrayUnsigned();
+			while (privBytes.length < 32) privBytes.unshift(0);
+			var ua = new Uint8Array(32);
+			for (var i = 0; i < 32; i++) ua[i] = privBytes[i];
+			// Get uncompressed public key bytes (65 bytes: 04 || x || y)
+			var pubBytesUncomp = nobleSecp256k1.getPublicKey(ua, false);
+			var pubHex = Crypto.util.bytesToHex(Array.from(pubBytesUncomp)).toUpperCase();
+			// Decode into PointFp (decodePointHex now validates on-curve via noble)
+			this.pubPoint = ecparams.getCurve().decodePointHex(pubHex);
 			this.pubPoint.compressed = this.compressed;
 		}
 		return this.pubPoint;
 	};
 
 	ECKey.prototype.getPubKeyHex = function () {
-		if (this.compressed) {
-			if (this.pubKeyHexComp) return this.pubKeyHexComp;
-			return this.pubKeyHexComp = Crypto.util.bytesToHex(this.getPub()).toString().toUpperCase();
-		} else {
-			if (this.pubKeyHexUncomp) return this.pubKeyHexUncomp;
-			return this.pubKeyHexUncomp = Crypto.util.bytesToHex(this.getPub()).toString().toUpperCase();
-		}
+		return Crypto.util.bytesToHex(this.getPub()).toString().toUpperCase();
 	};
 
-	/**
-	* Get the pubKeyHash for this key.
-	*
-	* This is calculated as RIPE160(SHA256([encoded pubkey])) and returned as
-	* a byte array.
-	*/
 	ECKey.prototype.getPubKeyHash = function () {
-		if (this.compressed) {
-			if (this.pubKeyHashComp) return this.pubKeyHashComp;
-			return this.pubKeyHashComp = Bitcoin.Util.sha256ripe160(this.getPub());
-		} else {
-			if (this.pubKeyHashUncomp) return this.pubKeyHashUncomp;
-			return this.pubKeyHashUncomp = Bitcoin.Util.sha256ripe160(this.getPub());
-		}
+		return Bitcoin.Util.sha256ripe160(this.getPub());
 	};
 
 	ECKey.prototype.getBitcoinAddress = function () {
@@ -5908,25 +6625,24 @@ Bitcoin.ECKey = (function () {
 		var compPub = this.getPub().slice();
 		this.setCompressed(savedComp);
 
-		// lift_x: force even-Y variant by setting prefix to 0x02
+		// lift_x: force even-Y variant (key-path spend uses x-only internal key)
 		compPub[0] = 0x02;
-		var P = ecparams.getCurve().decodePointHex(Crypto.util.bytesToHex(compPub).toUpperCase());
+		var pubHex = Crypto.util.bytesToHex(compPub).toUpperCase();
 
-		// x-only internal key (32 bytes, big-endian)
-		var xBytes = P.getX().toBigInteger().toByteArrayUnsigned();
-		while (xBytes.length < 32) xBytes.unshift(0);
+		// x-only internal key bytes (32 bytes)
+		var xBytes = compPub.slice(1);
 
 		// tagged_hash("TapTweak", xBytes) per BIP340
 		var tagHash = Crypto.SHA256("TapTweak", { asBytes: true });
 		var tweakBytes = Crypto.SHA256(tagHash.concat(tagHash).concat(xBytes), { asBytes: true });
-		var tweakInt = BigInteger.fromByteArrayUnsigned(tweakBytes);
+		var tweakHex = Crypto.util.bytesToHex(tweakBytes);
 
-		// Output key Q = P + tweak*G
-		var Q = P.add(ecparams.getG().multiply(tweakInt));
+		// Output key Q = P + tweak*G via noble (constant-time, audited)
+		var nobleP = nobleSecp256k1.Point.fromHex(pubHex);
+		var nobleQ = nobleP.add(nobleSecp256k1.Point.BASE.multiply(BigInt('0x' + tweakHex)));
 
 		// Witness program = x-coordinate of Q (32 bytes)
-		var qXBytes = Q.getX().toBigInteger().toByteArrayUnsigned();
-		while (qXBytes.length < 32) qXBytes.unshift(0);
+		var qXBytes = Crypto.util.hexToBytes(nobleQ.x.toString(16).padStart(64, '0'));
 
 		return Bitcoin.Bech32.segwitAddress('bc', 1, qXBytes);
 	};
@@ -5957,14 +6673,9 @@ Bitcoin.ECKey = (function () {
 		return privWif;
 	};
 
-	// Private Key Hex Format 
+	// Private Key Hex Format
 	ECKey.prototype.getBitcoinHexFormat = function () {
 		return Crypto.util.bytesToHex(this.getBitcoinPrivateKeyByteArray()).toString().toUpperCase();
-	};
-
-	// Private Key Base64 Format 
-	ECKey.prototype.getBitcoinBase64Format = function () {
-		return Crypto.util.bytesToBase64(this.getBitcoinPrivateKeyByteArray());
 	};
 
 	ECKey.prototype.getBitcoinPrivateKeyByteArray = function () {
@@ -5977,17 +6688,10 @@ Bitcoin.ECKey = (function () {
 	};
 
 	ECKey.prototype.toString = function (format) {
-		format = format || "";
-		if (format.toString().toLowerCase() == "base64" || format.toString().toLowerCase() == "b64") {
-			return this.getBitcoinBase64Format();
-		}
-		// Wallet Import Format
-		else if (format.toString().toLowerCase() == "wif") {
+		if (format && format.toString().toLowerCase() == "wif") {
 			return this.getBitcoinWalletImportFormat();
 		}
-		else {
-			return this.getBitcoinHexFormat();
-		}
+		return this.getBitcoinHexFormat();
 	};
 
 	ECKey.prototype.sign = function (hash) {
@@ -6059,29 +6763,6 @@ Bitcoin.ECKey = (function () {
 		return (ECKey.privateKeyPrefix == 0x80) ?
 							(/^[LK][123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{51}$/.test(key)) :
 							(/^c[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{51}$/.test(key));
-	};
-
-	// 44 characters
-	ECKey.isBase64Format = function (key) {
-		key = key.toString();
-		return (/^[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789=+\/]{44}$/.test(key));
-	};
-
-	// 99 characters, 1=1, if using dice convert 6 to 0
-	ECKey.isBase6Format = function (key) {
-		key = key.toString();
-		return (/^[012345]{99}$/.test(key));
-	};
-
-	// 22, 26 or 30 characters, always starts with an 'S'
-	ECKey.isMiniFormat = function (key) {
-		key = key.toString();
-		var validChars22 = /^S[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{21}$/.test(key);
-		var validChars26 = /^S[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{25}$/.test(key);
-		var validChars30 = /^S[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{29}$/.test(key);
-		var testBytes = Crypto.SHA256(key + "?", { asBytes: true });
-
-		return ((testBytes[0] === 0x00 || testBytes[0] === 0x01) && (validChars22 || validChars26 || validChars30));
 	};
 
 	return ECKey;
@@ -6586,7 +7267,7 @@ Bitcoin.Util = {
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { height: 100%; }
 body {
-    min-height: 100vh; /* ensures onmousemove covers the full viewport during seeding */
+    min-height: 100vh;
     font-family: var(--font);
     background: var(--bg);
     color: var(--text);
@@ -6656,69 +7337,6 @@ hr { margin: 20px 0; border: none; border-top: 1px solid var(--border); }
 #langselect:hover { border-color: var(--text-muted); background: var(--bg-hover); }
 #langselect:focus { border-color: var(--accent); }
 
-/* ── Entropy Seeder ───────────────────────────────────────────────────── */
-#seedpoolarea { display: none; }
-#seedpooldisplay { font-family: var(--font-mono); font-size: 0.75em; width: 100%; padding: 10px; word-wrap: break-word; color: var(--text-muted); }
-.seedpoint { width: 5px; height: 5px; display: block; border-radius: 50%; background: var(--accent); position: absolute; z-index: 10; }
-#generate {
-    font-family: var(--font-mono); font-size: 1em; min-height: 260px; text-align: left;
-    position: relative; padding: 24px 24px 20px; clear: both;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-top: none;
-    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-    display: flex; flex-direction: column; gap: 14px;
-}
-
-/* Title row */
-#generatetitle { font-size: 1.05em; color: var(--text); font-weight: 600; letter-spacing: 0.02em; }
-
-/* Mouse-move label row */
-#entropylabelrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-#entropylabelrow #generatelabelmovemouse { color: var(--text-muted); font-size: 0.88em; flex: 1; }
-#mousemovelimit {
-    font-size: 0.88em; font-weight: 700; color: var(--accent);
-    background: var(--accent-dim); border: 1px solid var(--accent);
-    border-radius: 20px; padding: 2px 10px; white-space: nowrap; min-width: 3.5em;
-    text-align: center; transition: color var(--transition);
-}
-
-/* Progress bar */
-#entropyprogressbar {
-    width: 100%; height: 10px;
-    background: var(--bg-hover);
-    border-radius: 6px;
-    overflow: hidden;
-    position: relative;
-}
-#entropyprogressfill {
-    /* Always full width — we scale it; avoids sub-pixel clip artifacts at 100% */
-    height: 100%; width: 100%;
-    background: linear-gradient(90deg, var(--accent) 0%, #ffb347 100%);
-    transform: scaleX(0);
-    transform-origin: left center;
-    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    will-change: transform;
-}
-/* Shimmer overlay */
-#entropyprogressfill::after {
-    content: '';
-    position: absolute; inset: 0;
-    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.22) 50%, transparent 100%);
-    background-size: 200% 100%;
-    animation: shimmer 1.6s linear infinite;
-}
-@keyframes shimmer { from { background-position: -200% 0; } to { background-position: 200% 0; } }
-
-/* Keyboard input row */
-#entropykeyrow { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
-#entropykeyrow #generatelabelkeypress { color: var(--text-muted); font-size: 0.85em; }
-#generatekeyinput {
-    background: var(--bg-input); color: var(--text); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 7px 10px; font-family: var(--font-mono);
-    font-size: 0.9em; position: relative; z-index: 20; width: min(300px, 100%);
-}
-#generatekeyinput:focus { outline: none; border-color: var(--accent); }
 #testnet { display: none; background: #f59e0b; color: #000; border-radius: var(--radius); font-weight: 700; padding: 10px; margin: 0 auto 16px; }
 
 /* ── Tab Navigation ───────────────────────────────────────────────────── */
@@ -7119,7 +7737,6 @@ input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; p
     #detailarea .privqr .item.right { width: 310px; }
     #detailarea .privqr .item { width: 285px; }
     #detailarea .notes { display: none; }
-    #seedpoolarea { display: none; }
     .faq { display: none; }
     body { background: #fff; color: #000; }
     .walletarea { border: none; background: none; }
@@ -7127,7 +7744,7 @@ input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; p
 
 	</style>
 </head>
-<body onclick="SecureRandom.seedTime();" onmousemove="ninja.seeder.seed(event);">
+<body>
 	<div id="busyblock"></div>
 	<div id="donationmodal" onclick="ninja.donation.hide();">
 		<div id="donationbox" onclick="event.stopPropagation();">
@@ -7162,7 +7779,6 @@ input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; p
 		</div>
 		<svg id="logo" width="210.43205mm" height="40.519382mm" viewBox="0 0 210.43205 40.519383" xmlns="http://www.w3.org/2000/svg"><g transform="translate(30.904418,-101.82565)"><g transform="matrix(0.26458333,0,0,0.26458333,-48.537774,85.043672)"><g transform="translate(104,140.9948)"><g transform="matrix(2.3928527,0,0,2.3928527,-37.348356,-77.572615)"><path fill="#f7931a" d="M 63.033,39.744 C 58.759,56.887 41.396,67.32 24.251,63.045 7.113,58.771 -3.32,41.407 0.956,24.265 5.228,7.12 22.591,-3.314 39.731,0.96 56.875,5.234 67.307,22.6 63.033,39.744 Z"/><path fill="#ffffff" d="M 46.103,27.444 C 46.74,23.186 43.498,20.897 39.065,19.37 l 1.438,-5.768 -3.511,-0.875 -1.4,5.616 c -0.923,-0.23 -1.871,-0.447 -2.813,-0.662 l 1.41,-5.653 -3.509,-0.875 -1.439,5.766 c -0.764,-0.174 -1.514,-0.346 -2.242,-0.527 l 0.004,-0.018 -4.842,-1.209 -0.934,3.75 c 0,0 2.605,0.597 2.55,0.634 1.422,0.355 1.679,1.296 1.636,2.042 l -1.638,6.571 c 0.098,0.025 0.225,0.061 0.365,0.117 -0.117,-0.029 -0.242,-0.061 -0.371,-0.092 l -2.296,9.205 c -0.174,0.432 -0.615,1.08 -1.609,0.834 0.035,0.051 -2.552,-0.637 -2.552,-0.637 l -1.743,4.019 4.569,1.139 c 0.85,0.213 1.683,0.436 2.503,0.646 l -1.453,5.834 3.507,0.875 1.439,-5.772 c 0.958,0.26 1.888,0.5 2.798,0.726 l -1.434,5.745 3.511,0.875 1.453,-5.823 c 5.987,1.133 10.489,0.676 12.384,-4.739 1.527,-4.36 -0.076,-6.875 -3.226,-8.515 2.294,-0.529 4.022,-2.038 4.483,-5.155 z m -8.022,11.249 c -1.085,4.36 -8.426,2.003 -10.806,1.412 l 1.928,-7.729 c 2.38,0.594 10.012,1.77 8.878,6.317 z m 1.086,-11.312 c -0.99,3.966 -7.1,1.951 -9.082,1.457 l 1.748,-7.01 c 1.982,0.494 8.365,1.416 7.334,5.553 z"/></g></g><g transform="translate(250)"><g style="font-weight:700;font-size:110px;font-family:Inter, Nunito, Arial, sans-serif;letter-spacing:0" aria-label="BitAddr.org"><path style="fill:#f7931a" d="M 8.0566406,97.259766 H 39.53125 q 9.345703,0 13.911133,0.805664 4.61914,0.751953 8.217773,3.22266 3.652344,2.4707 6.069336,6.60644 2.416992,4.08203 2.416992,9.18457 0,5.53223 -3.007812,10.15137 -2.954102,4.61914 -8.056641,6.92871 7.197266,2.09473 11.064453,7.14355 3.867188,5.04883 3.867188,11.87012 0,5.3711 -2.524414,10.47363 -2.470703,5.04883 -6.821289,8.11036 -4.296875,3.00781 -10.634766,3.70605 Q 50.058594,175.89258 34.858398,176 H 8.0566406 Z M 23.955078,110.36523 v 18.20801 H 34.375 q 9.291992,0 11.547852,-0.26855 4.082031,-0.4834 6.391601,-2.79297 2.363281,-2.36328 2.363281,-6.17676 0,-3.65234 -2.041015,-5.9082 -1.987305,-2.30957 -5.961914,-2.79297 -2.363282,-0.26856 -13.588868,-0.26856 z m 0,31.31348 v 21.05469 h 14.716797 q 8.59375,0 10.90332,-0.4834 3.544922,-0.64453 5.747071,-3.11523 2.255859,-2.52442 2.255859,-6.71387 0,-3.54492 -1.71875,-6.01563 -1.71875,-2.4707 -4.995117,-3.59863 -3.222656,-1.12793 -14.072266,-1.12793 z m 63.378906,-30.4541 V 97.259766 h 15.092776 v 13.964844 z m 0,64.77539 V 118.95898 H 102.42676 V 176 Z m 56.718746,-57.04102 v 12.03125 h -10.3125 v 22.98829 q 0,6.98242 0.26856,8.16406 0.32226,1.12793 1.34277,1.87988 1.07422,0.75195 2.57813,0.75195 2.09472,0 6.06933,-1.45019 l 1.28907,11.70898 q -5.26368,2.25586 -11.92383,2.25586 -4.08203,0 -7.3584,-1.34277 -3.27637,-1.39649 -4.83398,-3.54492 -1.50391,-2.20215 -2.09473,-5.90821 -0.4834,-2.63183 -0.4834,-10.63476 v -24.86817 h -6.92871 v -12.03125 h 6.92871 v -11.333 l 15.14648,-8.808597 v 20.141597 z"/><path style="fill:#3dbda7" d="m 233.63965,176 h -17.29492 l -6.875,-17.88574 H 177.99512 L 171.49609,176 H 154.63086 L 185.2998,97.259766 h 16.81153 z m -29.27246,-31.15234 -10.84961,-29.21875 -10.63477,29.21875 z M 294.2793,176 h -14.01856 v -8.37891 q -3.49121,4.8877 -8.27148,7.30469 -4.72656,2.36328 -9.56055,2.36328 -9.8291,0 -16.86523,-7.89551 -6.98243,-7.94921 -6.98243,-22.1289 0,-14.50195 6.82129,-22.02149 6.82129,-7.57324 17.24121,-7.57324 9.56055,0 16.54297,7.94922 V 97.259766 h 15.09278 z m -40.28321,-29.75586 q 0,9.13086 2.52442,13.21289 3.65234,5.9082 10.20508,5.9082 5.20996,0 8.8623,-4.40429 3.65234,-4.45801 3.65234,-13.2666 0,-9.82911 -3.54492,-14.12598 -3.54492,-4.35059 -9.07715,-4.35059 -5.37109,0 -9.02343,4.29688 -3.59864,4.24316 -3.59864,12.72949 z M 361.47168,176 h -14.01856 v -8.37891 q -3.49121,4.8877 -8.27148,7.30469 -4.72656,2.36328 -9.56055,2.36328 -9.8291,0 -16.86523,-7.89551 -6.98242,-7.94921 -6.98242,-22.1289 0,-14.50195 6.82129,-22.02149 6.82129,-7.57324 17.24121,-7.57324 9.56054,0 16.54297,7.94922 V 97.259766 h 15.09277 z m -40.2832,-29.75586 q 0,9.13086 2.52441,13.21289 3.65234,5.9082 10.20508,5.9082 5.20996,0 8.8623,-4.40429 3.65235,-4.45801 3.65235,-13.2666 0,-9.82911 -3.54492,-14.12598 -3.54493,-4.35059 -9.07715,-4.35059 -5.3711,0 -9.02344,4.29688 -3.59863,4.24316 -3.59863,12.72949 z M 390.79785,176 h -15.09277 v -57.04102 h 14.01855 v 8.11036 q 3.59864,-5.74707 6.44532,-7.57325 2.90039,-1.82617 6.55273,-1.82617 5.15625,0 9.93652,2.84668 l -4.67285,13.15918 q -3.81348,-2.4707 -7.08984,-2.4707 -3.16895,0 -5.3711,1.77246 -2.20214,1.71875 -3.49121,6.28418 -1.23535,4.56543 -1.23535,19.12109 z"/><path style="fill:#2e9e8a" d="M 419.15723,176 V 160.90723 H 434.25 V 176 Z m 27.07031,-29.32617 q 0,-7.51953 3.70605,-14.55567 3.70606,-7.03613 10.47364,-10.74218 6.82129,-3.70606 15.20019,-3.70606 12.94434,0 21.21582,8.43262 8.27149,8.37891 8.27149,21.21582 0,12.94434 -8.37891,21.48437 -8.3252,8.48633 -21.00098,8.48633 -7.84179,0 -14.98535,-3.54492 -7.08984,-3.54492 -10.7959,-10.36621 -3.70605,-6.875 -3.70605,-16.7041 z m 15.46875,0.80566 q 0,8.48633 4.02832,12.99805 4.02832,4.51172 9.93652,4.51172 5.90821,0 9.88282,-4.51172 4.02832,-4.51172 4.02832,-13.10547 0,-8.37891 -4.02832,-12.89062 -3.97461,-4.51172 -9.88282,-4.51172 -5.9082,0 -9.93652,4.51172 -4.02832,4.51171 -4.02832,12.99804 z M 531.35937,176 H 516.2666 v -57.04102 h 14.01856 v 8.11036 q 3.59863,-5.74707 6.44531,-7.57325 2.90039,-1.82617 6.55273,-1.82617 5.15625,0 9.93653,2.84668 l -4.67286,13.15918 q -3.81347,-2.4707 -7.08984,-2.4707 -3.16894,0 -5.37109,1.77246 -2.20215,1.71875 -3.49121,6.28418 -1.23536,4.56543 -1.23536,19.12109 z m 26.9629,3.75977 17.24121,2.09472 q 0.42968,3.00781 1.9873,4.13574 2.14844,1.61133 6.76758,1.61133 5.9082,0 8.8623,-1.77246 1.98731,-1.18164 3.00782,-3.81348 0.69824,-1.87988 0.69824,-6.92871 v -8.32519 Q 590.11914,176 579.80664,176 q -11.49414,0 -18.20801,-9.72168 -5.26367,-7.68066 -5.26367,-19.12109 0,-14.34082 6.875,-21.91407 6.92871,-7.57324 17.1875,-7.57324 10.58106,0 17.45606,9.29199 v -8.00293 h 14.12597 v 51.18653 q 0,10.09765 -1.66504,15.09277 -1.66504,4.99512 -4.67285,7.8418 -3.00781,2.84668 -8.05664,4.45801 -4.99512,1.61132 -12.67578,1.61132 -14.50195,0 -20.57129,-4.99511 -6.06934,-4.94141 -6.06934,-12.56836 0,-0.75196 0.0537,-1.82617 z m 13.48144,-33.46192 q 0,9.07715 3.49121,13.32031 3.54492,4.18946 8.70117,4.18946 5.53223,0 9.34571,-4.29688 3.81347,-4.35058 3.81347,-12.83691 0,-8.86231 -3.65234,-13.15918 -3.65234,-4.29688 -9.23828,-4.29688 -5.42481,0 -8.96973,4.24317 -3.49121,4.18945 -3.49121,12.83691 z"/></g></g></g></g></svg>
 		<div id="tagline">Open Source JavaScript Client-Side Bitcoin Wallet Generator</div>
-		<div id="seedpoolarea"><textarea rows="16" cols="62" id="seedpool"></textarea></div>
 		<div id="testnet"></div>
 		<ul class="menu" id="menu">
 			<li class="tab" id="singlewallet" onclick="ninja.tab.select(this);">Single Wallet
@@ -7174,22 +7790,6 @@ input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; p
 			<li class="tab" id="detailwallet" onclick="ninja.tab.select(this);">Wallet Details
 		</ul>
 		
-		<div id="generate">
-			<div id="generatetitle"><span id="generatelabelbitcoinaddress">Generating Bitcoin Address...</span></div>
-			<div id="entropylabelrow">
-				<span id="generatelabelmovemouse">MOVE your mouse around to add some extra randomness...</span>
-				<span id="mousemovelimit">0%</span>
-			</div>
-			<div id="entropyprogressbar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-				<div id="entropyprogressfill"></div>
-			</div>
-			<div id="entropykeyrow">
-				<span id="generatelabelkeypress">OR type some random characters into this textbox</span>
-				<input type="text" id="generatekeyinput" onkeydown="ninja.seeder.seedKeyPress(event);" />
-			</div>
-			<div id="seedpooldisplay"></div>
-		</div>
-
 		<div id="wallets">
 			<div id="singlearea" class="walletarea">
 				<div class="commands">
@@ -7495,7 +8095,7 @@ input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; p
 					</div>
 					<span class="print"><input type="button" class="button" name="print" id="detailprint" value="Print" onclick="window.print();" /></span>
 					<div class="row extra">
-						<span><label id="detailkeyformats">Key Formats: WIF, WIFC, HEX, B64, B6, MINI, BIP38</label></span>
+						<span><label id="detailkeyformats">Key Formats: WIF, WIFC, HEX, BIP38</label></span>
 					</div>
 				</div>
 				<div id="detailkeyarea">
@@ -7562,31 +8162,10 @@ input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; p
 						<span class="label" id="detaillabelprivhex">Private Key Hexadecimal Format (64 characters [0-9A-F]):</span>
 						<span class="output" id="detailprivhex"></span>
 					</div>
-					<div class="item">
-						<span class="label" id="detaillabelprivb64">Private Key Base64 (44 characters):</span>
-						<span class="output" id="detailprivb64"></span>
-					</div>
-					<div class="item" style="display: none;" id="detailmini">
-						<span class="label" id="detaillabelprivmini">Private Key Mini Format (22, 26 or 30 characters, starts with an 'S'):</span>
-						<span class="output" id="detailprivmini"></span>
-					</div>
-					<div class="item" style="display: none;" id="detailb6">
-						<span class="label" id="detaillabelprivb6">Private Key Base6 Format (99 characters [0-5]):</span>
-						<span class="output" id="detailprivb6"></span>
-					</div>
 					<div class="item" style="display: none;" id="detailbip38">
 						<span class="label" id="detaillabelprivbip38">Private Key BIP38 Format (58 characters base58, starts with '6P'):</span>
 						<div id="detailqrcodeprivatebip38" class="qrcode_private"></div>
 						<span class="output" id="detailprivbip38"></span>
-					</div>
-				</div>
-				<div class="faqs">
-					<div id="detailfaq1" class="faq"> 
-						<div id="detailq1" class="question" onclick="ninja.wallets.detailwallet.openCloseFaq(1);">
-							<span id="detaillabelq1">How do I make a wallet using dice? What is B6?</span>
-							<div id="detaile1" class="more"></div>
-						</div>
-						<div id="detaila1" class="answer">An important part of creating a Bitcoin wallet is ensuring the random numbers used to create the wallet are truly random. Physical randomness is better than computer generated pseudo-randomness. The easiest way to generate physical randomness is with dice. To create a Bitcoin private key you only need one six sided die which you roll 99 times. Stopping each time to record the value of the die. When recording the values follow these rules: 1=1, 2=2, 3=3, 4=4, 5=5, 6=0. By doing this you are recording the big random number, your private key, in B6 or base 6 format. You can then enter the 99 character base 6 private key into the text field above and click View Details. You will then see the Bitcoin address associated with your private key. You should also make note of your private key in WIF format since it is more widely used.</div>
 					</div>
 				</div>
 			</div>
@@ -7671,9 +8250,7 @@ ninja.privateKey = {
 		return (
 					Bitcoin.ECKey.isWalletImportFormat(key) ||
 					Bitcoin.ECKey.isCompressedWalletImportFormat(key) ||
-					Bitcoin.ECKey.isHexFormat(key) ||
-					Bitcoin.ECKey.isBase64Format(key) ||
-					Bitcoin.ECKey.isMiniFormat(key)
+					Bitcoin.ECKey.isHexFormat(key)
 				);
 	},
 	getECKeyFromAdding: function (privKey1, privKey2) {
@@ -7764,6 +8341,8 @@ ninja.privateKey = {
 		}
 
 		var decrypted;
+		// BIP38 mandates AES-256-ECB on 16-byte XOR-mixed blocks (see BIP38 spec §4).
+		// ECB is protocol-required here; it is NOT used for any other purpose.
 		var AES_opts = { mode: new Crypto.mode.ECB(Crypto.pad.NoPadding), asBytes: true };
 
 		var verifyHashAndReturn = function () {
@@ -7996,18 +8575,19 @@ ninja.publicKey = {
 	},
 	// Taproot P2TR address from a compressed public key byte array
 	getTaprootAddressFromByteArray: function (pubKeyByteArray) {
-		var ecparams = EllipticCurve.getSECCurveByName("secp256k1");
 		var compPub = pubKeyByteArray.slice();
 		compPub[0] = 0x02; // lift_x: force even-Y
-		var P = ecparams.getCurve().decodePointHex(Crypto.util.bytesToHex(compPub).toUpperCase());
-		var xBytes = P.getX().toBigInteger().toByteArrayUnsigned();
-		while (xBytes.length < 32) xBytes.unshift(0);
+		var pubHex = Crypto.util.bytesToHex(compPub).toUpperCase();
+		// x-only internal key bytes (32 bytes)
+		var xBytes = compPub.slice(1);
+		// tagged_hash("TapTweak", xBytes) per BIP340
 		var tagHash = Crypto.SHA256("TapTweak", { asBytes: true });
 		var tweakBytes = Crypto.SHA256(tagHash.concat(tagHash).concat(xBytes), { asBytes: true });
-		var tweakInt = BigInteger.fromByteArrayUnsigned(tweakBytes);
-		var Q = P.add(ecparams.getG().multiply(tweakInt));
-		var qXBytes = Q.getX().toBigInteger().toByteArrayUnsigned();
-		while (qXBytes.length < 32) qXBytes.unshift(0);
+		var tweakHex = Crypto.util.bytesToHex(tweakBytes);
+		// Q = P + tweak*G via noble
+		var nobleP = nobleSecp256k1.Point.fromHex(pubHex);
+		var nobleQ = nobleP.add(nobleSecp256k1.Point.BASE.multiply(BigInt('0x' + tweakHex)));
+		var qXBytes = Crypto.util.hexToBytes(nobleQ.x.toString(16).padStart(64, '0'));
 		return Bitcoin.Bech32.segwitAddress('bc', 1, qXBytes);
 	},
 	getHexFromByteArray: function (pubKeyByteArray) {
@@ -8048,125 +8628,28 @@ ninja.publicKey = {
 };
 	</script>
 	<script type="text/javascript">
-﻿ninja.seeder = {
-	init: (function () {
-		document.getElementById("generatekeyinput").value = "";
-	})(),
-
-	// number of mouse movements to wait for
-	seedLimit: (function () {
-		var num = Crypto.util.randomBytes(12)[11];
-		return 200 + Math.floor(num);
-	})(),
-
-	seedCount: 0, // counter
-	lastInputTime: new Date().getTime(),
-	seedPoints: [],
-	isStillSeeding: true,
+// All entropy comes from window.crypto.getRandomValues — no interactive seeding.
+// This object is kept for API compatibility (ninja.seeder.isStillSeeding is checked
+// by ninja.tab.select and other callers).
+ninja.seeder = {
+	isStillSeeding: false,
 	seederDependentWallets: ["singlewallet", "paperwallet", "bulkwallet", "vanitywallet", "splitwallet"],
-
-	// seed function exists to wait for mouse movement to add more entropy before generating an address
-	seed: function (evt) {
-		if (!evt) var evt = window.event;
-		var timeStamp = new Date().getTime();
-		// seeding is over now we generate and display the address
-		if (ninja.seeder.seedCount == ninja.seeder.seedLimit) {
-			ninja.seeder.seedCount++;
-			ninja.seeder.seedingOver();
-		}
-			// seed mouse position X and Y when mouse movements are greater than 40ms apart
-		else if ((ninja.seeder.seedCount < ninja.seeder.seedLimit) && evt && (timeStamp - ninja.seeder.lastInputTime) > 40) {
-			SecureRandom.seedTime(); // includes performance.now() high-res timing
-			SecureRandom.seedInt16((evt.clientX * evt.clientY));
-			// Additional: seed individual coordinates for more entropy
-			SecureRandom.seedInt16(evt.clientX);
-			SecureRandom.seedInt16(evt.clientY);
-			ninja.seeder.showPoint(evt.clientX, evt.clientY);
-			ninja.seeder.seedCount++;
-			ninja.seeder.lastInputTime = new Date().getTime();
-			ninja.seeder.showPool();
-		}
-	},
-
-	// seed function exists to wait for mouse movement to add more entropy before generating an address
-	seedKeyPress: function (evt) {
-		if (!evt) var evt = window.event;
-		// seeding is over now we generate and display the address
-		if (ninja.seeder.seedCount == ninja.seeder.seedLimit) {
-			ninja.seeder.seedCount++;
-			ninja.seeder.seedingOver();
-		}
-			// seed key press character
-		else if ((ninja.seeder.seedCount < ninja.seeder.seedLimit) && evt.which) {
-			var timeStamp = new Date().getTime();
-			SecureRandom.seedTime(); // includes performance.now() high-res timing
-			SecureRandom.seedInt8(evt.which);
-			var keyPressTimeDiff = timeStamp - ninja.seeder.lastInputTime;
-			// Inter-keystroke timing carries ~6-8 bits of human-sourced entropy
-			SecureRandom.seedInt16(keyPressTimeDiff);
-			ninja.seeder.seedCount++;
-			ninja.seeder.lastInputTime = new Date().getTime();
-			ninja.seeder.showPool();
-		}
-	},
-
-	showPool: function () {
-		var poolHex;
-		if (SecureRandom.poolCopyOnInit != null) {
-			poolHex = Crypto.util.bytesToHex(SecureRandom.poolCopyOnInit);
-			document.getElementById("seedpool").innerHTML = poolHex;
-			document.getElementById("seedpooldisplay").innerHTML = poolHex;
-		}
-		else {
-			poolHex = Crypto.util.bytesToHex(SecureRandom.pool);
-			document.getElementById("seedpool").innerHTML = poolHex;
-			document.getElementById("seedpooldisplay").innerHTML = poolHex;
-		}
-		var pct = Math.min(100, Math.round((ninja.seeder.seedCount / ninja.seeder.seedLimit) * 100));
-		var percentSeeded = pct + "%";
-		document.getElementById("mousemovelimit").innerHTML = percentSeeded;
-		// Drive the visual progress bar via scaleX (avoids sub-pixel clip issues)
-		var fill = document.getElementById("entropyprogressfill");
-		if (fill) {
-			fill.style.transform = "scaleX(" + (pct / 100) + ")";
-			document.getElementById("entropyprogressbar").setAttribute("aria-valuenow", pct);
-		}
-	},
-
-	showPoint: function (x, y) {
-		var div = document.createElement("div");
-		div.setAttribute("class", "seedpoint");
-		div.style.top = y + "px";
-		div.style.left = x + "px";
-		document.body.appendChild(div);
-		ninja.seeder.seedPoints.push(div);
-	},
-
-	removePoints: function () {
-		for (var i = 0; i < ninja.seeder.seedPoints.length; i++) {
-			document.body.removeChild(ninja.seeder.seedPoints[i]);
-		}
-		ninja.seeder.seedPoints = [];
-	},
 
 	seedingOver: function () {
 		ninja.seeder.isStillSeeding = false;
-		// run sync unit tests
 		ninja.status.unitTests();
-		// open selected tab
 		var walletType = ninja.tab.whichIsOpen();
 		if (walletType == null) {
 			ninja.tab.select("singlewallet");
 		} else {
-			ninja.tab.select(walletType)
+			ninja.tab.select(walletType);
 		}
-		document.getElementById("generate").style.display = "none";
-		// restore labels in the active language (URL param > current culture already set at load time)
 		var culture = ninja.getQueryString()["culture"] || ninja.translator.currentCulture;
 		ninja.translator.translate(culture);
-		ninja.seeder.removePoints();
 	}
 };
+
+// seedingOver() is called from ninja.onload.js, after all scripts are loaded.
 
 	</script>
 	<script type="text/javascript">
@@ -8360,17 +8843,8 @@ ninja.tab = {
                 document.getElementById(wType).className = "tab";
                 ninja.wallets[wType].close();
             }
-            
-            // don't open tab if entropy still being collected
-            // exceptions: brainwallet detailwallet
-            if (ninja.seeder.isStillSeeding == false || walletType == "brainwallet" || walletType == "detailwallet") {
-            	walletTab.className += " selected";
-            	document.getElementById("generate").style.display = "none";
-                ninja.wallets[walletTab.getAttribute("id")].open();
-            }
-            else if (ninja.seeder.isStillSeeding == true && !(walletType == "brainwallet" || walletType == "detailwallet")) {
-                document.getElementById("generate").style.display = "block";
-            }
+            walletTab.className += " selected";
+            ninja.wallets[walletTab.getAttribute("id")].open();
         }
     },
 
@@ -11773,22 +12247,6 @@ ninja.wallets.vanitywallet = {
 			return key;
 		},
 
-		checkAndShowMini: function (key) {
-			if (Bitcoin.ECKey.isMiniFormat(key)) {
-				// show Private Key Mini Format
-				document.getElementById("detailprivmini").innerHTML = key;
-				document.getElementById("detailmini").style.display = "block";
-			}
-		},
-
-		checkAndShowBase6: function (key) {
-			if (Bitcoin.ECKey.isBase6Format(key)) {
-				// show Private Key Base6 Format
-				document.getElementById("detailprivb6").innerHTML = key;
-				document.getElementById("detailb6").style.display = "block";
-			}
-		},
-
 		keyToECKeyWithBrain: function (key) {
 			var btcKey = new Bitcoin.ECKey(key);
 			if (btcKey.error != null) {
@@ -11853,8 +12311,6 @@ ninja.wallets.vanitywallet = {
 			if (privateKey.isBIP38Format(key)) {
 				return;
 			}
-			detail.checkAndShowMini(key);
-			detail.checkAndShowBase6(key);
 			var btcKey = detail.keyToECKeyWithBrain(key);
 			if (btcKey.priv == null) {
 				return;
@@ -11894,8 +12350,6 @@ ninja.wallets.vanitywallet = {
 				return;
 			}
 			document.getElementById("detailbip38commands").style.display = "none";
-			detail.checkAndShowMini(key);
-			detail.checkAndShowBase6(key);
 			var btcKey = detail.keyToECKeyWithBrain(key);
 			if(btcKey.priv == null){
 				return;
@@ -11910,7 +12364,6 @@ ninja.wallets.vanitywallet = {
 				// Uncompressed key
 				btcKey.setCompressed(false);
 				document.getElementById("detailprivhex").innerHTML = btcKey.toString().toUpperCase();
-				document.getElementById("detailprivb64").innerHTML = btcKey.toString("base64");
 				var bitcoinAddress = btcKey.getBitcoinAddress();
 				var wif = btcKey.getBitcoinWalletImportFormat();
 				document.getElementById("detailpubkey").innerHTML = btcKey.getPubKeyHex();
@@ -11981,9 +12434,6 @@ ninja.wallets.vanitywallet = {
 			document.getElementById("detailprivwif").innerHTML = "";
 			document.getElementById("detailprivwifcomp").innerHTML = "";
 			document.getElementById("detailprivhex").innerHTML = "";
-			document.getElementById("detailprivb64").innerHTML = "";
-			document.getElementById("detailprivb6").innerHTML = "";
-			document.getElementById("detailprivmini").innerHTML = "";
 			document.getElementById("detailprivbip38").innerHTML = "";
 			document.getElementById("detailqrcodepublic").innerHTML = "";
 			document.getElementById("detailqrcodepubliccomp").innerHTML = "";
@@ -11992,8 +12442,6 @@ ninja.wallets.vanitywallet = {
 			document.getElementById("detailqrcodepublicTaproot").innerHTML = "";
 			document.getElementById("detailqrcodeprivate").innerHTML = "";
 			document.getElementById("detailqrcodeprivatecomp").innerHTML = "";
-			document.getElementById("detailb6").style.display = "none";
-			document.getElementById("detailmini").style.display = "none";
 			document.getElementById("detailbip38").style.display = "none";
 		},
 
@@ -12324,7 +12772,7 @@ ninja.wallets.splitwallet = {
 			},
 			testGetByteArrayFromMultiplying: function () {
 				var key1 = "0478982F40FA0C0B7A55717583AFC99A4EDFD301A2729DC59B0B8EB9E18692BCB521F054FAD982AF4CC1933AFD1F1B563EA779A6AA6CCE36A30B947DD653E63E44";
-				var key2 = "SQE6yipP5oW8RBaStWoB47xsRQ8pat";
+				var key2 = "5JrBLQseeZdYw4jWEAHmNxGMr5fxh9NJU3fUwnv4khfKcg2rJVh";
 				var bytes = ninja.publicKey.getByteArrayFromMultiplying(key1, new Bitcoin.ECKey(key2));
 				if (bytes.toString() != "4,102,230,163,180,107,9,21,17,48,35,245,227,110,199,119,144,57,41,112,64,245,182,40,224,41,230,41,5,26,206,138,57,115,35,54,105,7,180,5,106,217,57,229,127,174,145,215,79,121,163,191,211,143,215,50,48,156,211,178,72,226,68,150,52") {
 					return false;
@@ -12333,7 +12781,7 @@ ninja.wallets.splitwallet = {
 			},
 			testGetByteArrayFromMultiplyingCompressedOutputsUncompressed: function () {
 				var key1 = "0278982F40FA0C0B7A55717583AFC99A4EDFD301A2729DC59B0B8EB9E18692BCB5";
-				var key2 = "SQE6yipP5oW8RBaStWoB47xsRQ8pat";
+				var key2 = "5JrBLQseeZdYw4jWEAHmNxGMr5fxh9NJU3fUwnv4khfKcg2rJVh";
 				var bytes = ninja.publicKey.getByteArrayFromMultiplying(key1, new Bitcoin.ECKey(key2));
 				if (bytes.toString() != "4,102,230,163,180,107,9,21,17,48,35,245,227,110,199,119,144,57,41,112,64,245,182,40,224,41,230,41,5,26,206,138,57,115,35,54,105,7,180,5,106,217,57,229,127,174,145,215,79,121,163,191,211,143,215,50,48,156,211,178,72,226,68,150,52") {
 					return false;
@@ -12401,12 +12849,6 @@ ninja.wallets.splitwallet = {
 			testBadKeyIsNotHex: function () {
 				return !(Bitcoin.ECKey.isHexFormat("bad key"));
 			},
-			testBadKeyIsNotBase64: function () {
-				return !(Bitcoin.ECKey.isBase64Format("bad key"));
-			},
-			testBadKeyIsNotMini: function () {
-				return !(Bitcoin.ECKey.isMiniFormat("bad key"));
-			},
 			testBadKeyReturnsNullPrivFromECKey: function () {
 				var key = "bad key";
 				var ecKey = new Bitcoin.ECKey(key);
@@ -12461,14 +12903,6 @@ ninja.wallets.splitwallet = {
 				}
 				return true;
 			},
-			testBase64ToECKey: function () {
-				var key = "KSZlw4ckGK3x2n/6OmRvLwYCJG2mCYqR0inDIVDycYs=";
-				var btcKey = new Bitcoin.ECKey(key);
-				if (btcKey.getBitcoinBase64Format() != "KSZlw4ckGK3x2n/6OmRvLwYCJG2mCYqR0inDIVDycYs=") {
-					return false;
-				}
-				return true;
-			},
 			testHexToECKey: function () {
 				var key = "292665C3872418ADF1DA7FFA3A646F2F0602246DA6098A91D229C32150F2718B";
 				var btcKey = new Bitcoin.ECKey(key);
@@ -12505,17 +12939,15 @@ ninja.wallets.splitwallet = {
 				}
 				return true;
 			},
-			testMini30CharsToECKey: function () {
+			testMiniFormatIsRejected: function () {
+				// Mini format is no longer accepted — keys must be WIF, WIF-compressed, or HEX
 				var key = "SQE6yipP5oW8RBaStWoB47xsRQ8pat";
 				var btcKey = new Bitcoin.ECKey(key);
-				if (btcKey.getBitcoinWalletImportFormat() != "5JrBLQseeZdYw4jWEAHmNxGMr5fxh9NJU3fUwnv4khfKcg2rJVh") {
-					return false;
-				}
-				return true;
+				return btcKey.priv == null;
 			},
 			testGetECKeyFromAdding: function () {
 				var key1 = "5J8QhiQtAiozKwyk3GCycAscg1tNaYhNdiiLey8vaDK8Bzm4znb";
-				var key2 = "SQE6yipP5oW8RBaStWoB47xsRQ8pat";
+				var key2 = "5JrBLQseeZdYw4jWEAHmNxGMr5fxh9NJU3fUwnv4khfKcg2rJVh";
 				var ecKey = ninja.privateKey.getECKeyFromAdding(key1, key2);
 				if (ecKey.getBitcoinWalletImportFormat() != "5KAJTSqSjpsZ11KyEE3qu5PrJVjR4ZCbNxK3Nb1F637oe41m1c2") {
 					return false;
@@ -12560,7 +12992,7 @@ ninja.wallets.splitwallet = {
 			},
 			testGetECKeyFromMultiplying: function () {
 				var key1 = "5J8QhiQtAiozKwyk3GCycAscg1tNaYhNdiiLey8vaDK8Bzm4znb";
-				var key2 = "SQE6yipP5oW8RBaStWoB47xsRQ8pat";
+				var key2 = "5JrBLQseeZdYw4jWEAHmNxGMr5fxh9NJU3fUwnv4khfKcg2rJVh";
 				var ecKey = ninja.privateKey.getECKeyFromMultiplying(key1, key2);
 				if (ecKey.getBitcoinWalletImportFormat() != "5KetpZ5mCGagCeJnMmvo18n4iVrtPSqrpnW5RP92Gv2BQy7GPCk") {
 					return false;
@@ -12603,14 +13035,11 @@ ninja.wallets.splitwallet = {
 				}
 				return true;
 			},
-			testGetECKeyFromBase6Key: function () {
+			testBase6FormatIsRejected: function () {
+				// Base6 format is no longer accepted — keys must be WIF, WIF-compressed, or HEX
 				var baseKey = "100531114202410255230521444145414341221420541210522412225005202300434134213212540304311321323051431";
-				var hexKey = "292665C3872418ADF1DA7FFA3A646F2F0602246DA6098A91D229C32150F2718B";
 				var ecKey = new Bitcoin.ECKey(baseKey);
-				if (ecKey.getBitcoinHexFormat() != hexKey) {
-					return false;
-				}
-				return true;
+				return ecKey.priv == null;
 			},
 
 			// EllipticCurve tests
@@ -13136,6 +13565,111 @@ ninja.wallets.splitwallet = {
 				var taproot = btcKey.getTaprootAddress();
 				return (legacy !== p2sh && legacy !== segwit && legacy !== taproot &&
 				        p2sh !== segwit && p2sh !== taproot && segwit !== taproot);
+			},
+
+			// ── Security tests ────────────────────────────────────────────────────
+
+			// noble-secp256k1 must be present and expose its key API
+			testNobleSecp256k1Loaded: function () {
+				return (
+					typeof nobleSecp256k1 !== 'undefined' &&
+					typeof nobleSecp256k1.getPublicKey === 'function' &&
+					typeof nobleSecp256k1.signSync === 'function' &&
+					typeof nobleSecp256k1.utils.isValidPrivateKey === 'function' &&
+					typeof nobleSecp256k1.Point.fromHex === 'function'
+				);
+			},
+
+			// window.crypto.getRandomValues must be available — failing here means
+			// this browser cannot safely generate Bitcoin keys
+			testCSPRNGAvailable: function () {
+				return !!(window.crypto && typeof window.crypto.getRandomValues === 'function');
+			},
+
+			// ECKey generation must produce a key in the valid secp256k1 range [1, n-1]
+			testRandomKeyIsInValidRange: function () {
+				var btcKey = new Bitcoin.ECKey(false);
+				if (btcKey.error || btcKey.priv == null) return false;
+				var privBytes = btcKey.priv.toByteArrayUnsigned();
+				while (privBytes.length < 32) privBytes.unshift(0);
+				var ua = new Uint8Array(32);
+				for (var i = 0; i < 32; i++) ua[i] = privBytes[i];
+				return nobleSecp256k1.utils.isValidPrivateKey(ua);
+			},
+
+			// A zero private key must be rejected
+			testZeroPrivateKeyIsRejected: function () {
+				var zeroHex = "0000000000000000000000000000000000000000000000000000000000000000";
+				var ecKey = new Bitcoin.ECKey(zeroHex);
+				return ecKey.priv === null;
+			},
+
+			// A private key equal to the curve order n must be rejected
+			testCurveOrderKeyIsRejected: function () {
+				// n = FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141
+				var nHex = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141";
+				var ecKey = new Bitcoin.ECKey(nHex);
+				return ecKey.priv === null;
+			},
+
+			// An all-0xFF private key (> n) must be rejected
+			testOverflowPrivateKeyIsRejected: function () {
+				var overHex = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
+				var ecKey = new Bitcoin.ECKey(overHex);
+				return ecKey.priv === null;
+			},
+
+			// An uncompressed public key that is NOT on the secp256k1 curve must be rejected
+			// We flip the last byte of a valid uncompressed key — the point (x, y') is off-curve.
+			testOffCurvePublicKeyIsRejected: function () {
+				// Valid uncompressed key for 5J8QhiQtAiozKwyk3GCycAscg1tNaYhNdiiLey8vaDK8Bzm4znb
+				var validHex = "0478982F40FA0C0B7A55717583AFC99A4EDFD301A2729DC59B0B8EB9E18692BCB521F054FAD982AF4CC1933AFD1F1B563EA779A6AA6CCE36A30B947DD653E63E44";
+				// Corrupt the last byte: E44 → E45 — no longer on the curve
+				var invalidHex = validHex.slice(0, -2) + "45";
+				try {
+					var ecparams = EllipticCurve.getSECCurveByName("secp256k1");
+					ecparams.getCurve().decodePointHex(invalidHex);
+					return false; // should have thrown
+				} catch (e) {
+					return true; // correctly rejected
+				}
+			},
+
+			// Hybrid-encoded points (prefix 06/07) must be rejected — non-canonical encoding
+			testHybridEncodedPointIsRejected: function () {
+				// Same key as above but with prefix 06 instead of 04
+				var hybridHex = "0678982F40FA0C0B7A55717583AFC99A4EDFD301A2729DC59B0B8EB9E18692BCB521F054FAD982AF4CC1933AFD1F1B563EA779A6AA6CCE36A30B947DD653E63E44";
+				try {
+					var ecparams = EllipticCurve.getSECCurveByName("secp256k1");
+					ecparams.getCurve().decodePointHex(hybridHex);
+					return false; // should have thrown
+				} catch (e) {
+					return true; // correctly rejected
+				}
+			},
+
+			// secrets.js must use the CSPRNG path (not Math.random)
+			testSecretsJsUsesCsprng: function () {
+				// If no CSPRNG fallback exists, config.unsafePRNG must always be false
+				secrets.setRNG();
+				return secrets.getConfig().unsafePRNG === false;
+			},
+
+			// ECDSA.sign must produce a valid signature verifiable by noble
+			testEcdsaSignVerifyWithNoble: function () {
+				var key = "292665C3872418ADF1DA7FFA3A646F2F0602246DA6098A91D229C32150F2718B";
+				var btcKey = new Bitcoin.ECKey(key);
+				var hash = Crypto.util.hexToBytes("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20");
+				var sig = btcKey.sign(hash);
+				return btcKey.verify(hash, sig) === true;
+			},
+
+			// ECPoint.validate() must accept a valid on-curve point
+			testValidPointPassesValidation: function () {
+				var validHex = "0478982F40FA0C0B7A55717583AFC99A4EDFD301A2729DC59B0B8EB9E18692BCB521F054FAD982AF4CC1933AFD1F1B563EA779A6AA6CCE36A30B947DD653E63E44";
+				var ecparams = EllipticCurve.getSECCurveByName("secp256k1");
+				var pt = ecparams.getCurve().decodePointHex(validHex);
+				return pt.validate() === true;
 			}
 		},
 
@@ -13224,7 +13758,9 @@ ninja.wallets.splitwallet = {
 				// intermediate test - create some encrypted keys from an intermediate
 				// then decrypt them to check that the private keys are recoverable
 				var intermediateBip38Test = function (i, onComplete) {
-					var pass = Math.random().toString(36).substr(2);
+					var _passBytes = new Uint8Array(8);
+					window.crypto.getRandomValues(_passBytes);
+					var pass = Array.from(_passBytes).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
 					ninja.privateKey.BIP38GenerateIntermediatePointAsync(pass, null, null, function (intermediatePoint) {
 						ninja.privateKey.BIP38GenerateECAddressAsync(intermediatePoint, false, function (address, encryptedKey) {
 							ninja.privateKey.BIP38EncryptedKeyToByteArrayAsync(encryptedKey, pass, function (privBytes) {
@@ -13288,6 +13824,9 @@ ninja.wallets.splitwallet = {
 })(ninja);
 	</script>
 	<script type="text/javascript">
+// All scripts loaded — start immediately (CSPRNG is available from page load)
+ninja.seeder.seedingOver();
+
 // sync theme toggle button with the theme applied by the inline head script
 ninja.theme.init();
 // run unit tests
@@ -13322,9 +13861,7 @@ if (ninja.getQueryString()["testnet"] == "true" || ninja.getQueryString()["testn
 	Bitcoin.ECKey.privateKeyPrefix = 0xEF; // testnet
 	ninja.testnetMode = true;
 }
-if (ninja.getQueryString()["showseedpool"] == "true" || ninja.getQueryString()["showseedpool"] == "1") {
-	document.getElementById("seedpoolarea").style.display = "block";
-}
+// showseedpool URL parameter removed — the entropy pool is never exposed in the UI
 	</script>
 </body>
 </html>

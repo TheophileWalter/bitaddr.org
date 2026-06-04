@@ -41,10 +41,15 @@ if (typeof Crypto == "undefined" || !Crypto.util) {
 
 			},
 
-			// Generate an array of any length of random bytes
+			// Generate an array of any length of random bytes via CSPRNG
 			randomBytes: function (n) {
-				for (var bytes = []; n > 0; n--)
-					bytes.push(Math.floor(Math.random() * 256));
+				if (!window.crypto || !window.crypto.getRandomValues) {
+					throw new Error('CSPRNG unavailable: window.crypto.getRandomValues is required.');
+				}
+				var ua = new Uint8Array(n);
+				window.crypto.getRandomValues(ua);
+				var bytes = [];
+				for (var i = 0; i < n; i++) bytes.push(ua[i]);
 				return bytes;
 			},
 

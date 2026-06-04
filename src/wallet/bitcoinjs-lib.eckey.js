@@ -95,9 +95,11 @@ Bitcoin.ECKey = (function () {
 
 	var ECKey = function (input) {
 		if (!input) {
-			// Generate new key
-			var n = ecparams.getN();
-			this.priv = ECDSA.getBigRandom(n);
+			// Generate a new random private key using noble-secp256k1.
+			// utils.randomPrivateKey() uses window.crypto.getRandomValues and
+			// rejects values outside [1, n-1] — no BigInteger RNG needed.
+			var privBytes = nobleSecp256k1.utils.randomPrivateKey();
+			this.priv = BigInteger.fromByteArrayUnsigned(Array.from(privBytes));
 		} else if (input instanceof BigInteger) {
 			// Input is a private key value
 			this.priv = input;
@@ -106,26 +108,20 @@ Bitcoin.ECKey = (function () {
 			this.priv = BigInteger.fromByteArrayUnsigned(input);
 		} else if ("string" == typeof input) {
 			var bytes = null;
-			try{
+			try {
 				if (ECKey.isWalletImportFormat(input)) {
 					bytes = ECKey.decodeWalletImportFormat(input);
 				} else if (ECKey.isCompressedWalletImportFormat(input)) {
 					bytes = ECKey.decodeCompressedWalletImportFormat(input);
 					this.compressed = true;
-				} else if (ECKey.isMiniFormat(input)) {
-					bytes = Crypto.SHA256(input, { asBytes: true });
 				} else if (ECKey.isHexFormat(input)) {
 					bytes = Crypto.util.hexToBytes(input);
-				} else if (ECKey.isBase64Format(input)) {
-					bytes = Crypto.util.base64ToBytes(input);
 				}
 			} catch (exc1) {
 				this.setError(exc1);
 			}
 
-			if (ECKey.isBase6Format(input)) {
-				this.priv = new BigInteger(input, 6);
-			} else if (bytes == null || bytes.length != 32) {
+			if (bytes == null || bytes.length != 32) {
 				this.priv = null;
 			} else {
 				// Prepend zero byte to prevent interpretation as negative integer
@@ -135,14 +131,16 @@ Bitcoin.ECKey = (function () {
 
 		this.compressed = (this.compressed == undefined) ? !!ECKey.compressByDefault : this.compressed;
 		try {
-			// check not zero
-			if (this.priv != null && BigInteger.ZERO.compareTo(this.priv) == 0) this.setError("Error: BigInteger equal to zero.");
-			// valid range [0x1, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364140])
-			var hexKeyRangeLimit = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364140";
-			var rangeLimitBytes = Crypto.util.hexToBytes(hexKeyRangeLimit);
-			var limitBigInt = BigInteger.fromByteArrayUnsigned(rangeLimitBytes);
-			if (this.priv != null && limitBigInt.compareTo(this.priv) < 0) this.setError("Error: BigInteger outside of curve range.")
-
+			if (this.priv != null) {
+				// Validate using noble: checks 0 < k < n (secp256k1 order)
+				var privBytes = this.priv.toByteArrayUnsigned();
+				while (privBytes.length < 32) privBytes.unshift(0);
+				var ua = new Uint8Array(32);
+				for (var i = 0; i < 32; i++) ua[i] = privBytes[i];
+				if (!nobleSecp256k1.utils.isValidPrivateKey(ua)) {
+					this.setError("Error: private key is outside the valid secp256k1 range [1, n-1].");
+				}
+			}
 			if (this.priv != null) {
 				KeyPool.push(this);
 			}
@@ -180,50 +178,37 @@ Bitcoin.ECKey = (function () {
 	* Return public key as a byte array in DER encoding
 	*/
 	ECKey.prototype.getPub = function () {
-		if (this.compressed) {
-			if (this.pubComp) return this.pubComp;
-			return this.pubComp = this.getPubPoint().getEncoded(1);
-		} else {
-			if (this.pubUncomp) return this.pubUncomp;
-			return this.pubUncomp = this.getPubPoint().getEncoded(0);
-		}
+		return this.getPubPoint().getEncoded(this.compressed ? 1 : 0);
 	};
 
 	/**
 	* Return public point as ECPoint object.
+	* Uses noble-secp256k1 for point multiplication (precomputed, window-based,
+	* constant-time) and reconstructs an EllipticCurve.PointFp for API compatibility.
 	*/
 	ECKey.prototype.getPubPoint = function () {
 		if (!this.pubPoint) {
-			this.pubPoint = ecparams.getG().multiply(this.priv);
+			// Derive public key bytes via noble (compressed = true for the Point constructor)
+			var privBytes = this.priv.toByteArrayUnsigned();
+			while (privBytes.length < 32) privBytes.unshift(0);
+			var ua = new Uint8Array(32);
+			for (var i = 0; i < 32; i++) ua[i] = privBytes[i];
+			// Get uncompressed public key bytes (65 bytes: 04 || x || y)
+			var pubBytesUncomp = nobleSecp256k1.getPublicKey(ua, false);
+			var pubHex = Crypto.util.bytesToHex(Array.from(pubBytesUncomp)).toUpperCase();
+			// Decode into PointFp (decodePointHex now validates on-curve via noble)
+			this.pubPoint = ecparams.getCurve().decodePointHex(pubHex);
 			this.pubPoint.compressed = this.compressed;
 		}
 		return this.pubPoint;
 	};
 
 	ECKey.prototype.getPubKeyHex = function () {
-		if (this.compressed) {
-			if (this.pubKeyHexComp) return this.pubKeyHexComp;
-			return this.pubKeyHexComp = Crypto.util.bytesToHex(this.getPub()).toString().toUpperCase();
-		} else {
-			if (this.pubKeyHexUncomp) return this.pubKeyHexUncomp;
-			return this.pubKeyHexUncomp = Crypto.util.bytesToHex(this.getPub()).toString().toUpperCase();
-		}
+		return Crypto.util.bytesToHex(this.getPub()).toString().toUpperCase();
 	};
 
-	/**
-	* Get the pubKeyHash for this key.
-	*
-	* This is calculated as RIPE160(SHA256([encoded pubkey])) and returned as
-	* a byte array.
-	*/
 	ECKey.prototype.getPubKeyHash = function () {
-		if (this.compressed) {
-			if (this.pubKeyHashComp) return this.pubKeyHashComp;
-			return this.pubKeyHashComp = Bitcoin.Util.sha256ripe160(this.getPub());
-		} else {
-			if (this.pubKeyHashUncomp) return this.pubKeyHashUncomp;
-			return this.pubKeyHashUncomp = Bitcoin.Util.sha256ripe160(this.getPub());
-		}
+		return Bitcoin.Util.sha256ripe160(this.getPub());
 	};
 
 	ECKey.prototype.getBitcoinAddress = function () {
@@ -279,25 +264,24 @@ Bitcoin.ECKey = (function () {
 		var compPub = this.getPub().slice();
 		this.setCompressed(savedComp);
 
-		// lift_x: force even-Y variant by setting prefix to 0x02
+		// lift_x: force even-Y variant (key-path spend uses x-only internal key)
 		compPub[0] = 0x02;
-		var P = ecparams.getCurve().decodePointHex(Crypto.util.bytesToHex(compPub).toUpperCase());
+		var pubHex = Crypto.util.bytesToHex(compPub).toUpperCase();
 
-		// x-only internal key (32 bytes, big-endian)
-		var xBytes = P.getX().toBigInteger().toByteArrayUnsigned();
-		while (xBytes.length < 32) xBytes.unshift(0);
+		// x-only internal key bytes (32 bytes)
+		var xBytes = compPub.slice(1);
 
 		// tagged_hash("TapTweak", xBytes) per BIP340
 		var tagHash = Crypto.SHA256("TapTweak", { asBytes: true });
 		var tweakBytes = Crypto.SHA256(tagHash.concat(tagHash).concat(xBytes), { asBytes: true });
-		var tweakInt = BigInteger.fromByteArrayUnsigned(tweakBytes);
+		var tweakHex = Crypto.util.bytesToHex(tweakBytes);
 
-		// Output key Q = P + tweak*G
-		var Q = P.add(ecparams.getG().multiply(tweakInt));
+		// Output key Q = P + tweak*G via noble (constant-time, audited)
+		var nobleP = nobleSecp256k1.Point.fromHex(pubHex);
+		var nobleQ = nobleP.add(nobleSecp256k1.Point.BASE.multiply(BigInt('0x' + tweakHex)));
 
 		// Witness program = x-coordinate of Q (32 bytes)
-		var qXBytes = Q.getX().toBigInteger().toByteArrayUnsigned();
-		while (qXBytes.length < 32) qXBytes.unshift(0);
+		var qXBytes = Crypto.util.hexToBytes(nobleQ.x.toString(16).padStart(64, '0'));
 
 		return Bitcoin.Bech32.segwitAddress('bc', 1, qXBytes);
 	};
@@ -328,14 +312,9 @@ Bitcoin.ECKey = (function () {
 		return privWif;
 	};
 
-	// Private Key Hex Format 
+	// Private Key Hex Format
 	ECKey.prototype.getBitcoinHexFormat = function () {
 		return Crypto.util.bytesToHex(this.getBitcoinPrivateKeyByteArray()).toString().toUpperCase();
-	};
-
-	// Private Key Base64 Format 
-	ECKey.prototype.getBitcoinBase64Format = function () {
-		return Crypto.util.bytesToBase64(this.getBitcoinPrivateKeyByteArray());
 	};
 
 	ECKey.prototype.getBitcoinPrivateKeyByteArray = function () {
@@ -348,17 +327,10 @@ Bitcoin.ECKey = (function () {
 	};
 
 	ECKey.prototype.toString = function (format) {
-		format = format || "";
-		if (format.toString().toLowerCase() == "base64" || format.toString().toLowerCase() == "b64") {
-			return this.getBitcoinBase64Format();
-		}
-		// Wallet Import Format
-		else if (format.toString().toLowerCase() == "wif") {
+		if (format && format.toString().toLowerCase() == "wif") {
 			return this.getBitcoinWalletImportFormat();
 		}
-		else {
-			return this.getBitcoinHexFormat();
-		}
+		return this.getBitcoinHexFormat();
 	};
 
 	ECKey.prototype.sign = function (hash) {
@@ -430,29 +402,6 @@ Bitcoin.ECKey = (function () {
 		return (ECKey.privateKeyPrefix == 0x80) ?
 							(/^[LK][123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{51}$/.test(key)) :
 							(/^c[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{51}$/.test(key));
-	};
-
-	// 44 characters
-	ECKey.isBase64Format = function (key) {
-		key = key.toString();
-		return (/^[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789=+\/]{44}$/.test(key));
-	};
-
-	// 99 characters, 1=1, if using dice convert 6 to 0
-	ECKey.isBase6Format = function (key) {
-		key = key.toString();
-		return (/^[012345]{99}$/.test(key));
-	};
-
-	// 22, 26 or 30 characters, always starts with an 'S'
-	ECKey.isMiniFormat = function (key) {
-		key = key.toString();
-		var validChars22 = /^S[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{21}$/.test(key);
-		var validChars26 = /^S[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{25}$/.test(key);
-		var validChars30 = /^S[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{29}$/.test(key);
-		var testBytes = Crypto.SHA256(key + "?", { asBytes: true });
-
-		return ((testBytes[0] === 0x00 || testBytes[0] === 0x01) && (validChars22 || validChars26 || validChars30));
 	};
 
 	return ECKey;

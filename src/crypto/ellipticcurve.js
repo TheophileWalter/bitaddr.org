@@ -18,8 +18,9 @@
 	// q instanceof BigInteger
 	// x instanceof BigInteger
 	ec.FieldElementFp = function (q, x) {
-		this.x = x;
-		// TODO if(x.compareTo(q) >= 0) error
+		// Normalise x into [0, q) — handles both negative values and x ≥ q that
+		// can arise from intermediate arithmetic (e.g. q.subtract(0) == q).
+		this.x = (x.signum() < 0 || x.compareTo(q) >= 0) ? x.mod(q) : x;
 		this.q = q;
 	};
 
@@ -58,106 +59,6 @@
 
 	ec.FieldElementFp.prototype.getByteLength = function () {
 		return Math.floor((this.toBigInteger().bitLength() + 7) / 8);
-	};
-
-	// D.1.4 91
-	/**
-	* return a sqrt root - the routine verifies that the calculation
-	* returns the right value - if none exists it returns null.
-	* 
-	* Copyright (c) 2000 - 2011 The Legion Of The Bouncy Castle (http://www.bouncycastle.org)
-	* Ported to JavaScript by bitaddr.org
-	*/
-	ec.FieldElementFp.prototype.sqrt = function () {
-		if (!this.q.testBit(0)) throw new Error("even value of q");
-
-		// p mod 4 == 3
-		if (this.q.testBit(1)) {
-			// z = g^(u+1) + p, p = 4u + 3
-			var z = new ec.FieldElementFp(this.q, this.x.modPow(this.q.shiftRight(2).add(BigInteger.ONE), this.q));
-			return z.square().equals(this) ? z : null;
-		}
-
-		// p mod 4 == 1
-		var qMinusOne = this.q.subtract(BigInteger.ONE);
-		var legendreExponent = qMinusOne.shiftRight(1);
-		if (!(this.x.modPow(legendreExponent, this.q).equals(BigInteger.ONE))) return null;
-		var u = qMinusOne.shiftRight(2);
-		var k = u.shiftLeft(1).add(BigInteger.ONE);
-		var Q = this.x;
-		var fourQ = Q.shiftLeft(2).mod(this.q);
-		var U, V;
-
-		do {
-			var rand = new SecureRandom();
-			var P;
-			do {
-				P = new BigInteger(this.q.bitLength(), rand);
-			}
-			while (P.compareTo(this.q) >= 0 || !(P.multiply(P).subtract(fourQ).modPow(legendreExponent, this.q).equals(qMinusOne)));
-
-			var result = ec.FieldElementFp.fastLucasSequence(this.q, P, Q, k);
-
-			U = result[0];
-			V = result[1];
-			if (V.multiply(V).mod(this.q).equals(fourQ)) {
-				// Integer division by 2, mod q
-				if (V.testBit(0)) {
-					V = V.add(this.q);
-				}
-				V = V.shiftRight(1);
-				return new ec.FieldElementFp(this.q, V);
-			}
-		}
-		while (U.equals(BigInteger.ONE) || U.equals(qMinusOne));
-
-		return null;
-	};
-
-	/*
-	* Copyright (c) 2000 - 2011 The Legion Of The Bouncy Castle (http://www.bouncycastle.org)
-	* Ported to JavaScript by bitaddr.org
-	*/
-	ec.FieldElementFp.fastLucasSequence = function (p, P, Q, k) {
-		// TODO Research and apply "common-multiplicand multiplication here"
-
-		var n = k.bitLength();
-		var s = k.getLowestSetBit();
-		var Uh = BigInteger.ONE;
-		var Vl = BigInteger.TWO;
-		var Vh = P;
-		var Ql = BigInteger.ONE;
-		var Qh = BigInteger.ONE;
-
-		for (var j = n - 1; j >= s + 1; --j) {
-			Ql = Ql.multiply(Qh).mod(p);
-			if (k.testBit(j)) {
-				Qh = Ql.multiply(Q).mod(p);
-				Uh = Uh.multiply(Vh).mod(p);
-				Vl = Vh.multiply(Vl).subtract(P.multiply(Ql)).mod(p);
-				Vh = Vh.multiply(Vh).subtract(Qh.shiftLeft(1)).mod(p);
-			}
-			else {
-				Qh = Ql;
-				Uh = Uh.multiply(Vl).subtract(Ql).mod(p);
-				Vh = Vh.multiply(Vl).subtract(P.multiply(Ql)).mod(p);
-				Vl = Vl.multiply(Vl).subtract(Ql.shiftLeft(1)).mod(p);
-			}
-		}
-
-		Ql = Ql.multiply(Qh).mod(p);
-		Qh = Ql.multiply(Q).mod(p);
-		Uh = Uh.multiply(Vl).subtract(Ql).mod(p);
-		Vl = Vh.multiply(Vl).subtract(P.multiply(Ql)).mod(p);
-		Ql = Ql.multiply(Qh).mod(p);
-
-		for (var j = 1; j <= s; ++j) {
-			Uh = Uh.multiply(Vl).mod(p);
-			Vl = Vl.multiply(Vl).subtract(Ql.shiftLeft(1)).mod(p);
-			Ql = Ql.multiply(Ql).mod(p);
-		}
-
-		return [Uh, Vl];
 	};
 
 	// ----------------
@@ -314,37 +215,6 @@
 		return R;
 	};
 
-	// Compute this*j + x*k (simultaneous multiplication)
-	ec.PointFp.prototype.multiplyTwo = function (j, x, k) {
-		var i;
-		if (j.bitLength() > k.bitLength())
-			i = j.bitLength() - 1;
-		else
-			i = k.bitLength() - 1;
-
-		var R = this.curve.getInfinity();
-		var both = this.add(x);
-		while (i >= 0) {
-			R = R.twice();
-			if (j.testBit(i)) {
-				if (k.testBit(i)) {
-					R = R.add(both);
-				}
-				else {
-					R = R.add(this);
-				}
-			}
-			else {
-				if (k.testBit(i)) {
-					R = R.add(x);
-				}
-			}
-			--i;
-		}
-
-		return R;
-	};
-
 	// patched by bitaddr.org and Casascius for use with Bitcoin.ECKey
 	// patched by coretechs to support compressed public keys
 	ec.PointFp.prototype.getEncoded = function (compressed) {
@@ -389,83 +259,6 @@
 		return new ec.PointFp(curve, curve.fromBigInteger(x), curve.fromBigInteger(y));
 	};
 
-	ec.PointFp.prototype.add2D = function (b) {
-		if (this.isInfinity()) return b;
-		if (b.isInfinity()) return this;
-
-		if (this.x.equals(b.x)) {
-			if (this.y.equals(b.y)) {
-				// this = b, i.e. this must be doubled
-				return this.twice();
-			}
-			// this = -b, i.e. the result is the point at infinity
-			return this.curve.getInfinity();
-		}
-
-		var x_x = b.x.subtract(this.x);
-		var y_y = b.y.subtract(this.y);
-		var gamma = y_y.divide(x_x);
-
-		var x3 = gamma.square().subtract(this.x).subtract(b.x);
-		var y3 = gamma.multiply(this.x.subtract(x3)).subtract(this.y);
-
-		return new ec.PointFp(this.curve, x3, y3);
-	};
-
-	ec.PointFp.prototype.twice2D = function () {
-		if (this.isInfinity()) return this;
-		if (this.y.toBigInteger().signum() == 0) {
-			// if y1 == 0, then (x1, y1) == (x1, -y1)
-			// and hence this = -this and thus 2(x1, y1) == infinity
-			return this.curve.getInfinity();
-		}
-
-		var TWO = this.curve.fromBigInteger(BigInteger.valueOf(2));
-		var THREE = this.curve.fromBigInteger(BigInteger.valueOf(3));
-		var gamma = this.x.square().multiply(THREE).add(this.curve.a).divide(this.y.multiply(TWO));
-
-		var x3 = gamma.square().subtract(this.x.multiply(TWO));
-		var y3 = gamma.multiply(this.x.subtract(x3)).subtract(this.y);
-
-		return new ec.PointFp(this.curve, x3, y3);
-	};
-
-	ec.PointFp.prototype.multiply2D = function (k) {
-		if (this.isInfinity()) return this;
-		if (k.signum() == 0) return this.curve.getInfinity();
-
-		var e = k;
-		var h = e.multiply(new BigInteger("3"));
-
-		var neg = this.negate();
-		var R = this;
-
-		var i;
-		for (i = h.bitLength() - 2; i > 0; --i) {
-			R = R.twice();
-
-			var hBit = h.testBit(i);
-			var eBit = e.testBit(i);
-
-			if (hBit != eBit) {
-				R = R.add2D(hBit ? this : neg);
-			}
-		}
-
-		return R;
-	};
-
-	ec.PointFp.prototype.isOnCurve = function () {
-		var x = this.getX().toBigInteger();
-		var y = this.getY().toBigInteger();
-		var a = this.curve.getA().toBigInteger();
-		var b = this.curve.getB().toBigInteger();
-		var n = this.curve.getQ();
-		var lhs = y.multiply(y).mod(n);
-		var rhs = x.multiply(x).multiply(x).add(a.multiply(x)).add(b).mod(n);
-		return lhs.equals(rhs);
-	};
-
 	ec.PointFp.prototype.toString = function () {
 		return '(' + this.getX().toBigInteger().toString() + ',' + this.getY().toBigInteger().toString() + ')';
 	};
@@ -475,35 +268,24 @@
 	*
 	* See SEC 1, section 3.2.2.1: Elliptic Curve Public Key Validation Primitive
 	*/
+	/*
+	 * Validate a public key point.
+	 * Delegates to noble-secp256k1 which enforces:
+	 *   - prefix byte canonical (02/03/04)
+	 *   - coordinates in [0, p)
+	 *   - point satisfies y² ≡ x³ + 7 (mod p)
+	 *   - point is not at infinity
+	 * For secp256k1 (cofactor h=1) every point on the curve is in the
+	 * prime-order subgroup, so no separate nQ=O check is needed.
+	 */
 	ec.PointFp.prototype.validate = function () {
-		var n = this.curve.getQ();
-
-		// Check Q != O
 		if (this.isInfinity()) {
 			throw new Error("Point is at infinity.");
 		}
-
-		// Check coordinate bounds
-		var x = this.getX().toBigInteger();
-		var y = this.getY().toBigInteger();
-		if (x.compareTo(BigInteger.ONE) < 0 || x.compareTo(n.subtract(BigInteger.ONE)) > 0) {
-			throw new Error('x coordinate out of bounds');
-		}
-		if (y.compareTo(BigInteger.ONE) < 0 || y.compareTo(n.subtract(BigInteger.ONE)) > 0) {
-			throw new Error('y coordinate out of bounds');
-		}
-
-		// Check y^2 = x^3 + ax + b (mod n)
-		if (!this.isOnCurve()) {
-			throw new Error("Point is not on the curve.");
-		}
-
-		// Check nQ = 0 (Q is a scalar multiple of G)
-		if (this.multiply(n).isInfinity()) {
-			// TODO: This check doesn't work - fix.
-			throw new Error("Point is not a scalar multiple of G.");
-		}
-
+		// Encode to compressed bytes and let noble do the authoritative check
+		var encoded = this.getEncoded(1);
+		var hex = Crypto.util.bytesToHex(encoded).toUpperCase();
+		nobleSecp256k1.Point.fromHex(hex); // throws on any invalid input
 		return true;
 	};
 
@@ -549,33 +331,19 @@
 		this.reducer.reduce(x);
 	};
 
-	// for now, work with hex strings because they're easier in JS
-	// compressed support added by bitaddr.org
+	// Decode a hex-encoded public key point.
+	// noble-secp256k1 is the authoritative decoder for all cases:
+	// decompression (02/03), uncompressed validation (04), and on-curve check.
+	// Hybrid encoding (06/07) is rejected by noble automatically.
 	ec.CurveFp.prototype.decodePointHex = function (s) {
 		var firstByte = parseInt(s.substr(0, 2), 16);
-		switch (firstByte) { // first byte
-			case 0:
-				return this.infinity;
-			case 2: // compressed
-			case 3: // compressed
-				var yTilde = firstByte & 1;
-				var xHex = s.substr(2, s.length - 2);
-				var X1 = new BigInteger(xHex, 16);
-				return this.decompressPoint(yTilde, X1);
-			case 4: // uncompressed
-			case 6: // hybrid
-			case 7: // hybrid
-				var len = (s.length - 2) / 2;
-				var xHex = s.substr(2, len);
-				var yHex = s.substr(len + 2, len);
-
-				return new ec.PointFp(this,
-					this.fromBigInteger(new BigInteger(xHex, 16)),
-					this.fromBigInteger(new BigInteger(yHex, 16)));
-
-			default: // unsupported
-				return null;
-		}
+		if (firstByte === 0) return this.infinity;
+		// Delegate to noble: handles 02/03/04, validates on-curve, rejects 06/07
+		var np = nobleSecp256k1.Point.fromHex(s.toUpperCase());
+		var xBig = new BigInteger(np.x.toString(16), 16);
+		var yBig = new BigInteger(np.y.toString(16), 16);
+		var compressed = (firstByte === 2 || firstByte === 3);
+		return new ec.PointFp(this, this.fromBigInteger(xBig), this.fromBigInteger(yBig), null, compressed);
 	};
 
 	ec.CurveFp.prototype.encodePointHex = function (p) {
@@ -592,29 +360,6 @@
 		}
 		return "04" + xHex + yHex;
 	};
-
-	/*
-	* Copyright (c) 2000 - 2011 The Legion Of The Bouncy Castle (http://www.bouncycastle.org)
-	* Ported to JavaScript by bitaddr.org
-	*
-	* Number yTilde
-	* BigInteger X1
-	*/
-	ec.CurveFp.prototype.decompressPoint = function (yTilde, X1) {
-		var x = this.fromBigInteger(X1);
-		var alpha = x.multiply(x.square().add(this.getA())).add(this.getB());
-		var beta = alpha.sqrt();
-		// if we can't find a sqrt we haven't got a point on the curve - run!
-		if (beta == null) throw new Error("Invalid point compression");
-		var betaValue = beta.toBigInteger();
-		var bit0 = betaValue.testBit(0) ? 1 : 0;
-		if (bit0 != yTilde) {
-			// Use the other root
-			beta = this.fromBigInteger(this.getQ().subtract(betaValue));
-		}
-		return new ec.PointFp(this, x, beta, null, true);
-	};
-
 
 	ec.fromHex = function (s) { return new BigInteger(s, 16); };
 

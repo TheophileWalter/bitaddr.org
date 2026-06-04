@@ -32,22 +32,6 @@
 			return key;
 		},
 
-		checkAndShowMini: function (key) {
-			if (Bitcoin.ECKey.isMiniFormat(key)) {
-				// show Private Key Mini Format
-				document.getElementById("detailprivmini").innerHTML = key;
-				document.getElementById("detailmini").style.display = "block";
-			}
-		},
-
-		checkAndShowBase6: function (key) {
-			if (Bitcoin.ECKey.isBase6Format(key)) {
-				// show Private Key Base6 Format
-				document.getElementById("detailprivb6").innerHTML = key;
-				document.getElementById("detailb6").style.display = "block";
-			}
-		},
-
 		keyToECKeyWithBrain: function (key) {
 			var btcKey = new Bitcoin.ECKey(key);
 			if (btcKey.error != null) {
@@ -112,8 +96,6 @@
 			if (privateKey.isBIP38Format(key)) {
 				return;
 			}
-			detail.checkAndShowMini(key);
-			detail.checkAndShowBase6(key);
 			var btcKey = detail.keyToECKeyWithBrain(key);
 			if (btcKey.priv == null) {
 				return;
@@ -153,8 +135,6 @@
 				return;
 			}
 			document.getElementById("detailbip38commands").style.display = "none";
-			detail.checkAndShowMini(key);
-			detail.checkAndShowBase6(key);
 			var btcKey = detail.keyToECKeyWithBrain(key);
 			if(btcKey.priv == null){
 				return;
@@ -169,7 +149,6 @@
 				// Uncompressed key
 				btcKey.setCompressed(false);
 				document.getElementById("detailprivhex").innerHTML = btcKey.toString().toUpperCase();
-				document.getElementById("detailprivb64").innerHTML = btcKey.toString("base64");
 				var bitcoinAddress = btcKey.getBitcoinAddress();
 				var wif = btcKey.getBitcoinWalletImportFormat();
 				document.getElementById("detailpubkey").innerHTML = btcKey.getPubKeyHex();
@@ -240,9 +219,6 @@
 			document.getElementById("detailprivwif").innerHTML = "";
 			document.getElementById("detailprivwifcomp").innerHTML = "";
 			document.getElementById("detailprivhex").innerHTML = "";
-			document.getElementById("detailprivb64").innerHTML = "";
-			document.getElementById("detailprivb6").innerHTML = "";
-			document.getElementById("detailprivmini").innerHTML = "";
 			document.getElementById("detailprivbip38").innerHTML = "";
 			document.getElementById("detailqrcodepublic").innerHTML = "";
 			document.getElementById("detailqrcodepubliccomp").innerHTML = "";
@@ -251,8 +227,6 @@
 			document.getElementById("detailqrcodepublicTaproot").innerHTML = "";
 			document.getElementById("detailqrcodeprivate").innerHTML = "";
 			document.getElementById("detailqrcodeprivatecomp").innerHTML = "";
-			document.getElementById("detailb6").style.display = "none";
-			document.getElementById("detailmini").style.display = "none";
 			document.getElementById("detailbip38").style.display = "none";
 		},
 

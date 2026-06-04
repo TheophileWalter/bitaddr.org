@@ -8,14 +8,11 @@ var defaults = {
 	
 	bytesPerChar: 2,
 	maxBytesPerChar: 6, // Math.pow(256,7) > Math.pow(2,53)
-		
+
 	// Primitive polynomials (in decimal form) for Galois Fields GF(2^n), for 2 <= n <= 30
 	// The index of each term in the array corresponds to the n for that polynomial
 	// i.e. to get the polynomial for n=16, use primitivePolynomials[16]
-	primitivePolynomials: [null,null,1,3,3,5,3,3,29,17,9,5,83,27,43,3,45,9,39,39,9,5,3,33,27,9,71,39,9,5,83],
-	
-	// warning for insecure PRNG
-	warning: 'WARNING:\nA secure random number generator was not found.\nUsing Math.random(), which is NOT cryptographically strong!'
+	primitivePolynomials: [null,null,1,3,3,5,3,3,29,17,9,5,83,27,43,3,45,9,39,39,9,5,3,33,27,9,71,39,9,5,83]
 };
 
 // Protected settings object
@@ -38,6 +35,7 @@ function init(bits){
 	config.bits = bits || defaults.bits;
 	config.size = Math.pow(2, config.bits);
 	config.max = config.size - 1;
+	config.unsafePRNG = false;
 	
 	// Construct the exp and log tables for multiplication.	
 	var logs = [], exps = [], x = 1, primitive = defaults.primitivePolynomials[config.bits];
@@ -116,34 +114,12 @@ function getRNG(){
 		}
 	}
 
-	// A totally insecure RNG!!! (except in Safari)
-	// Will produce a warning every time it is called.
-	config.unsafePRNG = true;
-	warn();
-	
-	var bitsPerNum = 32;
-	var max = Math.pow(2,bitsPerNum)-1;
-	return function(bits){
-		var elems = Math.ceil(bits/bitsPerNum);
-		var arr = [], str=null;
-		while(str===null){
-			for(var i=0; i<elems; i++){
-				arr[i] = Math.floor(Math.random() * max + 1); 
-			}
-			str = construct(bits, arr, 10, bitsPerNum);
-		}
-		return str;
-	};
+	// No CSPRNG available — abort rather than fall back to Math.random
+	throw new Error(
+		'secrets.js: No cryptographically secure RNG found. ' +
+		'Key splitting requires window.crypto.getRandomValues (browser) or crypto.randomBytes (Node.js).'
+	);
 };
-
-// Warn about using insecure rng.
-// Called when Math.random() is being used.
-function warn(){
-	global['console']['warn'](defaults.warning);
-	if(typeof global['alert'] === 'function' && config.alert){
-		global['alert'](defaults.warning);
-	}
-}
 
 // Set the PRNG to use. If no RNG function is supplied, pick a default using getRNG()
 /** @expose **/
@@ -151,7 +127,7 @@ exports.setRNG = function(rng, alert){
 	if(!isInited()){
 		this.init();
 	}
-	config.unsafePRNG=false;
+	config.unsafePRNG = false;
 	rng = rng || getRNG();
 	
 	// test the RNG (5 times)
@@ -180,9 +156,6 @@ exports.random = function(bits){
 		throw new Error('Number of bits must be an integer greater than 1.')
 	}
 	
-	if(config.unsafePRNG){
-		warn();
-	}
 	return bin2hex(config.rng(bits));
 }
 
@@ -220,10 +193,6 @@ exports.share = function(secret, numShares, threshold, padLength, withoutPrefix)
 	}
 	if(typeof padLength !== 'number' || padLength%1 !== 0 ){
 		throw new Error('Zero-pad length must be an integer greater than 1.');
-	}
-	
-	if(config.unsafePRNG){
-		warn();
 	}
 	
 	secret = '1' + hex2bin(secret); // append a 1 so that we can preserve the correct number of leading zeros in our secret

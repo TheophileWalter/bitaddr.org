@@ -5,9 +5,7 @@ ninja.privateKey = {
 		return (
 					Bitcoin.ECKey.isWalletImportFormat(key) ||
 					Bitcoin.ECKey.isCompressedWalletImportFormat(key) ||
-					Bitcoin.ECKey.isHexFormat(key) ||
-					Bitcoin.ECKey.isBase64Format(key) ||
-					Bitcoin.ECKey.isMiniFormat(key)
+					Bitcoin.ECKey.isHexFormat(key)
 				);
 	},
 	getECKeyFromAdding: function (privKey1, privKey2) {
@@ -98,6 +96,8 @@ ninja.privateKey = {
 		}
 
 		var decrypted;
+		// BIP38 mandates AES-256-ECB on 16-byte XOR-mixed blocks (see BIP38 spec §4).
+		// ECB is protocol-required here; it is NOT used for any other purpose.
 		var AES_opts = { mode: new Crypto.mode.ECB(Crypto.pad.NoPadding), asBytes: true };
 
 		var verifyHashAndReturn = function () {
@@ -330,18 +330,19 @@ ninja.publicKey = {
 	},
 	// Taproot P2TR address from a compressed public key byte array
 	getTaprootAddressFromByteArray: function (pubKeyByteArray) {
-		var ecparams = EllipticCurve.getSECCurveByName("secp256k1");
 		var compPub = pubKeyByteArray.slice();
 		compPub[0] = 0x02; // lift_x: force even-Y
-		var P = ecparams.getCurve().decodePointHex(Crypto.util.bytesToHex(compPub).toUpperCase());
-		var xBytes = P.getX().toBigInteger().toByteArrayUnsigned();
-		while (xBytes.length < 32) xBytes.unshift(0);
+		var pubHex = Crypto.util.bytesToHex(compPub).toUpperCase();
+		// x-only internal key bytes (32 bytes)
+		var xBytes = compPub.slice(1);
+		// tagged_hash("TapTweak", xBytes) per BIP340
 		var tagHash = Crypto.SHA256("TapTweak", { asBytes: true });
 		var tweakBytes = Crypto.SHA256(tagHash.concat(tagHash).concat(xBytes), { asBytes: true });
-		var tweakInt = BigInteger.fromByteArrayUnsigned(tweakBytes);
-		var Q = P.add(ecparams.getG().multiply(tweakInt));
-		var qXBytes = Q.getX().toBigInteger().toByteArrayUnsigned();
-		while (qXBytes.length < 32) qXBytes.unshift(0);
+		var tweakHex = Crypto.util.bytesToHex(tweakBytes);
+		// Q = P + tweak*G via noble
+		var nobleP = nobleSecp256k1.Point.fromHex(pubHex);
+		var nobleQ = nobleP.add(nobleSecp256k1.Point.BASE.multiply(BigInt('0x' + tweakHex)));
+		var qXBytes = Crypto.util.hexToBytes(nobleQ.x.toString(16).padStart(64, '0'));
 		return Bitcoin.Bech32.segwitAddress('bc', 1, qXBytes);
 	},
 	getHexFromByteArray: function (pubKeyByteArray) {
