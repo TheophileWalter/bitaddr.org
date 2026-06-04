@@ -1,3 +1,5 @@
+AddType text/plain .sig
+
 RewriteEngine on
 
 RewriteCond %{HTTPS} off

@@ -40,29 +40,11 @@ Bitcoin.Util = {
 			return [0xff].concat(Crypto.util.wordsToBytes([i >>> 32, i]));
 		}
 	},
-	/**
-	* Parse a Bitcoin value byte array, returning a BigInteger.
-	*/
-	valueToBigInt: function (valueBuffer) {
-		if (valueBuffer instanceof BigInteger) return valueBuffer;
-
-		// Prepend zero byte to prevent interpretation as negative integer
-		return BigInteger.fromByteArrayUnsigned(valueBuffer);
-	},
-	/**
-	* Format a Bitcoin value as a string.
-	*
-	* Takes a BigInteger or byte-array and returns that amount of Bitcoins in a
-	* nice standard formatting.
-	*
-	* Examples:
-	* 12.3555
-	* 0.1234
-	* 900.99998888
-	* 34.00
-	*/
+	// Format a satoshi value (native BigInt or byte array) as a BTC string
 	formatValue: function (valueBuffer) {
-		var value = this.valueToBigInt(valueBuffer).toString();
+		var n = typeof valueBuffer === 'bigint' ? valueBuffer :
+			BigInt('0x' + Array.from(valueBuffer).map(function (b) { return ('0' + b.toString(16)).slice(-2); }).join('') || '0');
+		var value = n.toString();
 		var integerPart = value.length > 8 ? value.substr(0, value.length - 8) : '0';
 		var decimalPart = value.length > 8 ? value.substr(value.length - 8) : value;
 		while (decimalPart.length < 8) decimalPart = "0" + decimalPart;
@@ -70,24 +52,14 @@ Bitcoin.Util = {
 		while (decimalPart.length < 2) decimalPart += "0";
 		return integerPart + "." + decimalPart;
 	},
-	/**
-	* Parse a floating point string as a Bitcoin value.
-	*
-	* Keep in mind that parsing user input is messy. You should always display
-	* the parsed value back to the user to make sure we understood his input
-	* correctly.
-	*/
+	// Parse a BTC string into satoshis (native BigInt)
 	parseValue: function (valueString) {
-		// TODO: Detect other number formats (e.g. comma as decimal separator)
 		var valueComp = valueString.split('.');
-		var integralPart = valueComp[0];
-		var fractionalPart = valueComp[1] || "0";
+		var integralPart = valueComp[0] || '0';
+		var fractionalPart = valueComp[1] || '0';
 		while (fractionalPart.length < 8) fractionalPart += "0";
-		fractionalPart = fractionalPart.replace(/^0+/g, '');
-		var value = BigInteger.valueOf(parseInt(integralPart));
-		value = value.multiply(BigInteger.valueOf(100000000));
-		value = value.add(BigInteger.valueOf(parseInt(fractionalPart)));
-		return value;
+		fractionalPart = (fractionalPart.replace(/^0+/, '') || '0').slice(0, 8);
+		return BigInt(integralPart) * 100000000n + BigInt(fractionalPart);
 	},
 	/**
 	* Calculate RIPEMD160(SHA256(data)).

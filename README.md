@@ -15,6 +15,24 @@ New features compared to the original:
 - Modern dark/light theme
 - Improved entropy collection with progress bar
 
+Security improvements:
+- All secp256k1 operations backed by [noble-secp256k1](https://github.com/paulmillr/noble-secp256k1) v1.7.1 (audited, MIT)
+- Homemade BigInteger and EllipticCurve libraries fully removed — no custom cryptographic arithmetic
+- Deterministic RFC 6979 signatures (constant-time, low-s) via noble's `signSync`
+- Private keys stored as `Uint8Array(32)`; scalar arithmetic uses native `BigInt`
+
+Project structure:
+```
+src/
+├── crypto/   noble-secp256k1, CryptoJS (SHA-256, AES, RIPEMD-160, PBKDF2, HMAC), scrypt, ECDSA bridge
+├── wallet/   address formats, Base58, ECKey, BIP38, split wallet, secrets.js
+├── ui/       HTML template, CSS, wallet panels, QR code, seeder, translations
+└── tests/    unit tests (73 synchronous tests)
+```
+
+Build: `node build.js` — produces a single self-contained `bitaddr.org.html`.
+Tests: `node run-tests.js` — runs all 73 tests in Node.js (no browser required).
+
 
 Please send DONATIONS for this project to Bitcoin Address:
 bc1qx4z2w9lmudccutv79jze0zzdcmg7mxxj7jd3k4
@@ -47,15 +65,14 @@ script tags.
 
 Summary of JavaScript functions with a redistributable license:
 
-JavaScript function   | License
---------------------- | ---------------
-window.Crypto         | BSD License
-window.SecureRandom   | BSD License
-window.EllipticCurve  | BSD License
-window.BigInteger     | BSD License
-window.QRCode         | MIT License
-window.Bitcoin        | MIT License
-window.Crypto_scrypt  | MIT License
+JavaScript function      | License
+----------------------- | ---------------
+window.Crypto           | BSD License
+window.SecureRandom     | BSD License
+window.nobleSecp256k1   | MIT License
+window.QRCode           | MIT License
+window.Bitcoin          | MIT License
+window.Crypto_scrypt    | MIT License
 
 The [bitaddr.org](https://bitaddr.org) software is available under The MIT License (MIT)
 Copyright (c) 2011-2016 bitaddress.org (pointbiz)

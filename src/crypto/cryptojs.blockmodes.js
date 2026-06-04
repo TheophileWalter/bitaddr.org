@@ -117,8 +117,10 @@
 	C_pad.iso10126 = {
 		pad: function (cipher, message) {
 			var reqd = _requiredPadding(cipher, message);
-			for (var i = 1; i < reqd; i++) {
-				message.push(Math.floor(Math.random() * 256));
+			if (reqd > 1) {
+				var randBytes = new Uint8Array(reqd - 1);
+				window.crypto.getRandomValues(randBytes);
+				for (var i = 0; i < reqd - 1; i++) message.push(randBytes[i]);
 			}
 			message.push(reqd);
 		},

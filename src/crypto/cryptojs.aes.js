@@ -3,6 +3,13 @@
 * http://code.google.com/p/crypto-js/
 * Copyright (c) 2009-2013, Jeff Mott. All rights reserved.
 * http://code.google.com/p/crypto-js/wiki/License
+*
+* SECURITY NOTE — AES-ECB mode is used exclusively for BIP38 key encryption/decryption.
+* BIP38 (https://github.com/bitcoin/bips/blob/master/bip-0038.mediawiki) mandates raw
+* AES-256-ECB on exactly 16-byte blocks that have been XOR-mixed with scrypt-derived key
+* material.  This is a protocol requirement; replacing ECB with an AEAD mode would break
+* interoperability with all BIP38 implementations.
+* AES-ECB is NOT used anywhere else in this application for user data.
 */
 (function () {
 
