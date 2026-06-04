@@ -1,10 +1,10 @@
-# bitaddr.org
+# [bitaddr.org](https://bitaddr.org)
 JavaScript Client-Side Bitcoin Wallet Generator
 
 This project is a fork of [bitaddress.org](https://github.com/pointbiz/bitaddress.org) by pointbiz,
 maintained and extended by Théophile Walter.
 
-The bitaddr.org project provides an all-in-one HTML document with embedded
+The [bitaddr.org](https://bitaddr.org) project provides an all-in-one HTML document with embedded
 JavaScript/CSS/Images. The JavaScript is readable, not minified, and contains no
 XMLHttpRequest's (no AJAX). The benefit of this technique is you can load the
 JavaScript locally and trust that the JavaScript did not change after being loaded.
@@ -37,8 +37,8 @@ Notice of Copyrights and Licenses:
 This project is a fork of bitaddress.org by pointbiz.
 Original repository: https://github.com/pointbiz/bitaddress.org
 
-The bitaddr.org project, software and embedded resources are copyright Théophile Walter.
-The bitaddr.org name and logo are not part of the open source license.
+The [bitaddr.org](https://bitaddr.org) project, software and embedded resources are copyright Théophile Walter.
+The [bitaddr.org](https://bitaddr.org) name and logo are not part of the open source license.
 
 Portions of the all-in-one HTML document contain JavaScript codes that are the
 copyrights of others. The individual copyrights are included throughout the document
@@ -57,7 +57,7 @@ window.QRCode         | MIT License
 window.Bitcoin        | MIT License
 window.Crypto_scrypt  | MIT License
 
-The bitaddr.org software is available under The MIT License (MIT)
+The [bitaddr.org](https://bitaddr.org) software is available under The MIT License (MIT)
 Copyright (c) 2011-2016 bitaddress.org (pointbiz)
 Copyright (c) 2026 Théophile Walter
 
