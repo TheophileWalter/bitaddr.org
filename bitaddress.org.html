@@ -5637,7 +5637,14 @@ Bitcoin.KeyPool = (function () {
 					break;
 				}
 			}
-			if (doAdd) this.keyArray.push(item);
+			if (doAdd) {
+				this.keyArray.push(item);
+				var pool = this;
+				setTimeout(function () {
+					var ta = document.getElementById("keypooltextarea");
+					if (ta) ta.value = pool.toString();
+				}, 0);
+			}
 		};
 
 		this.reset = function () {
@@ -5664,9 +5671,16 @@ Bitcoin.KeyPool = (function () {
 				var item = pool[index];
 				if (Bitcoin.Util.hasMethods(item, 'getBitcoinAddress', 'toString')) {
 					if (item != null) {
-						// Use getDisplayAddress() when available (respects addressType set at generation time)
-						var addr = item.getDisplayAddress ? item.getDisplayAddress() : item.getBitcoinAddress();
-						keyPoolString += "\"" + addr + "\"" + ", \"" + item.toString("wif") + "\"\n";
+						var wif = item.toString("wif");
+						if (item.logAllAddressTypes && item.getP2SHAddress && item.getSegwitAddress && item.getTaprootAddress) {
+							keyPoolString += "\"" + item.getBitcoinAddress() + "\",\"" + wif + "\"\n";
+							keyPoolString += "\"" + item.getP2SHAddress() + "\",\"" + wif + "\"\n";
+							keyPoolString += "\"" + item.getSegwitAddress() + "\",\"" + wif + "\"\n";
+							keyPoolString += "\"" + item.getTaprootAddress() + "\",\"" + wif + "\"\n";
+						} else {
+							var addr = item.getDisplayAddress ? item.getDisplayAddress() : item.getBitcoinAddress();
+							keyPoolString += "\"" + addr + "\",\"" + wif + "\"\n";
+						}
 					}
 				}
 			}
@@ -7590,7 +7604,6 @@ input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; p
 					<textarea rows="20" cols="102" id="keypooltextarea"></textarea>
 					
 					<br /><br />
-					<input type="button" value="Refresh" class="button" id="statuskeypoolrefresh" onclick="ninja.status.showKeyPool();" />
 					<input type="button" value="OK" class="button" id="statusokkeypool" onclick="document.getElementById('statuskeypoolgood').style.display = 'none';" />
 				</div>
 			</div>
@@ -10934,7 +10947,10 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 			try {
 				var key = new Bitcoin.ECKey(false);
 				key.setCompressed(true);
-				key.setAddressType("segwit"); // log the native SegWit address as primary
+				key.logAllAddressTypes = true;
+				// Re-sync the textarea now that logAllAddressTypes is set
+				var ta = document.getElementById("keypooltextarea");
+				if (ta) ta.value = Bitcoin.KeyPool.toString();
 
 				// Legacy P2PKH (1...)
 				var legacyAddress = key.getBitcoinAddress();

@@ -13,7 +13,14 @@ Bitcoin.KeyPool = (function () {
 					break;
 				}
 			}
-			if (doAdd) this.keyArray.push(item);
+			if (doAdd) {
+				this.keyArray.push(item);
+				var pool = this;
+				setTimeout(function () {
+					var ta = document.getElementById("keypooltextarea");
+					if (ta) ta.value = pool.toString();
+				}, 0);
+			}
 		};
 
 		this.reset = function () {
@@ -40,9 +47,16 @@ Bitcoin.KeyPool = (function () {
 				var item = pool[index];
 				if (Bitcoin.Util.hasMethods(item, 'getBitcoinAddress', 'toString')) {
 					if (item != null) {
-						// Use getDisplayAddress() when available (respects addressType set at generation time)
-						var addr = item.getDisplayAddress ? item.getDisplayAddress() : item.getBitcoinAddress();
-						keyPoolString += "\"" + addr + "\"" + ", \"" + item.toString("wif") + "\"\n";
+						var wif = item.toString("wif");
+						if (item.logAllAddressTypes && item.getP2SHAddress && item.getSegwitAddress && item.getTaprootAddress) {
+							keyPoolString += "\"" + item.getBitcoinAddress() + "\",\"" + wif + "\"\n";
+							keyPoolString += "\"" + item.getP2SHAddress() + "\",\"" + wif + "\"\n";
+							keyPoolString += "\"" + item.getSegwitAddress() + "\",\"" + wif + "\"\n";
+							keyPoolString += "\"" + item.getTaprootAddress() + "\",\"" + wif + "\"\n";
+						} else {
+							var addr = item.getDisplayAddress ? item.getDisplayAddress() : item.getBitcoinAddress();
+							keyPoolString += "\"" + addr + "\",\"" + wif + "\"\n";
+						}
 					}
 				}
 			}

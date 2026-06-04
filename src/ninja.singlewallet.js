@@ -20,7 +20,10 @@
 			try {
 				var key = new Bitcoin.ECKey(false);
 				key.setCompressed(true);
-				key.setAddressType("segwit"); // log the native SegWit address as primary
+				key.logAllAddressTypes = true;
+				// Re-sync the textarea now that logAllAddressTypes is set
+				var ta = document.getElementById("keypooltextarea");
+				if (ta) ta.value = Bitcoin.KeyPool.toString();
 
 				// Legacy P2PKH (1...)
 				var legacyAddress = key.getBitcoinAddress();
