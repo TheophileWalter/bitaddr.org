@@ -1,7 +1,7 @@
 ﻿// ── Theme toggle ────────────────────────────────────────────────────────
 ninja.theme = {
 	current: function () {
-		return document.documentElement.getAttribute('data-theme') || 'dark';
+		return document.documentElement.getAttribute('data-theme') || 'light';
 	},
 	apply: function (theme) {
 		document.documentElement.setAttribute('data-theme', theme);

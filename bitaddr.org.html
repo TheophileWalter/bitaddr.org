@@ -56,7 +56,7 @@
 	<script>
 		// Apply saved theme before first paint to avoid flash
 		(function() {
-			var t = localStorage.getItem('bitaddr-theme') || 'dark';
+			var t = localStorage.getItem('bitaddr-theme') || 'light';
 			document.documentElement.setAttribute('data-theme', t);
 		})();
 	</script>
@@ -8244,7 +8244,7 @@ ninja.publicKey = {
 ﻿// ── Theme toggle ────────────────────────────────────────────────────────
 ninja.theme = {
 	current: function () {
-		return document.documentElement.getAttribute('data-theme') || 'dark';
+		return document.documentElement.getAttribute('data-theme') || 'light';
 	},
 	apply: function (theme) {
 		document.documentElement.setAttribute('data-theme', theme);
