@@ -15,7 +15,7 @@ https://bitcointalk.org/index.php?topic=43496.0
 
 
 Please send DONATIONS for this project to Bitcoin Address: 
-1NiNja1bUmhSoTXozBRBEtR8LeF9TGbZBN
+bc1qx4z2w9lmudccutv79jze0zzdcmg7mxxj7jd3k4
 
 
 END USER NOTES:

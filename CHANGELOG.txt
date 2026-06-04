@@ -12,7 +12,7 @@ https://github.com/pointbiz/bitaddress.org
 Bitcoin Forum thread:
 https://bitcointalk.org/index.php?topic=43496.0
 
-Donation Address: 1NiNja1bUmhSoTXozBRBEtR8LeF9TGbZBN
+Donation Address: bc1qx4z2w9lmudccutv79jze0zzdcmg7mxxj7jd3k4
 
 END USER NOTES: 
  1) For Bulk Wallet I recommended using Google Chrome, it's the fastest.
