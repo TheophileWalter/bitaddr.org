@@ -117,7 +117,7 @@
 //main.css
 	</style>
 </head>
-<body>
+<body onmousemove="ninja.seeder.seed(event);">
 	<div id="busyblock"></div>
 	<div id="donationmodal" onclick="ninja.donation.hide();">
 		<div id="donationbox" onclick="event.stopPropagation();">
@@ -162,7 +162,22 @@
 			<li class="tab" id="splitwallet" onclick="ninja.tab.select(this);">Split Wallet
 			<li class="tab" id="detailwallet" onclick="ninja.tab.select(this);">Wallet Details
 		</ul>
-		
+
+		<div id="generate">
+			<div id="generatetitle"><span id="generatelabelbitcoinaddress">Generating Bitcoin Address...</span></div>
+			<div id="entropylabelrow">
+				<span id="generatelabelmovemouse">MOVE your mouse around to add some extra randomness...</span>
+				<span id="mousemovelimit">0%</span>
+			</div>
+			<div id="entropyprogressbar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+				<div id="entropyprogressfill"></div>
+			</div>
+			<div id="entropykeyrow">
+				<span id="generatelabelkeypress">OR type some random characters into this textbox</span>
+				<input type="text" id="generatekeyinput" autocomplete="off" onkeydown="ninja.seeder.seedKeyPress(event);" />
+			</div>
+		</div>
+
 		<div id="wallets">
 			<div id="singlearea" class="walletarea">
 				<div class="commands">

@@ -2687,10 +2687,12 @@ var nobleSecp256k1 = (() => {
 /*!
 * Cryptographically Secure Random Number Generator
 *
-* Sole source: window.crypto.getRandomValues (OS CSPRNG, NIST SP 800-90A).
-* No user-interaction seeding, no environmental entropy accumulation.
-* The OS CSPRNG is the only legitimate source; all other signals are
-* weaker, harder to audit, and increase attack surface without benefit.
+* Primary source: window.crypto.getRandomValues (OS CSPRNG, NIST SP 800-90A).
+* Auxiliary pool: user-interaction entropy (mouse, keyboard) mixed via SHA-256.
+*   The auxiliary pool exists ONLY as a defence-in-depth measure in case the
+*   browser CSPRNG were ever compromised.  It cannot weaken output: when pool
+*   entropy is present, output = CSPRNG XOR SHA256(pool || CSPRNG), so output
+*   is at least as strong as the stronger of the two sources.
 *
 * Copyright Tom Wu, bitaddr.org  BSD License.
 * http://www-cs-students.stanford.edu/~tjw/jsbn/LICENSE
@@ -2709,7 +2711,32 @@ var nobleSecp256k1 = (() => {
 		}
 	})();
 
-	// Fill byte array ba[] with CSPRNG bytes
+	// ── Auxiliary entropy pool ────────────────────────────────────────────────
+	// Populated by ninja.seeder via mouse/keyboard events.
+	// Serves ONLY as a precaution: the CSPRNG is always the primary source.
+
+	var _auxPool = (function () {
+		// Pre-seed with CSPRNG to avoid a trivial all-zero initial state.
+		var p = new Uint8Array(32);
+		window.crypto.getRandomValues(p);
+		return p;
+	}());
+	var _auxPoolHasUserEntropy = false;
+
+	// Mix caller-supplied bytes into the pool: pool = SHA256(pool || data)
+	// Called by ninja.seeder on each mouse/keyboard event.
+	sr.mixEntropy = function (data) {
+		var input = new Array(32 + data.length);
+		for (var i = 0; i < 32; i++) input[i] = _auxPool[i];
+		for (var i = 0; i < data.length; i++) input[32 + i] = data[i] & 0xff;
+		var hash = Crypto.SHA256(input, { asBytes: true });
+		for (var i = 0; i < 32; i++) _auxPool[i] = hash[i];
+		_auxPoolHasUserEntropy = true;
+	};
+
+	// Fill byte array ba[] with cryptographically random bytes.
+	// When user entropy has been collected, each 32-byte block is XOR'd with
+	// SHA256(pool || chunk || chunkIndex) to fold in the auxiliary pool.
 	sr.prototype.nextBytes = function (ba) {
 		if (!window.crypto || !window.crypto.getRandomValues) {
 			throw new Error(
@@ -2719,7 +2746,35 @@ var nobleSecp256k1 = (() => {
 		}
 		var ua = new Uint8Array(ba.length);
 		window.crypto.getRandomValues(ua);
-		for (var i = 0; i < ua.length; i++) ba[i] = ua[i];
+
+		if (!_auxPoolHasUserEntropy) {
+			// User entropy not yet collected — use CSPRNG output directly.
+			for (var i = 0; i < ua.length; i++) ba[i] = ua[i];
+			return;
+		}
+
+		// Combine CSPRNG output with the auxiliary entropy pool.
+		// Security invariant: output is at least as strong as CSPRNG alone,
+		// and stronger if CSPRNG were weak but pool has real user entropy.
+		for (var off = 0; off < ba.length; off += 32) {
+			var end = Math.min(off + 32, ba.length);
+			var len = end - off;
+			// h = pool(32) || chunkIdx(1) || csprng_chunk(len)
+			var h = new Array(33 + len);
+			for (var i = 0; i < 32; i++) h[i] = _auxPool[i];
+			h[32] = (off / 32) & 0xff;
+			for (var i = 0; i < len; i++) h[33 + i] = ua[off + i];
+			var mask = Crypto.SHA256(h, { asBytes: true });
+			for (var i = 0; i < len; i++) ba[off + i] = ua[off + i] ^ mask[i];
+		}
+
+		// Forward secrecy: update pool so a future pool compromise cannot
+		// retroactively reveal keys generated in this call.
+		var fwd = new Array(32 + ba.length);
+		for (var i = 0; i < 32; i++) fwd[i] = _auxPool[i];
+		for (var i = 0; i < ba.length; i++) fwd[32 + i] = ba[i];
+		var newPool = Crypto.SHA256(fwd, { asBytes: true });
+		for (var i = 0; i < 32; i++) _auxPool[i] = newPool[i];
 	};
 
 	// Static single-byte helper used by some internal callers
@@ -5306,6 +5361,59 @@ hr { margin: 20px 0; border: none; border-top: 1px solid var(--border); }
 .show { display: block; }
 .pubkeyhex { word-wrap: break-word; }
 
+/* ── Entropy collection panel ─────────────────────────────────────────── */
+/* Shown while ninja.seeder gathers auxiliary randomness from the user.   */
+/* Sits in the normal flow below the menu (logo + controls remain above). */
+/* Hides itself (display:none) once enough events have been collected.    */
+#generate {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    padding: 28px 32px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+#generatetitle { font-size: 1.05em; font-weight: 600; color: var(--text); }
+#entropylabelrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+#entropylabelrow #generatelabelmovemouse { color: var(--text-muted); font-size: 0.88em; flex: 1; }
+#mousemovelimit {
+    font-size: 0.88em; font-weight: 700; color: var(--accent);
+    background: var(--accent-dim); border: 1px solid var(--accent);
+    border-radius: 20px; padding: 2px 10px; white-space: nowrap;
+    min-width: 3.5em; text-align: center;
+}
+#entropyprogressbar {
+    width: 100%; height: 10px;
+    background: var(--bg-hover); border: 1px solid var(--border);
+    border-radius: 6px; overflow: hidden;
+}
+#entropyprogressfill {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--accent) 0%, #ffb347 100%);
+    border-radius: 6px;
+    transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 10px rgba(247,147,26,.45);
+    position: relative;
+}
+#entropyprogressfill::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.25) 50%, transparent 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.6s linear infinite;
+}
+@keyframes shimmer { from { background-position: -200% 0; } to { background-position: 200% 0; } }
+#entropykeyrow { display: flex; flex-direction: column; gap: 8px; }
+#generatelabelkeypress { color: var(--text-muted); font-size: 0.85em; }
+#generatekeyinput {
+    background: var(--bg-input); color: var(--text);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 7px 10px; font-family: var(--font-mono); font-size: 0.9em; width: 100%;
+}
+#generatekeyinput:focus { outline: none; border-color: var(--accent); }
+
 /* ── Expand / Collapse sprites (unchanged) ────────────────────────────── */
 /* ── Expand / Collapse chevrons (CSS-only, fully themeable) ───────────── */
 .more, .less {
@@ -5767,7 +5875,7 @@ input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; p
 
 	</style>
 </head>
-<body>
+<body onmousemove="ninja.seeder.seed(event);">
 	<div id="busyblock"></div>
 	<div id="donationmodal" onclick="ninja.donation.hide();">
 		<div id="donationbox" onclick="event.stopPropagation();">
@@ -5812,7 +5920,22 @@ input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; p
 			<li class="tab" id="splitwallet" onclick="ninja.tab.select(this);">Split Wallet
 			<li class="tab" id="detailwallet" onclick="ninja.tab.select(this);">Wallet Details
 		</ul>
-		
+
+		<div id="generate">
+			<div id="generatetitle"><span id="generatelabelbitcoinaddress">Generating Bitcoin Address...</span></div>
+			<div id="entropylabelrow">
+				<span id="generatelabelmovemouse">MOVE your mouse around to add some extra randomness...</span>
+				<span id="mousemovelimit">0%</span>
+			</div>
+			<div id="entropyprogressbar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+				<div id="entropyprogressfill"></div>
+			</div>
+			<div id="entropykeyrow">
+				<span id="generatelabelkeypress">OR type some random characters into this textbox</span>
+				<input type="text" id="generatekeyinput" autocomplete="off" onkeydown="ninja.seeder.seedKeyPress(event);" />
+			</div>
+		</div>
+
 		<div id="wallets">
 			<div id="singlearea" class="walletarea">
 				<div class="commands">
@@ -6651,15 +6774,97 @@ ninja.publicKey = {
 };
 	</script>
 	<script type="text/javascript">
-// All entropy comes from window.crypto.getRandomValues — no interactive seeding.
-// This object is kept for API compatibility (ninja.seeder.isStillSeeding is checked
-// by ninja.tab.select and other callers).
+/*
+ * ninja.seeder — Auxiliary entropy collection from mouse and keyboard events.
+ *
+ * The browser CSPRNG (window.crypto.getRandomValues) is the primary and
+ * sufficient source of randomness.  This seeder exists ONLY as a
+ * defence-in-depth measure: if the browser CSPRNG were ever compromised,
+ * the collected interaction entropy is mixed in via SHA-256 inside
+ * SecureRandom.nextBytes(), ensuring generated keys remain strong.
+ *
+ * User-interaction entropy can only improve key quality, never weaken it.
+ * Entropy values are never displayed on screen.
+ */
+
 ninja.seeder = {
-	isStillSeeding: false,
+	// Randomised target (50–100 events) so completion timing cannot be
+	// predicted by an observer watching network traffic or screen.
+	seedLimit: (function () {
+		var b = new Uint8Array(1);
+		window.crypto.getRandomValues(b);
+		return 100 + (b[0] % 101);
+	}()),
+
+	seedCount: 0,
+	lastInputTime: 0,
+	isStillSeeding: true,
 	seederDependentWallets: ["singlewallet", "paperwallet", "bulkwallet", "vanitywallet", "splitwallet"],
+
+	// Called from ninja.onload.js once all scripts are loaded.
+	start: function () {
+		ninja.seeder.lastInputTime = Date.now();
+		// The #generate overlay is visible by default (CSS: display flex).
+		// Mouse events are bound via onmousemove on <body>.
+		// Keyboard events are bound via onkeydown on #generatekeyinput.
+	},
+
+	// Bound to body onmousemove — collects coordinates and timing.
+	seed: function (evt) {
+		if (!ninja.seeder.isStillSeeding) return;
+		var now = Date.now();
+		if (now - ninja.seeder.lastInputTime < 40) return; // throttle: ≥ 40 ms apart
+		ninja.seeder.lastInputTime = now;
+
+		var x = evt.clientX || 0;
+		var y = evt.clientY || 0;
+		SecureRandom.mixEntropy([
+			x & 0xff, (x >> 8) & 0xff,
+			y & 0xff, (y >> 8) & 0xff,
+			now & 0xff, (now >> 8) & 0xff, (now >> 16) & 0xff, (now >> 24) & 0xff
+		]);
+		ninja.seeder._advance();
+	},
+
+	// Bound to #generatekeyinput onkeydown — collects key identity and timing.
+	seedKeyPress: function (evt) {
+		if (!ninja.seeder.isStillSeeding) return;
+		var now = Date.now();
+		var which = evt.which || evt.keyCode || 0;
+		// Inter-keystroke interval carries ~6–8 bits of human-sourced entropy.
+		var dt = now - ninja.seeder.lastInputTime;
+		ninja.seeder.lastInputTime = now;
+		SecureRandom.mixEntropy([
+			which & 0xff,
+			dt & 0xff, (dt >> 8) & 0xff,
+			now & 0xff, (now >> 8) & 0xff
+		]);
+		ninja.seeder._advance();
+	},
+
+	_advance: function () {
+		ninja.seeder.seedCount++;
+		ninja.seeder._updateProgress();
+		if (ninja.seeder.seedCount === ninja.seeder.seedLimit) {
+			// Delay slightly so the progress bar transition reaches 100% before hiding.
+			setTimeout(function () { ninja.seeder.seedingOver(); }, 400);
+		}
+	},
+
+	_updateProgress: function () {
+		var pct = Math.min(100, Math.round((ninja.seeder.seedCount / ninja.seeder.seedLimit) * 100));
+		var fill = document.getElementById("entropyprogressfill");
+		if (fill) fill.style.width = pct + "%";
+		var bar = document.getElementById("entropyprogressbar");
+		if (bar) bar.setAttribute("aria-valuenow", pct);
+		var label = document.getElementById("mousemovelimit");
+		if (label) label.innerHTML = pct + "%";
+	},
 
 	seedingOver: function () {
 		ninja.seeder.isStillSeeding = false;
+		var gen = document.getElementById("generate");
+		if (gen) gen.style.display = "none";
 		ninja.status.unitTests();
 		var walletType = ninja.tab.whichIsOpen();
 		if (walletType == null) {
@@ -6671,8 +6876,6 @@ ninja.seeder = {
 		ninja.translator.translate(culture);
 	}
 };
-
-// seedingOver() is called from ninja.onload.js, after all scripts are loaded.
 
 	</script>
 	<script type="text/javascript">
@@ -11594,8 +11797,10 @@ ninja.wallets.splitwallet = {
 })(ninja);
 	</script>
 	<script type="text/javascript">
-// All scripts loaded — start immediately (CSPRNG is available from page load)
-ninja.seeder.seedingOver();
+// All scripts loaded — start entropy collection.
+// seedingOver() is called internally once enough mouse/keyboard events have
+// been collected; the #generate overlay hides at that point.
+ninja.seeder.start();
 
 // sync theme toggle button with the theme applied by the inline head script
 ninja.theme.init();

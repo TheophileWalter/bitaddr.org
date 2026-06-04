@@ -1,5 +1,7 @@
-// All scripts loaded — start immediately (CSPRNG is available from page load)
-ninja.seeder.seedingOver();
+// All scripts loaded — start entropy collection.
+// seedingOver() is called internally once enough mouse/keyboard events have
+// been collected; the #generate overlay hides at that point.
+ninja.seeder.start();
 
 // sync theme toggle button with the theme applied by the inline head script
 ninja.theme.init();

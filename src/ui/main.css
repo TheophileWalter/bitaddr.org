@@ -98,6 +98,59 @@ hr { margin: 20px 0; border: none; border-top: 1px solid var(--border); }
 .show { display: block; }
 .pubkeyhex { word-wrap: break-word; }
 
+/* ── Entropy collection panel ─────────────────────────────────────────── */
+/* Shown while ninja.seeder gathers auxiliary randomness from the user.   */
+/* Sits in the normal flow below the menu (logo + controls remain above). */
+/* Hides itself (display:none) once enough events have been collected.    */
+#generate {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    padding: 28px 32px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+#generatetitle { font-size: 1.05em; font-weight: 600; color: var(--text); }
+#entropylabelrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+#entropylabelrow #generatelabelmovemouse { color: var(--text-muted); font-size: 0.88em; flex: 1; }
+#mousemovelimit {
+    font-size: 0.88em; font-weight: 700; color: var(--accent);
+    background: var(--accent-dim); border: 1px solid var(--accent);
+    border-radius: 20px; padding: 2px 10px; white-space: nowrap;
+    min-width: 3.5em; text-align: center;
+}
+#entropyprogressbar {
+    width: 100%; height: 10px;
+    background: var(--bg-hover); border: 1px solid var(--border);
+    border-radius: 6px; overflow: hidden;
+}
+#entropyprogressfill {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--accent) 0%, #ffb347 100%);
+    border-radius: 6px;
+    transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 10px rgba(247,147,26,.45);
+    position: relative;
+}
+#entropyprogressfill::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.25) 50%, transparent 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.6s linear infinite;
+}
+@keyframes shimmer { from { background-position: -200% 0; } to { background-position: 200% 0; } }
+#entropykeyrow { display: flex; flex-direction: column; gap: 8px; }
+#generatelabelkeypress { color: var(--text-muted); font-size: 0.85em; }
+#generatekeyinput {
+    background: var(--bg-input); color: var(--text);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 7px 10px; font-family: var(--font-mono); font-size: 0.9em; width: 100%;
+}
+#generatekeyinput:focus { outline: none; border-color: var(--accent); }
+
 /* ── Expand / Collapse sprites (unchanged) ────────────────────────────── */
 /* ── Expand / Collapse chevrons (CSS-only, fully themeable) ───────────── */
 .more, .less {
