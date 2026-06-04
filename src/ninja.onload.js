@@ -15,7 +15,7 @@ if (ninja.getQueryString()["culture"] != undefined) {
 	ninja.translator.translate(ninja.getQueryString()["culture"]);
 } else {
 	var savedLang = null;
-	try { savedLang = localStorage.getItem('bitaddress-lang'); } catch(e) {}
+	try { savedLang = localStorage.getItem('bitaddr-lang'); } catch(e) {}
 	if (savedLang && !ninja.translator.translate(savedLang)) {
 		ninja.translator.autoDetectTranslation();
 	} else if (!savedLang) {

@@ -54,7 +54,7 @@
 		"footerlabelgithub": "GitHub Repository",
 		"footerlabelgithubzip": "zip",
 		"footerlabelsig": "sig",
-		"footerlabelcopyright1": "Copyright bitaddress.org.",
+		"footerlabelcopyright1": "Copyright bitaddr.org.",
 		"footerlabelcopyright2": "Copyright JavaScriptu je uveden ve zdrojovém kódu.",
 		"footerlabelnowarranty": "Bez záruky.",
 

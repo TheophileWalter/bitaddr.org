@@ -19,7 +19,7 @@
 				// set current culture
 				translator.currentCulture = culture;
 				// persist chosen language across sessions
-				try { localStorage.setItem('bitaddress-lang', culture); } catch(e) {}
+				try { localStorage.setItem('bitaddr-lang', culture); } catch(e) {}
 				// sync the language dropdown
 				var langSel = document.getElementById("langselect");
 				if (langSel) langSel.value = culture;
@@ -223,7 +223,7 @@
 				"footerlabelgithub": "GitHub Repository",
 				"footerlabelgithubzip": "zip",
 				"footerlabelsig": "sig",
-				"footerlabelcopyright1": "Copyright bitaddress.org.",
+				"footerlabelcopyright1": "Copyright bitaddr.org.",
 				"footerlabelcopyright2": "JavaScript copyrights are included in the source.",
 				"footerlabelnowarranty": "No warranty.",
 

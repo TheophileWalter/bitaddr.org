@@ -5,7 +5,7 @@ ninja.theme = {
 	},
 	apply: function (theme) {
 		document.documentElement.setAttribute('data-theme', theme);
-		localStorage.setItem('bitaddress-theme', theme);
+		localStorage.setItem('bitaddr-theme', theme);
 		var label = document.getElementById('themelabel');
 		var icon  = document.querySelector('#themetoggle .theme-icon');
 		if (label) label.textContent = theme === 'light' ? 'Dark' : 'Light';

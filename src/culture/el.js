@@ -54,7 +54,7 @@
 		"footerlabelgithub": "Αποθετήριο GitHub",
 		"footerlabelgithubzip": "zip",
 		"footerlabelsig": "sig",
-		"footerlabelcopyright1": "Copyright bitaddress.org.",
+		"footerlabelcopyright1": "Copyright bitaddr.org.",
 		"footerlabelcopyright2": "Τα πνευματικά δικαιώματα της JavaScript περιλαμβάνονται στον κώδικα.",
 		"footerlabelnowarranty": "Καμία εγγύηση.",
 

@@ -6,8 +6,8 @@
 
 	Notice of Copyrights and Licenses:
 	***********************************
-	The bitaddress.org project, software and embedded resources are copyright bitaddress.org (pointbiz). 
-	The bitaddress.org name and logo are not part of the open source license.
+	The bitaddr.org project, software and embedded resources are copyright bitaddr.org (pointbiz). 
+	The bitaddr.org name and logo are not part of the open source license.
 
 	Portions of the all-in-one HTML document contain JavaScript codes that are the copyrights of others. 
 	The individual copyrights are included throughout the document along with their licenses.
@@ -24,8 +24,8 @@
 	window.Bitcoin			MIT License
 	window.Crypto_scrypt		MIT License
 
-	The bitaddress.org software is available under The MIT License (MIT)
-	Copyright (c) 2011-2016 bitaddress.org (pointbiz)
+	The bitaddr.org software is available under The MIT License (MIT)
+	Copyright (c) 2011-2016 bitaddr.org (pointbiz)
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy of this software and 
 	associated documentation files (the "Software"), to deal in the Software without restriction, including 
@@ -42,16 +42,16 @@
 	WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
 	SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-	GitHub Repository: https://github.com/pointbiz/bitaddress.org
+	GitHub Repository: https://github.com/pointbiz/bitaddr.org
 	-->
 
-	<title>bitaddress.org</title>
+	<title>bitaddr.org</title>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<script>
 		// Apply saved theme before first paint to avoid flash
 		(function() {
-			var t = localStorage.getItem('bitaddress-theme') || 'dark';
+			var t = localStorage.getItem('bitaddr-theme') || 'dark';
 			document.documentElement.setAttribute('data-theme', t);
 		})();
 	</script>
@@ -1452,7 +1452,7 @@ if (typeof Crypto == "undefined" || !Crypto.util) {
 *   - Keyboard timing (via ninja.seeder)
 *   - Web Audio API frequency-bin noise (if available)
 *
-* Copyright Tom Wu, bitaddress.org  BSD License.
+* Copyright Tom Wu, bitaddr.org  BSD License.
 * http://www-cs-students.stanford.edu/~tjw/jsbn/LICENSE
 */
 (function () {
@@ -1608,7 +1608,7 @@ if (typeof Crypto == "undefined" || !Crypto.util) {
 * Ported loosely from BouncyCastle's Java EC code
 * Only Fp curves implemented for now
 * 
-* Copyright Tom Wu, bitaddress.org  BSD License.
+* Copyright Tom Wu, bitaddr.org  BSD License.
 * http://www-cs-students.stanford.edu/~tjw/jsbn/LICENSE
 */
 (function () {
@@ -1670,7 +1670,7 @@ if (typeof Crypto == "undefined" || !Crypto.util) {
 	* returns the right value - if none exists it returns null.
 	* 
 	* Copyright (c) 2000 - 2011 The Legion Of The Bouncy Castle (http://www.bouncycastle.org)
-	* Ported to JavaScript by bitaddress.org
+	* Ported to JavaScript by bitaddr.org
 	*/
 	ec.FieldElementFp.prototype.sqrt = function () {
 		if (!this.q.testBit(0)) throw new Error("even value of q");
@@ -1720,7 +1720,7 @@ if (typeof Crypto == "undefined" || !Crypto.util) {
 
 	/*
 	* Copyright (c) 2000 - 2011 The Legion Of The Bouncy Castle (http://www.bouncycastle.org)
-	* Ported to JavaScript by bitaddress.org
+	* Ported to JavaScript by bitaddr.org
 	*/
 	ec.FieldElementFp.fastLucasSequence = function (p, P, Q, k) {
 		// TODO Research and apply "common-multiplicand multiplication here"
@@ -1949,7 +1949,7 @@ if (typeof Crypto == "undefined" || !Crypto.util) {
 		return R;
 	};
 
-	// patched by bitaddress.org and Casascius for use with Bitcoin.ECKey
+	// patched by bitaddr.org and Casascius for use with Bitcoin.ECKey
 	// patched by coretechs to support compressed public keys
 	ec.PointFp.prototype.getEncoded = function (compressed) {
 		var x = this.getX().toBigInteger();
@@ -2154,7 +2154,7 @@ if (typeof Crypto == "undefined" || !Crypto.util) {
 	};
 
 	// for now, work with hex strings because they're easier in JS
-	// compressed support added by bitaddress.org
+	// compressed support added by bitaddr.org
 	ec.CurveFp.prototype.decodePointHex = function (s) {
 		var firstByte = parseInt(s.substr(0, 2), 16);
 		switch (firstByte) { // first byte
@@ -2199,7 +2199,7 @@ if (typeof Crypto == "undefined" || !Crypto.util) {
 
 	/*
 	* Copyright (c) 2000 - 2011 The Legion Of The Bouncy Castle (http://www.bouncycastle.org)
-	* Ported to JavaScript by bitaddress.org
+	* Ported to JavaScript by bitaddr.org
 	*
 	* Number yTilde
 	* BigInteger X1
@@ -6498,7 +6498,7 @@ Bitcoin.Util = {
 	</script>
 	<style type="text/css">
 /* ═══════════════════════════════════════════════════════════════════════
-   bitaddress.org — Modern Crypto Theme (dark + light)
+   bitaddr.org — Modern Crypto Theme (dark + light)
    Mobile-first, responsive, CSS-variable driven
    ═══════════════════════════════════════════════════════════════════════ */
 
@@ -7615,7 +7615,7 @@ input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; p
 				<div class="tooltip" id="statusprotocolbad">
 					<span class="statuswarn" id="statuslabelprotocolbad">&#9888; Think twice!</span>
 					<span id="statuslabelprotocolbad1">You appear to be running this generator online from a live website. For valuable wallets it is recommended to</span>
-					<a id="statuslabelprotocolbad2" href="https://github.com/pointbiz/bitaddress.org/archive/v3.3.0.zip">download</a>
+					<a id="statuslabelprotocolbad2" href="https://github.com/pointbiz/bitaddr.org/archive/v3.3.0.zip">download</a>
 					<span id="statuslabelprotocolbad3">the zip file from GitHub and run this generator offline as a local html file.</span>
 					<br /><br /><input type="button" value="OK" class="button" id="statusokprotocolbad" onclick="document.getElementById('statusprotocolbad').style.display = 'none';" />
 				</div>
@@ -7637,8 +7637,8 @@ input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; p
 						<span class="statusicon" id="statuskeypool" onclick="ninja.status.showKeyPool();">&#8803;</span>
 					</span>
 					<span class="item"><span id="footerlabeldonations">Donations:</span> <span id="donationaddress" onclick="ninja.donation.show();" title="Copier &amp; afficher le QR">bc1qx4z2w9lmudccutv79jze0zzdcmg7mxxj7jd3k4</span></span>
-					<span class="item"><a href="https://github.com/pointbiz/bitaddress.org" target="_blank" id="footerlabelgithub">GitHub Repository</a> 
-						(<a href="https://github.com/pointbiz/bitaddress.org/archive/v3.3.0.zip" target="_blank" id="footerlabelgithubzip">zip</a>)</span>
+					<span class="item"><a href="https://github.com/pointbiz/bitaddr.org" target="_blank" id="footerlabelgithub">GitHub Repository</a> 
+						(<a href="https://github.com/pointbiz/bitaddr.org/archive/v3.3.0.zip" target="_blank" id="footerlabelgithubzip">zip</a>)</span>
 				</div>
 			</div>
 			<div class="authorpgp">
@@ -7648,12 +7648,12 @@ input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; p
 				</span>
 				<span class="item">527B 5C82 B1F6 B2DB 72A0<br />ECBF 8749 7B91 6397 4F5A</span>
 				<span class="item">
-					(<a href="pointbiz_bitaddress.org.asc" target="_blank" id="footerlabelpgp">PGP</a>)
+					(<a href="pointbiz_bitaddr.org.asc" target="_blank" id="footerlabelpgp">PGP</a>)
 					(<a href="javascript:window.location=window.location.pathname+'.sig';" target="_blank" id="footerlabelsig">sig</a>)
 				</span>
 			</div>
 			<div class="copyright">
-				<span id="footerlabelcopyright1">Copyright bitaddress.org.</span>
+				<span id="footerlabelcopyright1">Copyright bitaddr.org.</span>
 				<span id="footerlabelcopyright2">JavaScript copyrights are included in the source.</span>
 				<span id="footerlabelnowarranty">No warranty.</span>
 			</div>
@@ -8245,7 +8245,7 @@ ninja.theme = {
 	},
 	apply: function (theme) {
 		document.documentElement.setAttribute('data-theme', theme);
-		localStorage.setItem('bitaddress-theme', theme);
+		localStorage.setItem('bitaddr-theme', theme);
 		var label = document.getElementById('themelabel');
 		var icon  = document.querySelector('#themetoggle .theme-icon');
 		if (label) label.textContent = theme === 'light' ? 'Dark' : 'Light';
@@ -8448,7 +8448,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 				// set current culture
 				translator.currentCulture = culture;
 				// persist chosen language across sessions
-				try { localStorage.setItem('bitaddress-lang', culture); } catch(e) {}
+				try { localStorage.setItem('bitaddr-lang', culture); } catch(e) {}
 				// sync the language dropdown
 				var langSel = document.getElementById("langselect");
 				if (langSel) langSel.value = culture;
@@ -8652,7 +8652,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 				"footerlabelgithub": "GitHub Repository",
 				"footerlabelgithubzip": "zip",
 				"footerlabelsig": "sig",
-				"footerlabelcopyright1": "Copyright bitaddress.org.",
+				"footerlabelcopyright1": "Copyright bitaddr.org.",
 				"footerlabelcopyright2": "JavaScript copyrights are included in the source.",
 				"footerlabelnowarranty": "No warranty.",
 
@@ -8806,7 +8806,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"footerlabelgithub": "GitHub Repository",
 		"footerlabelgithubzip": "zip",
 		"footerlabelsig": "sig",
-		"footerlabelcopyright1": "Copyright bitaddress.org.",
+		"footerlabelcopyright1": "Copyright bitaddr.org.",
 		"footerlabelcopyright2": "Copyright JavaScriptu je uveden ve zdrojovém kódu.",
 		"footerlabelnowarranty": "Bez záruky.",
 
@@ -9007,7 +9007,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"footerlabelgithub": "GitHub-Repository",
 		"footerlabelgithubzip": "zip",
 		"footerlabelsig": "sig",
-		"footerlabelcopyright1": "Copyright bitaddress.org.",
+		"footerlabelcopyright1": "Copyright bitaddr.org.",
 		"footerlabelcopyright2": "JavaScript-Copyrights sind im Quelltext enthalten.",
 		"footerlabelnowarranty": "Ohne Gew&auml;hr.",
 
@@ -9208,7 +9208,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"footerlabelgithub": "Αποθετήριο GitHub",
 		"footerlabelgithubzip": "zip",
 		"footerlabelsig": "sig",
-		"footerlabelcopyright1": "Copyright bitaddress.org.",
+		"footerlabelcopyright1": "Copyright bitaddr.org.",
 		"footerlabelcopyright2": "Τα πνευματικά δικαιώματα της JavaScript περιλαμβάνονται στον κώδικα.",
 		"footerlabelnowarranty": "Καμία εγγύηση.",
 
@@ -9409,7 +9409,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"footerlabelgithub": "Repositorio GitHub",
 		"footerlabelgithubzip": "zip",
 		"footerlabelsig": "sig",
-		"footerlabelcopyright1": "Copyright bitaddress.org.",
+		"footerlabelcopyright1": "Copyright bitaddr.org.",
 		"footerlabelcopyright2": "Copyright del código JavaScript: en el fuente.",
 		"footerlabelnowarranty": "Sin garantía.",
 
@@ -9724,7 +9724,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"footerlabelgithub": "Dépôt GitHub",
 		"footerlabelgithubzip": "zip",
 		"footerlabelsig": "sig",
-		"footerlabelcopyright1": "Copyright bitaddress.org.",
+		"footerlabelcopyright1": "Copyright bitaddr.org.",
 		"footerlabelcopyright2": "Les droits d'auteur JavaScript sont inclus dans le code source.",
 		"footerlabelnowarranty": "Aucune garantie.",
 
@@ -9812,7 +9812,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"footerlabelgithub": "GitHub kódtár",
 		"footerlabelgithubzip": "zip",
 		"footerlabelsig": "sig",
-		"footerlabelcopyright1": "Copyright bitaddress.org.",
+		"footerlabelcopyright1": "Copyright bitaddr.org.",
 		"footerlabelcopyright2": "Az egyes JavaScript kódok szerzőinek jogai a forráskódon belül találhatók meg.",
 		"footerlabelnowarranty": "Garancia nincs.",
 
@@ -10013,7 +10013,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"footerlabelgithub": "Repository GitHub",
 		"footerlabelgithubzip": "zip",
 		"footerlabelsig": "sig",
-		"footerlabelcopyright1": "Copyright bitaddress.org.",
+		"footerlabelcopyright1": "Copyright bitaddr.org.",
 		"footerlabelcopyright2": "Le note di copyright dei file JavaScript sono inclusi nei sorgenti stessi.",
 		"footerlabelnowarranty": "Nessuna garanzia.",
 
@@ -10214,7 +10214,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"footerlabelgithub": "GitHubリポジトリ",
 		"footerlabelgithubzip": "zip",
 		"footerlabelsig": "sig",
-		"footerlabelcopyright1": "Copyright bitaddress.org.",
+		"footerlabelcopyright1": "Copyright bitaddr.org.",
 		"footerlabelcopyright2": "JavaScriptのコピーライト情報はソースに含まれています。",
 		"footerlabelnowarranty": "保障はありません。",
 
@@ -10415,7 +10415,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"footerlabelgithub": "Repositório GitHub",
 		"footerlabelgithubzip": "zip",
 		"footerlabelsig": "sig",
-		"footerlabelcopyright1": "Copyright bitaddress.org.",
+		"footerlabelcopyright1": "Copyright bitaddr.org.",
 		"footerlabelcopyright2": "Copyright do código JavaScript: no código-fonte.",
 		"footerlabelnowarranty": "Sem garantia.",
 
@@ -10616,7 +10616,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"footerlabelgithub": "Проект на GitHub",
 		"footerlabelgithubzip": "zip",
 		"footerlabelsig": "sig",
-		"footerlabelcopyright1": "Копирайт bitaddress.org.",
+		"footerlabelcopyright1": "Копирайт bitaddr.org.",
 		"footerlabelcopyright2": "Информация о копирайте на JavaScript в исходниках.",
 		"footerlabelnowarranty": "Без гарантий.",
 
@@ -10817,7 +10817,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"footerlabelgithub": "GitHub页面",
 		"footerlabelgithubzip": "zip",
 		"footerlabelsig": "sig",
-		"footerlabelcopyright1": "Copyright bitaddress.org.",
+		"footerlabelcopyright1": "Copyright bitaddr.org.",
 		"footerlabelcopyright2": "JavaScript的版权信息已经包含在源代码中。",
 		"footerlabelnowarranty": "No warranty",
 
@@ -12480,7 +12480,7 @@ ninja.wallets.splitwallet = {
 				return true;
 			},
 			testBrainToECKey: function () {
-				var key = "bitaddress.org unit test";
+				var key = "bitaddr.org unit test";
 				var bytes = Crypto.SHA256(key, { asBytes: true });
 				var btcKey = new Bitcoin.ECKey(bytes);
 				if (btcKey.getBitcoinWalletImportFormat() != "5J8QhiQtAiozKwyk3GCycAscg1tNaYhNdiiLey8vaDK8Bzm4znb") {
@@ -13288,7 +13288,7 @@ if (ninja.getQueryString()["culture"] != undefined) {
 	ninja.translator.translate(ninja.getQueryString()["culture"]);
 } else {
 	var savedLang = null;
-	try { savedLang = localStorage.getItem('bitaddress-lang'); } catch(e) {}
+	try { savedLang = localStorage.getItem('bitaddr-lang'); } catch(e) {}
 	if (savedLang && !ninja.translator.translate(savedLang)) {
 		ninja.translator.autoDetectTranslation();
 	} else if (!savedLang) {

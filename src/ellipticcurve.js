@@ -4,7 +4,7 @@
 * Ported loosely from BouncyCastle's Java EC code
 * Only Fp curves implemented for now
 * 
-* Copyright Tom Wu, bitaddress.org  BSD License.
+* Copyright Tom Wu, bitaddr.org  BSD License.
 * http://www-cs-students.stanford.edu/~tjw/jsbn/LICENSE
 */
 (function () {
@@ -66,7 +66,7 @@
 	* returns the right value - if none exists it returns null.
 	* 
 	* Copyright (c) 2000 - 2011 The Legion Of The Bouncy Castle (http://www.bouncycastle.org)
-	* Ported to JavaScript by bitaddress.org
+	* Ported to JavaScript by bitaddr.org
 	*/
 	ec.FieldElementFp.prototype.sqrt = function () {
 		if (!this.q.testBit(0)) throw new Error("even value of q");
@@ -116,7 +116,7 @@
 
 	/*
 	* Copyright (c) 2000 - 2011 The Legion Of The Bouncy Castle (http://www.bouncycastle.org)
-	* Ported to JavaScript by bitaddress.org
+	* Ported to JavaScript by bitaddr.org
 	*/
 	ec.FieldElementFp.fastLucasSequence = function (p, P, Q, k) {
 		// TODO Research and apply "common-multiplicand multiplication here"
@@ -345,7 +345,7 @@
 		return R;
 	};
 
-	// patched by bitaddress.org and Casascius for use with Bitcoin.ECKey
+	// patched by bitaddr.org and Casascius for use with Bitcoin.ECKey
 	// patched by coretechs to support compressed public keys
 	ec.PointFp.prototype.getEncoded = function (compressed) {
 		var x = this.getX().toBigInteger();
@@ -550,7 +550,7 @@
 	};
 
 	// for now, work with hex strings because they're easier in JS
-	// compressed support added by bitaddress.org
+	// compressed support added by bitaddr.org
 	ec.CurveFp.prototype.decodePointHex = function (s) {
 		var firstByte = parseInt(s.substr(0, 2), 16);
 		switch (firstByte) { // first byte
@@ -595,7 +595,7 @@
 
 	/*
 	* Copyright (c) 2000 - 2011 The Legion Of The Bouncy Castle (http://www.bouncycastle.org)
-	* Ported to JavaScript by bitaddress.org
+	* Ported to JavaScript by bitaddr.org
 	*
 	* Number yTilde
 	* BigInteger X1

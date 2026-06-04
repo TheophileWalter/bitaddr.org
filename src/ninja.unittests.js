@@ -323,7 +323,7 @@
 				return true;
 			},
 			testBrainToECKey: function () {
-				var key = "bitaddress.org unit test";
+				var key = "bitaddr.org unit test";
 				var bytes = Crypto.SHA256(key, { asBytes: true });
 				var btcKey = new Bitcoin.ECKey(bytes);
 				if (btcKey.getBitcoinWalletImportFormat() != "5J8QhiQtAiozKwyk3GCycAscg1tNaYhNdiiLey8vaDK8Bzm4znb") {

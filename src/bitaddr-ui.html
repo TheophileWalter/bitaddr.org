@@ -6,8 +6,8 @@
 
 	Notice of Copyrights and Licenses:
 	***********************************
-	The bitaddress.org project, software and embedded resources are copyright bitaddress.org (pointbiz). 
-	The bitaddress.org name and logo are not part of the open source license.
+	The bitaddr.org project, software and embedded resources are copyright bitaddr.org (pointbiz). 
+	The bitaddr.org name and logo are not part of the open source license.
 
 	Portions of the all-in-one HTML document contain JavaScript codes that are the copyrights of others. 
 	The individual copyrights are included throughout the document along with their licenses.
@@ -24,8 +24,8 @@
 	window.Bitcoin			MIT License
 	window.Crypto_scrypt		MIT License
 
-	The bitaddress.org software is available under The MIT License (MIT)
-	Copyright (c) 2011-2016 bitaddress.org (pointbiz)
+	The bitaddr.org software is available under The MIT License (MIT)
+	Copyright (c) 2011-2016 bitaddr.org (pointbiz)
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy of this software and 
 	associated documentation files (the "Software"), to deal in the Software without restriction, including 
@@ -42,16 +42,16 @@
 	WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
 	SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-	GitHub Repository: https://github.com/pointbiz/bitaddress.org
+	GitHub Repository: https://github.com/pointbiz/bitaddr.org
 	-->
 
-	<title>bitaddress.org</title>
+	<title>bitaddr.org</title>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<script>
 		// Apply saved theme before first paint to avoid flash
 		(function() {
-			var t = localStorage.getItem('bitaddress-theme') || 'dark';
+			var t = localStorage.getItem('bitaddr-theme') || 'dark';
 			document.documentElement.setAttribute('data-theme', t);
 		})();
 	</script>
@@ -614,7 +614,7 @@
 				<div class="tooltip" id="statusprotocolbad">
 					<span class="statuswarn" id="statuslabelprotocolbad">&#9888; Think twice!</span>
 					<span id="statuslabelprotocolbad1">You appear to be running this generator online from a live website. For valuable wallets it is recommended to</span>
-					<a id="statuslabelprotocolbad2" href="https://github.com/pointbiz/bitaddress.org/archive/v//version.zip">download</a>
+					<a id="statuslabelprotocolbad2" href="https://github.com/pointbiz/bitaddr.org/archive/v//version.zip">download</a>
 					<span id="statuslabelprotocolbad3">the zip file from GitHub and run this generator offline as a local html file.</span>
 					<br /><br /><input type="button" value="OK" class="button" id="statusokprotocolbad" onclick="document.getElementById('statusprotocolbad').style.display = 'none';" />
 				</div>
@@ -636,8 +636,8 @@
 						<span class="statusicon" id="statuskeypool" onclick="ninja.status.showKeyPool();">&#8803;</span>
 					</span>
 					<span class="item"><span id="footerlabeldonations">Donations:</span> <span id="donationaddress" onclick="ninja.donation.show();" title="Copier &amp; afficher le QR">bc1qx4z2w9lmudccutv79jze0zzdcmg7mxxj7jd3k4</span></span>
-					<span class="item"><a href="https://github.com/pointbiz/bitaddress.org" target="_blank" id="footerlabelgithub">GitHub Repository</a> 
-						(<a href="https://github.com/pointbiz/bitaddress.org/archive/v//version.zip" target="_blank" id="footerlabelgithubzip">zip</a>)</span>
+					<span class="item"><a href="https://github.com/pointbiz/bitaddr.org" target="_blank" id="footerlabelgithub">GitHub Repository</a> 
+						(<a href="https://github.com/pointbiz/bitaddr.org/archive/v//version.zip" target="_blank" id="footerlabelgithubzip">zip</a>)</span>
 				</div>
 			</div>
 			<div class="authorpgp">
@@ -647,12 +647,12 @@
 				</span>
 				<span class="item">527B 5C82 B1F6 B2DB 72A0<br />ECBF 8749 7B91 6397 4F5A</span>
 				<span class="item">
-					(<a href="pointbiz_bitaddress.org.asc" target="_blank" id="footerlabelpgp">PGP</a>)
+					(<a href="pointbiz_bitaddr.org.asc" target="_blank" id="footerlabelpgp">PGP</a>)
 					(<a href="javascript:window.location=window.location.pathname+'.sig';" target="_blank" id="footerlabelsig">sig</a>)
 				</span>
 			</div>
 			<div class="copyright">
-				<span id="footerlabelcopyright1">Copyright bitaddress.org.</span>
+				<span id="footerlabelcopyright1">Copyright bitaddr.org.</span>
 				<span id="footerlabelcopyright2">JavaScript copyrights are included in the source.</span>
 				<span id="footerlabelnowarranty">No warranty.</span>
 			</div>

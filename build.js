@@ -53,7 +53,7 @@ const tokens = [
 ];
 
 const pkg = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
-let html = fs.readFileSync('./src/bitaddress-ui.html', 'utf8');
+let html = fs.readFileSync('./src/bitaddr-ui.html', 'utf8');
 
 for (const { token, file } of tokens) {
 	html = html.replace(token, fs.readFileSync(file, 'utf8'));
@@ -62,5 +62,5 @@ for (const { token, file } of tokens) {
 html = html.replace(/\/\/version/g, pkg.version);
 html = html.replace(/\r\n/g, '\n');
 
-fs.writeFileSync('./bitaddress.org.html', html, 'utf8');
-console.log('Build OK → bitaddress.org.html');
+fs.writeFileSync('./bitaddr.org.html', html, 'utf8');
+console.log('Build OK → bitaddr.org.html');

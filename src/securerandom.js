@@ -17,7 +17,7 @@
 *   - Keyboard timing (via ninja.seeder)
 *   - Web Audio API frequency-bin noise (if available)
 *
-* Copyright Tom Wu, bitaddress.org  BSD License.
+* Copyright Tom Wu, bitaddr.org  BSD License.
 * http://www-cs-students.stanford.edu/~tjw/jsbn/LICENSE
 */
 (function () {

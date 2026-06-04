@@ -1,5 +1,5 @@
 {
-  "name": "bitaddress.org",
+  "name": "bitaddr.org",
   "version": "3.3.0",
   "sha1sum": "6cc839a9f60196e3c5e1ddf6cb9e49ce2ae85cb7",
   "sha256sum": "dec17c07685e1870960903d8f58090475b25af946fe95a734f88408cef4aa194",
@@ -20,7 +20,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/pointbiz/bitaddress.org.git"
+    "url": "git://github.com/pointbiz/bitaddr.org.git"
   },
   "keywords": [
     "bitcoin address wallet generator"
@@ -30,6 +30,6 @@
   "readmeFilename": "README.md",
   "gitHead": "d77aaf687fca1f0e28388b0a8de5eb3d89d4fad3",
   "bugs": {
-    "url": "https://github.com/pointbiz/bitaddress.org/issues"
+    "url": "https://github.com/pointbiz/bitaddr.org/issues"
   }
 }
