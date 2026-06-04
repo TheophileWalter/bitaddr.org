@@ -20,16 +20,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/pointbiz/bitaddr.org.git"
+    "url": "git://github.com/TheophileWalter/bitaddr.org.git"
   },
   "keywords": [
     "bitcoin address wallet generator"
   ],
-  "author": "pointbiz",
+  "author": "Théophile Walter",
+  "contributors": [
+    "pointbiz (original author, https://github.com/pointbiz/bitaddress.org)"
+  ],
   "license": "MIT",
   "readmeFilename": "README.md",
-  "gitHead": "d77aaf687fca1f0e28388b0a8de5eb3d89d4fad3",
   "bugs": {
-    "url": "https://github.com/pointbiz/bitaddr.org/issues"
+    "url": "https://github.com/TheophileWalter/bitaddr.org/issues"
   }
 }
