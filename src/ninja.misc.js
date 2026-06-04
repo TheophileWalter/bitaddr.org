@@ -83,6 +83,26 @@ ninja.theme = {
 	}();
 })(ninja);
 
+ninja.donation = {
+	addr: "bc1qx4z2w9lmudccutv79jze0zzdcmg7mxxj7jd3k4",
+	show: function () {
+		var qrDiv = document.getElementById("donationqr");
+		qrDiv.innerHTML = "";
+		qrDiv.appendChild(ninja.qrCode.createCanvas("bitcoin:" + ninja.donation.addr, 5));
+		document.getElementById("donationmodal").classList.add("open");
+		if (navigator.clipboard) {
+			navigator.clipboard.writeText(ninja.donation.addr).then(function () {
+				var confirm = document.getElementById("donationcopyconfirm");
+				confirm.textContent = "Adresse copiée !";
+				setTimeout(function () { confirm.textContent = ""; }, 2500);
+			});
+		}
+	},
+	hide: function () {
+		document.getElementById("donationmodal").classList.remove("open");
+	}
+};
+
 ninja.tab = {
     select: function (walletTab) {
         // detect type: normally an HtmlElement/object but when string then get the element

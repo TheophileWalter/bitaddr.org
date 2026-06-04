@@ -6989,6 +6989,18 @@ input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; p
 @keyframes spin { to { transform: rotate(360deg); } }
 #busyblock.busy { display: block; }
 
+/* ── Donation modal ──────────────────────────────────────────────────── */
+#donationmodal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 1000; align-items: center; justify-content: center; }
+#donationmodal.open { display: flex; }
+#donationbox { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 28px 24px 20px; text-align: center; position: relative; }
+#donationclose { position: absolute; top: 10px; right: 12px; background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.1em; line-height: 1; padding: 2px 6px; border-radius: 4px; }
+#donationclose:hover { color: var(--text); background: var(--bg-hover); }
+#donationqr canvas { border-radius: 6px; display: block; }
+#donationaddr { font-family: var(--font-mono); font-size: 0.72em; color: var(--text-muted); margin-top: 14px; word-break: break-all; max-width: 220px; }
+#donationcopyconfirm { font-size: 0.82em; color: var(--green); height: 1.4em; margin-top: 6px; }
+#donationaddress { cursor: pointer; text-decoration: underline dotted; text-underline-offset: 3px; }
+#donationaddress:hover { color: var(--accent); }
+
 /* ── Footer ───────────────────────────────────────────────────────────── */
 .footer {
     font-size: 0.82em;
@@ -7108,6 +7120,14 @@ input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; p
 </head>
 <body onclick="SecureRandom.seedTime();" onmousemove="ninja.seeder.seed(event);">
 	<div id="busyblock"></div>
+	<div id="donationmodal" onclick="ninja.donation.hide();">
+		<div id="donationbox" onclick="event.stopPropagation();">
+			<button id="donationclose" onclick="ninja.donation.hide();">&#x2715;</button>
+			<div id="donationqr"></div>
+			<div id="donationaddr">bc1qx4z2w9lmudccutv79jze0zzdcmg7mxxj7jd3k4</div>
+			<div id="donationcopyconfirm"></div>
+		</div>
+	</div>
 	<div id="main">
 		<div id="topcontrols">
 			<div id="culturemenu">
@@ -7616,7 +7636,7 @@ input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; p
 						<span class="statusicon" id="statusunittests" onclick="ninja.status.showUnitTests();">...</span>
 						<span class="statusicon" id="statuskeypool" onclick="ninja.status.showKeyPool();">&#8803;</span>
 					</span>
-					<span class="item"><span id="footerlabeldonations">Donations:</span> bc1qx4z2w9lmudccutv79jze0zzdcmg7mxxj7jd3k4</span>
+					<span class="item"><span id="footerlabeldonations">Donations:</span> <span id="donationaddress" onclick="ninja.donation.show();" title="Copier &amp; afficher le QR">bc1qx4z2w9lmudccutv79jze0zzdcmg7mxxj7jd3k4</span></span>
 					<span class="item"><a href="https://github.com/pointbiz/bitaddress.org" target="_blank" id="footerlabelgithub">GitHub Repository</a> 
 						(<a href="https://github.com/pointbiz/bitaddress.org/archive/v3.3.0.zip" target="_blank" id="footerlabelgithubzip">zip</a>)</span>
 				</div>
@@ -8302,6 +8322,26 @@ ninja.theme = {
 		};
 	}();
 })(ninja);
+
+ninja.donation = {
+	addr: "bc1qx4z2w9lmudccutv79jze0zzdcmg7mxxj7jd3k4",
+	show: function () {
+		var qrDiv = document.getElementById("donationqr");
+		qrDiv.innerHTML = "";
+		qrDiv.appendChild(ninja.qrCode.createCanvas("bitcoin:" + ninja.donation.addr, 5));
+		document.getElementById("donationmodal").classList.add("open");
+		if (navigator.clipboard) {
+			navigator.clipboard.writeText(ninja.donation.addr).then(function () {
+				var confirm = document.getElementById("donationcopyconfirm");
+				confirm.textContent = "Adresse copiée !";
+				setTimeout(function () { confirm.textContent = ""; }, 2500);
+			});
+		}
+	},
+	hide: function () {
+		document.getElementById("donationmodal").classList.remove("open");
+	}
+};
 
 ninja.tab = {
     select: function (walletTab) {
