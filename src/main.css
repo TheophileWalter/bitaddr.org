@@ -345,7 +345,9 @@ input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; p
 
 /* ── Paper Wallet ─────────────────────────────────────────────────────── */
 #paperarea { min-height: 120px; display: none; }
-#paperarea .keyarea { border: 1px solid var(--border); border-top: 0; }
+#paperarea .keyarea:not(.art) { height: auto; min-height: 110px; overflow: hidden; border: 1px solid var(--border); border-top: 0; }
+#paperarea .keyarea:not(.art) .pubaddress { height: auto; }
+#paperarea .keyarea:not(.art) .privwif { max-width: 45%; word-break: break-all; }
 #paperarea .keyarea.art { display: block; height: auto; border: 0; font-family: Ubuntu, Arial; padding: 0; margin: 0; }
 .keyarea { height: 110px; text-align: left; position: relative; padding: 5px; }
 .keyarea .public { float: left; }
@@ -357,10 +359,12 @@ input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; p
 .keyarea canvas { background: #fff; padding: 4px; border-radius: 4px; }
 /* Artwallet: absolute positions must stay unchanged for print */
 #paperarea .artwallet .papersvg { width: 486px; height: 261px; border: 0; margin: 0; padding: 0; left: 0; }
-#paperarea .artwallet .qrcode_public { top: 52px; left: 17px; z-index: 100; margin: 0; float: none; display: block; position: absolute; background-color: #fff; padding: 5px 5px 2px; }
-#paperarea .artwallet .qrcode_private { top: 104px; left: 360px; z-index: 100; margin: 0; float: none; display: block; position: absolute; background-color: #fff; padding: 5px 5px 2px; }
-#paperarea .artwallet .btcaddress { position: absolute; top: 240px; left: 139px; z-index: 100; font-size: 10px; background-color: transparent; font-weight: bold; color: #000; margin: 0; -webkit-transform-origin: top left; -webkit-transform: rotate(-90deg); -moz-transform-origin: top left; -moz-transform: rotate(-90deg); transform-origin: top left; transform: rotate(-90deg); }
-#paperarea .artwallet .btcprivwif { position: absolute; top: 236px; left: 346px; z-index: 100; font-size: 7px; background-color: transparent; font-weight: bold; color: #000; margin: 0; -webkit-transform-origin: top left; -webkit-transform: rotate(-90deg); -moz-transform-origin: top left; -moz-transform: rotate(-90deg); transform-origin: top left; transform: rotate(-90deg); }
+#paperarea .artwallet .qrcode_public { top: 31px; left: 11px; z-index: 100; margin: 0; float: none; display: block; position: absolute; background-color: #fff; padding: 5px 5px 2px; }
+#paperarea .artwallet .qrcode_private { top: 93px; left: 355px; z-index: 100; margin: 0; float: none; display: block; position: absolute; background-color: #fff; padding: 5px 5px 2px; }
+/* Fix QR code public display size regardless of address length (canvas resolution stays high) */
+#paperarea .artwallet .qrcode_public canvas { width: 82px !important; height: 82px !important; }
+#paperarea .artwallet .btcaddress { position: absolute; top: 253px; left: 130px; z-index: 100; font-size: 10px; background-color: transparent; font-weight: bold; color: #000; margin: 0; -webkit-transform-origin: top left; -webkit-transform: rotate(-90deg); -moz-transform-origin: top left; -moz-transform: rotate(-90deg); transform-origin: top left; transform: rotate(-90deg); }
+#paperarea .artwallet .btcprivwif { position: absolute; top: 229px; left: 333px; z-index: 100; font-size: 7px; background-color: transparent; font-weight: bold; color: #000; margin: 0; -webkit-transform-origin: top left; -webkit-transform: rotate(-90deg); -moz-transform-origin: top left; -moz-transform: rotate(-90deg); transform-origin: top left; transform: rotate(-90deg); }
 #paperarea .artwallet .btcencryptedkey { position: absolute; top: 174px; left: 332px; z-index: 100; font-size: 8px; background-color: transparent; font-weight: bold; color: #000; margin: 0; -webkit-transform-origin: top left; -webkit-transform: rotate(-90deg); -moz-transform-origin: top left; -moz-transform: rotate(-90deg); transform-origin: top left; transform: rotate(-90deg); }
 .pagebreak { height: 40px; }
 .paper .commands { border: 1px solid var(--border); }
