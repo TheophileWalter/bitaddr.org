@@ -189,33 +189,18 @@
 				<div class="body">
 					<div id="singlekeyarea">
 						<div id="singleaddresses">
-							<div class="singleaddrblock">
-								<span class="label" id="singlelabelbitcoinaddress">Bitcoin Address (Legacy P2PKH)</span>
-								<div class="singleaddrrow">
-									<div id="qrcode_public"></div>
-									<span class="output" id="btcaddress"></span>
-								</div>
+							<div id="singleaddrtyperow">
+								<label class="label" id="singlelabeladdrtype">Address Type</label>
+								<select id="singleaddrtype" onchange="ninja.wallets.singlewallet.showAddressType(this.value);">
+									<option value="legacy">Legacy P2PKH (1…)</option>
+									<option value="p2sh">P2SH-P2WPKH (3…)</option>
+									<option value="segwit" selected>Native SegWit P2WPKH (bc1q…)</option>
+									<option value="taproot">Taproot P2TR (bc1p…)</option>
+								</select>
 							</div>
-							<div class="singleaddrblock">
-								<span class="label" id="singlelabelP2SH">P2SH-P2WPKH (3…)</span>
-								<div class="singleaddrrow">
-									<div id="qrcode_public_p2sh"></div>
-									<span class="output" id="btcaddressP2SH"></span>
-								</div>
-							</div>
-							<div class="singleaddrblock">
-								<span class="label" id="singlelabelSegwit">Native SegWit P2WPKH (bc1q…)</span>
-								<div class="singleaddrrow">
-									<div id="qrcode_public_segwit"></div>
-									<span class="output" id="btcaddressSegwit"></span>
-								</div>
-							</div>
-							<div class="singleaddrblock">
-								<span class="label" id="singlelabelTaproot">Taproot P2TR (bc1p…)</span>
-								<div class="singleaddrrow">
-									<div id="qrcode_public_taproot"></div>
-									<span class="output" id="btcaddressTaproot"></span>
-								</div>
+							<div class="singleaddrrow">
+								<div id="qrcode_public_single"></div>
+								<span class="output" id="btcaddress_single"></span>
 							</div>
 							<div id="singleshare">SHARE</div>
 						</div>

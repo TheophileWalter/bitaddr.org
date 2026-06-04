@@ -1,11 +1,25 @@
 (function (wallets, qrCode) {
+	var _key = null;
+
+	// Push a single (address, wif) entry to the key pool.
+	// addr is used for deduplication: the same address will not be added twice,
+	// but switching to a different type logs a new entry with the same WIF.
+	// wif is captured by value so older entries survive a subsequent key generation.
+	function _addToPool(addr, wif) {
+		Bitcoin.KeyPool.push({
+			priv: _key.priv,                       // non-null so push() accepts the item
+			getBitcoinAddress: function () { return addr; },
+			toString:          function () { return wif; }
+		});
+	}
+
 	var single = wallets.singlewallet = {
 		isOpen: function () {
 			return (document.getElementById("singlewallet").className.indexOf("selected") != -1);
 		},
 
 		open: function () {
-			if (document.getElementById("btcaddress").innerHTML == "") {
+			if (!_key) {
 				single.generateNewAddressAndKey();
 			}
 			document.getElementById("singlearea").style.display = "block";
@@ -15,51 +29,46 @@
 			document.getElementById("singlearea").style.display = "none";
 		},
 
-		// Generate a key pair and display all supported address formats
+		// Derive only the requested type, display it, and log it to the pool.
+		// The other three types are never computed unless the user selects them.
+		showAddressType: function (type) {
+			if (!_key) return;
+			var addr = "";
+			if (type === "legacy")  addr = _key.getBitcoinAddress();
+			if (type === "p2sh")    addr = _key.getP2SHAddress();
+			if (type === "segwit")  addr = _key.getSegwitAddress();
+			if (type === "taproot") addr = _key.getTaprootAddress();
+			document.getElementById("btcaddress_single").innerHTML = addr;
+			if (addr) {
+				qrCode.showQrCode({ "qrcode_public_single": addr }, 4);
+				_addToPool(addr, _key.getBitcoinWalletImportFormat());
+			}
+		},
+
 		generateNewAddressAndKey: function () {
 			try {
-				var key = new Bitcoin.ECKey(false);
-				key.setCompressed(true);
-				key.logAllAddressTypes = true;
-				// Re-sync the textarea now that logAllAddressTypes is set
-				var ta = document.getElementById("keypooltextarea");
-				if (ta) ta.value = Bitcoin.KeyPool.toString();
+				_key = new Bitcoin.ECKey(false);
+				_key.setCompressed(true);
 
-				// Legacy P2PKH (1...)
-				var legacyAddress = key.getBitcoinAddress();
-				// P2SH-P2WPKH (3...)
-				var p2shAddress = key.getP2SHAddress();
-				// Native SegWit P2WPKH (bc1q...)
-				var segwitAddress = key.getSegwitAddress();
-				// Taproot P2TR (bc1p...)
-				var taprootAddress = key.getTaprootAddress();
-				// Private key (WIF compressed)
-				var privateKeyWif = key.getBitcoinWalletImportFormat();
+				// The ECKey constructor auto-pushes a legacy entry. Remove it so the
+				// pool only contains entries we add explicitly (one per derived type).
+				var arr = Bitcoin.KeyPool.getArray();
+				arr.pop();
+				Bitcoin.KeyPool.setArray(arr);
 
-				document.getElementById("btcaddress").innerHTML = legacyAddress;
-				document.getElementById("btcaddressP2SH").innerHTML = p2shAddress;
-				document.getElementById("btcaddressSegwit").innerHTML = segwitAddress;
-				document.getElementById("btcaddressTaproot").innerHTML = taprootAddress;
-				document.getElementById("btcprivwif").innerHTML = privateKeyWif;
+				document.getElementById("btcprivwif").innerHTML = _key.getBitcoinWalletImportFormat();
+				qrCode.showQrCode({ "qrcode_private": _key.getBitcoinWalletImportFormat() }, 4);
 
-				// Public addresses: smaller modules (3) to fit 4 QR codes neatly
-				qrCode.showQrCode({
-					"qrcode_public": legacyAddress,
-					"qrcode_public_p2sh": p2shAddress,
-					"qrcode_public_segwit": segwitAddress,
-					"qrcode_public_taproot": taprootAddress
-				}, 3);
-				// Private key: larger modules (4) for easier scanning
-				qrCode.showQrCode({ "qrcode_private": privateKeyWif }, 4);
+				var sel = document.getElementById("singleaddrtype");
+				single.showAddressType(sel ? sel.value : "segwit");
 			}
 			catch (e) {
 				alert(e);
-				["btcaddress","btcaddressP2SH","btcaddressSegwit","btcaddressTaproot","btcprivwif"].forEach(function(id) {
-					document.getElementById(id).innerHTML = "error";
-				});
-				["qrcode_public","qrcode_public_p2sh","qrcode_public_segwit","qrcode_public_taproot","qrcode_private"].forEach(function(id) {
-					document.getElementById(id).innerHTML = "";
-				});
+				_key = null;
+				document.getElementById("btcaddress_single").innerHTML = "error";
+				document.getElementById("btcprivwif").innerHTML = "error";
+				document.getElementById("qrcode_public_single").innerHTML = "";
+				document.getElementById("qrcode_private").innerHTML = "";
 			}
 		}
 	};

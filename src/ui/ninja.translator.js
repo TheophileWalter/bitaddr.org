@@ -117,10 +117,8 @@
 				// single wallet
 				"newaddress": "Generate New Address",
 				"singleprint": "Print",
-				"singlelabelbitcoinaddress": "Bitcoin Address (Legacy P2PKH)",
-				"singlelabelP2SH": "P2SH-P2WPKH (3…)",
-				"singlelabelSegwit": "Native SegWit P2WPKH (bc1q…)",
-				"singlelabelTaproot": "Taproot P2TR (bc1p…)",
+				"singlelabeladdrtype": "Address Type",
+				"singleaddrtype": { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "Native SegWit P2WPKH (bc1q…)", "taproot": "Taproot P2TR (bc1p…)" },
 				"singlelabelprivatekey": "Private Key (WIF compressed)",
 				"singleshare": "SHARE",
 				"singlesecret": "SECRET",
