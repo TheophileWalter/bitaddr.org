@@ -21,8 +21,6 @@
 	*******************		***************
 	window.Crypto			BSD License
 	window.SecureRandom		BSD License
-	window.EllipticCurve		BSD License
-	window.BigInteger		BSD License
 	window.QRCode			MIT License
 	window.Bitcoin			MIT License
 	window.Crypto_scrypt		MIT License
@@ -2735,422 +2733,6 @@ var nobleSecp256k1 = (() => {
 
 	</script>
 	<script type="text/javascript">
-//https://raw.github.com/bitcoinjs/bitcoinjs-lib/faa10f0f6a1fff0b9a99fffb9bc30cee33b17212/src/ecdsa.js
-/*!
-* Basic Javascript Elliptic Curve implementation
-* Ported loosely from BouncyCastle's Java EC code
-* Only Fp curves implemented for now
-* 
-* Copyright Tom Wu, bitaddr.org  BSD License.
-* http://www-cs-students.stanford.edu/~tjw/jsbn/LICENSE
-*/
-(function () {
-
-	// Constructor function of Global EllipticCurve object
-	var ec = window.EllipticCurve = function () { };
-
-
-	// ----------------
-	// ECFieldElementFp constructor
-	// q instanceof BigInteger
-	// x instanceof BigInteger
-	ec.FieldElementFp = function (q, x) {
-		// Normalise x into [0, q) — handles both negative values and x ≥ q that
-		// can arise from intermediate arithmetic (e.g. q.subtract(0) == q).
-		this.x = (x.signum() < 0 || x.compareTo(q) >= 0) ? x.mod(q) : x;
-		this.q = q;
-	};
-
-	ec.FieldElementFp.prototype.equals = function (other) {
-		if (other == this) return true;
-		return (this.q.equals(other.q) && this.x.equals(other.x));
-	};
-
-	ec.FieldElementFp.prototype.toBigInteger = function () {
-		return this.x;
-	};
-
-	ec.FieldElementFp.prototype.negate = function () {
-		return new ec.FieldElementFp(this.q, this.x.negate().mod(this.q));
-	};
-
-	ec.FieldElementFp.prototype.add = function (b) {
-		return new ec.FieldElementFp(this.q, this.x.add(b.toBigInteger()).mod(this.q));
-	};
-
-	ec.FieldElementFp.prototype.subtract = function (b) {
-		return new ec.FieldElementFp(this.q, this.x.subtract(b.toBigInteger()).mod(this.q));
-	};
-
-	ec.FieldElementFp.prototype.multiply = function (b) {
-		return new ec.FieldElementFp(this.q, this.x.multiply(b.toBigInteger()).mod(this.q));
-	};
-
-	ec.FieldElementFp.prototype.square = function () {
-		return new ec.FieldElementFp(this.q, this.x.square().mod(this.q));
-	};
-
-	ec.FieldElementFp.prototype.divide = function (b) {
-		return new ec.FieldElementFp(this.q, this.x.multiply(b.toBigInteger().modInverse(this.q)).mod(this.q));
-	};
-
-	ec.FieldElementFp.prototype.getByteLength = function () {
-		return Math.floor((this.toBigInteger().bitLength() + 7) / 8);
-	};
-
-	// ----------------
-	// ECPointFp constructor
-	ec.PointFp = function (curve, x, y, z, compressed) {
-		this.curve = curve;
-		this.x = x;
-		this.y = y;
-		// Projective coordinates: either zinv == null or z * zinv == 1
-		// z and zinv are just BigIntegers, not fieldElements
-		if (z == null) {
-			this.z = BigInteger.ONE;
-		}
-		else {
-			this.z = z;
-		}
-		this.zinv = null;
-		// compression flag
-		this.compressed = !!compressed;
-	};
-
-	ec.PointFp.prototype.getX = function () {
-		if (this.zinv == null) {
-			this.zinv = this.z.modInverse(this.curve.q);
-		}
-		var r = this.x.toBigInteger().multiply(this.zinv);
-		this.curve.reduce(r);
-		return this.curve.fromBigInteger(r);
-	};
-
-	ec.PointFp.prototype.getY = function () {
-		if (this.zinv == null) {
-			this.zinv = this.z.modInverse(this.curve.q);
-		}
-		var r = this.y.toBigInteger().multiply(this.zinv);
-		this.curve.reduce(r);
-		return this.curve.fromBigInteger(r);
-	};
-
-	ec.PointFp.prototype.equals = function (other) {
-		if (other == this) return true;
-		if (this.isInfinity()) return other.isInfinity();
-		if (other.isInfinity()) return this.isInfinity();
-		var u, v;
-		// u = Y2 * Z1 - Y1 * Z2
-		u = other.y.toBigInteger().multiply(this.z).subtract(this.y.toBigInteger().multiply(other.z)).mod(this.curve.q);
-		if (!u.equals(BigInteger.ZERO)) return false;
-		// v = X2 * Z1 - X1 * Z2
-		v = other.x.toBigInteger().multiply(this.z).subtract(this.x.toBigInteger().multiply(other.z)).mod(this.curve.q);
-		return v.equals(BigInteger.ZERO);
-	};
-
-	ec.PointFp.prototype.isInfinity = function () {
-		if ((this.x == null) && (this.y == null)) return true;
-		return this.z.equals(BigInteger.ZERO) && !this.y.toBigInteger().equals(BigInteger.ZERO);
-	};
-
-	ec.PointFp.prototype.negate = function () {
-		return new ec.PointFp(this.curve, this.x, this.y.negate(), this.z);
-	};
-
-	ec.PointFp.prototype.add = function (b) {
-		if (this.isInfinity()) return b;
-		if (b.isInfinity()) return this;
-
-		// u = Y2 * Z1 - Y1 * Z2
-		var u = b.y.toBigInteger().multiply(this.z).subtract(this.y.toBigInteger().multiply(b.z)).mod(this.curve.q);
-		// v = X2 * Z1 - X1 * Z2
-		var v = b.x.toBigInteger().multiply(this.z).subtract(this.x.toBigInteger().multiply(b.z)).mod(this.curve.q);
-
-
-		if (BigInteger.ZERO.equals(v)) {
-			if (BigInteger.ZERO.equals(u)) {
-				return this.twice(); // this == b, so double
-			}
-			return this.curve.getInfinity(); // this = -b, so infinity
-		}
-
-		var THREE = new BigInteger("3");
-		var x1 = this.x.toBigInteger();
-		var y1 = this.y.toBigInteger();
-		var x2 = b.x.toBigInteger();
-		var y2 = b.y.toBigInteger();
-
-		var v2 = v.square();
-		var v3 = v2.multiply(v);
-		var x1v2 = x1.multiply(v2);
-		var zu2 = u.square().multiply(this.z);
-
-		// x3 = v * (z2 * (z1 * u^2 - 2 * x1 * v^2) - v^3)
-		var x3 = zu2.subtract(x1v2.shiftLeft(1)).multiply(b.z).subtract(v3).multiply(v).mod(this.curve.q);
-		// y3 = z2 * (3 * x1 * u * v^2 - y1 * v^3 - z1 * u^3) + u * v^3
-		var y3 = x1v2.multiply(THREE).multiply(u).subtract(y1.multiply(v3)).subtract(zu2.multiply(u)).multiply(b.z).add(u.multiply(v3)).mod(this.curve.q);
-		// z3 = v^3 * z1 * z2
-		var z3 = v3.multiply(this.z).multiply(b.z).mod(this.curve.q);
-
-		return new ec.PointFp(this.curve, this.curve.fromBigInteger(x3), this.curve.fromBigInteger(y3), z3);
-	};
-
-	ec.PointFp.prototype.twice = function () {
-		if (this.isInfinity()) return this;
-		if (this.y.toBigInteger().signum() == 0) return this.curve.getInfinity();
-
-		// TODO: optimized handling of constants
-		var THREE = new BigInteger("3");
-		var x1 = this.x.toBigInteger();
-		var y1 = this.y.toBigInteger();
-
-		var y1z1 = y1.multiply(this.z);
-		var y1sqz1 = y1z1.multiply(y1).mod(this.curve.q);
-		var a = this.curve.a.toBigInteger();
-
-		// w = 3 * x1^2 + a * z1^2
-		var w = x1.square().multiply(THREE);
-		if (!BigInteger.ZERO.equals(a)) {
-			w = w.add(this.z.square().multiply(a));
-		}
-		w = w.mod(this.curve.q);
-		//this.curve.reduce(w);
-		// x3 = 2 * y1 * z1 * (w^2 - 8 * x1 * y1^2 * z1)
-		var x3 = w.square().subtract(x1.shiftLeft(3).multiply(y1sqz1)).shiftLeft(1).multiply(y1z1).mod(this.curve.q);
-		// y3 = 4 * y1^2 * z1 * (3 * w * x1 - 2 * y1^2 * z1) - w^3
-		var y3 = w.multiply(THREE).multiply(x1).subtract(y1sqz1.shiftLeft(1)).shiftLeft(2).multiply(y1sqz1).subtract(w.square().multiply(w)).mod(this.curve.q);
-		// z3 = 8 * (y1 * z1)^3
-		var z3 = y1z1.square().multiply(y1z1).shiftLeft(3).mod(this.curve.q);
-
-		return new ec.PointFp(this.curve, this.curve.fromBigInteger(x3), this.curve.fromBigInteger(y3), z3);
-	};
-
-	// Simple NAF (Non-Adjacent Form) multiplication algorithm
-	// TODO: modularize the multiplication algorithm
-	ec.PointFp.prototype.multiply = function (k) {
-		if (this.isInfinity()) return this;
-		if (k.signum() == 0) return this.curve.getInfinity();
-
-		var e = k;
-		var h = e.multiply(new BigInteger("3"));
-
-		var neg = this.negate();
-		var R = this;
-
-		var i;
-		for (i = h.bitLength() - 2; i > 0; --i) {
-			R = R.twice();
-
-			var hBit = h.testBit(i);
-			var eBit = e.testBit(i);
-
-			if (hBit != eBit) {
-				R = R.add(hBit ? this : neg);
-			}
-		}
-
-		return R;
-	};
-
-	// patched by bitaddr.org and Casascius for use with Bitcoin.ECKey
-	// patched by coretechs to support compressed public keys
-	ec.PointFp.prototype.getEncoded = function (compressed) {
-		var x = this.getX().toBigInteger();
-		var y = this.getY().toBigInteger();
-		var len = 32; // integerToBytes will zero pad if integer is less than 32 bytes. 32 bytes length is required by the Bitcoin protocol.
-		var enc = ec.integerToBytes(x, len);
-
-		// when compressed prepend byte depending if y point is even or odd 
-		if (compressed) {
-			if (y.isEven()) {
-				enc.unshift(0x02);
-			}
-			else {
-				enc.unshift(0x03);
-			}
-		}
-		else {
-			enc.unshift(0x04);
-			enc = enc.concat(ec.integerToBytes(y, len)); // uncompressed public key appends the bytes of the y point
-		}
-		return enc;
-	};
-
-	ec.PointFp.decodeFrom = function (curve, enc) {
-		var type = enc[0];
-		var dataLen = enc.length - 1;
-
-		// Extract x and y as byte arrays
-		var xBa = enc.slice(1, 1 + dataLen / 2);
-		var yBa = enc.slice(1 + dataLen / 2, 1 + dataLen);
-
-		// Prepend zero byte to prevent interpretation as negative integer
-		xBa.unshift(0);
-		yBa.unshift(0);
-
-		// Convert to BigIntegers
-		var x = new BigInteger(xBa);
-		var y = new BigInteger(yBa);
-
-		// Return point
-		return new ec.PointFp(curve, curve.fromBigInteger(x), curve.fromBigInteger(y));
-	};
-
-	ec.PointFp.prototype.toString = function () {
-		return '(' + this.getX().toBigInteger().toString() + ',' + this.getY().toBigInteger().toString() + ')';
-	};
-
-	/**
-	* Validate an elliptic curve point.
-	*
-	* See SEC 1, section 3.2.2.1: Elliptic Curve Public Key Validation Primitive
-	*/
-	/*
-	 * Validate a public key point.
-	 * Delegates to noble-secp256k1 which enforces:
-	 *   - prefix byte canonical (02/03/04)
-	 *   - coordinates in [0, p)
-	 *   - point satisfies y² ≡ x³ + 7 (mod p)
-	 *   - point is not at infinity
-	 * For secp256k1 (cofactor h=1) every point on the curve is in the
-	 * prime-order subgroup, so no separate nQ=O check is needed.
-	 */
-	ec.PointFp.prototype.validate = function () {
-		if (this.isInfinity()) {
-			throw new Error("Point is at infinity.");
-		}
-		// Encode to compressed bytes and let noble do the authoritative check
-		var encoded = this.getEncoded(1);
-		var hex = Crypto.util.bytesToHex(encoded).toUpperCase();
-		nobleSecp256k1.Point.fromHex(hex); // throws on any invalid input
-		return true;
-	};
-
-
-
-
-	// ----------------
-	// ECCurveFp constructor
-	ec.CurveFp = function (q, a, b) {
-		this.q = q;
-		this.a = this.fromBigInteger(a);
-		this.b = this.fromBigInteger(b);
-		this.infinity = new ec.PointFp(this, null, null);
-		this.reducer = new Barrett(this.q);
-	}
-
-	ec.CurveFp.prototype.getQ = function () {
-		return this.q;
-	};
-
-	ec.CurveFp.prototype.getA = function () {
-		return this.a;
-	};
-
-	ec.CurveFp.prototype.getB = function () {
-		return this.b;
-	};
-
-	ec.CurveFp.prototype.equals = function (other) {
-		if (other == this) return true;
-		return (this.q.equals(other.q) && this.a.equals(other.a) && this.b.equals(other.b));
-	};
-
-	ec.CurveFp.prototype.getInfinity = function () {
-		return this.infinity;
-	};
-
-	ec.CurveFp.prototype.fromBigInteger = function (x) {
-		return new ec.FieldElementFp(this.q, x);
-	};
-
-	ec.CurveFp.prototype.reduce = function (x) {
-		this.reducer.reduce(x);
-	};
-
-	// Decode a hex-encoded public key point.
-	// noble-secp256k1 is the authoritative decoder for all cases:
-	// decompression (02/03), uncompressed validation (04), and on-curve check.
-	// Hybrid encoding (06/07) is rejected by noble automatically.
-	ec.CurveFp.prototype.decodePointHex = function (s) {
-		var firstByte = parseInt(s.substr(0, 2), 16);
-		if (firstByte === 0) return this.infinity;
-		// Delegate to noble: handles 02/03/04, validates on-curve, rejects 06/07
-		var np = nobleSecp256k1.Point.fromHex(s.toUpperCase());
-		var xBig = new BigInteger(np.x.toString(16), 16);
-		var yBig = new BigInteger(np.y.toString(16), 16);
-		var compressed = (firstByte === 2 || firstByte === 3);
-		return new ec.PointFp(this, this.fromBigInteger(xBig), this.fromBigInteger(yBig), null, compressed);
-	};
-
-	ec.CurveFp.prototype.encodePointHex = function (p) {
-		if (p.isInfinity()) return "00";
-		var xHex = p.getX().toBigInteger().toString(16);
-		var yHex = p.getY().toBigInteger().toString(16);
-		var oLen = this.getQ().toString(16).length;
-		if ((oLen % 2) != 0) oLen++;
-		while (xHex.length < oLen) {
-			xHex = "0" + xHex;
-		}
-		while (yHex.length < oLen) {
-			yHex = "0" + yHex;
-		}
-		return "04" + xHex + yHex;
-	};
-
-	ec.fromHex = function (s) { return new BigInteger(s, 16); };
-
-	ec.integerToBytes = function (i, len) {
-		var bytes = i.toByteArrayUnsigned();
-		if (len < bytes.length) {
-			bytes = bytes.slice(bytes.length - len);
-		} else while (len > bytes.length) {
-			bytes.unshift(0);
-		}
-		return bytes;
-	};
-
-
-	// Named EC curves
-	// ----------------
-	// X9ECParameters constructor
-	ec.X9Parameters = function (curve, g, n, h) {
-		this.curve = curve;
-		this.g = g;
-		this.n = n;
-		this.h = h;
-	}
-	ec.X9Parameters.prototype.getCurve = function () { return this.curve; };
-	ec.X9Parameters.prototype.getG = function () { return this.g; };
-	ec.X9Parameters.prototype.getN = function () { return this.n; };
-	ec.X9Parameters.prototype.getH = function () { return this.h; };
-
-	// secp256k1 is the Curve used by Bitcoin
-	ec.secNamedCurves = {
-		// used by Bitcoin
-		"secp256k1": function () {
-			// p = 2^256 - 2^32 - 2^9 - 2^8 - 2^7 - 2^6 - 2^4 - 1
-			var p = ec.fromHex("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F");
-			var a = BigInteger.ZERO;
-			var b = ec.fromHex("7");
-			var n = ec.fromHex("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
-			var h = BigInteger.ONE;
-			var curve = new ec.CurveFp(p, a, b);
-			var G = curve.decodePointHex("04"
-					+ "79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798"
-					+ "483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8");
-			return new ec.X9Parameters(curve, G, n, h);
-		}
-	};
-
-	// secp256k1 called by Bitcoin's ECKEY
-	ec.getSECCurveByName = function (name) {
-		if (ec.secNamedCurves[name] == undefined) return null;
-		return ec.secNamedCurves[name]();
-	}
-})();
-	</script>
-	<script type="text/javascript">
 // secrets.js - by Alexander Stetsyuk - released under MIT License
 (function(exports, global){
 var defaults = {
@@ -3652,1289 +3234,6 @@ exports.hex2str = function(str, bytesPerChar){
 // by default, initialize without an RNG
 exports.init();
 })(typeof module !== 'undefined' && module['exports'] ? module['exports'] : (window['secrets'] = {}), typeof GLOBAL !== 'undefined' ? GLOBAL : window );
-	</script>
-	<script type="text/javascript">
-// Upstream 'BigInteger' here:
-// Original Author: http://www-cs-students.stanford.edu/~tjw/jsbn/
-// Follows 'jsbn' on Github: https://github.com/jasondavies/jsbn
-// Review and Testing: https://github.com/cryptocoinjs/bigi/
-/*!
-* Basic JavaScript BN library - subset useful for RSA encryption. v1.4
-* 
-* Copyright (c) 2005  Tom Wu
-* All Rights Reserved.
-* BSD License
-* http://www-cs-students.stanford.edu/~tjw/jsbn/LICENSE
-*
-* Copyright Stephan Thomas
-* Copyright pointbiz
-*/
-
-(function () {
-
-	// (public) Constructor function of Global BigInteger object
-	var BigInteger = window.BigInteger = function BigInteger(a, b, c) {
-		if (!(this instanceof BigInteger))
-			return new BigInteger(a, b, c);
-
-		if (a != null)
-			if ("number" == typeof a) this.fromNumber(a, b, c);
-			else if (b == null && "string" != typeof a) this.fromString(a, 256);
-			else this.fromString(a, b);
-	};
-
-	// Bits per digit
-	var dbits;
-
-	// JavaScript engine analysis
-	var canary = 0xdeadbeefcafe;
-	var j_lm = ((canary & 0xffffff) == 0xefcafe);
-
-	// return new, unset BigInteger
-	function nbi() { return new BigInteger(null); }
-
-	// am: Compute w_j += (x*this_i), propagate carries,
-	// c is initial carry, returns final carry.
-	// c < 3*dvalue, x < 2*dvalue, this_i < dvalue
-	// We need to select the fastest one that works in this environment.
-
-	// am1: use a single mult and divide to get the high bits,
-	// max digit bits should be 26 because
-	// max internal value = 2*dvalue^2-2*dvalue (< 2^53)
-	function am1(i, x, w, j, c, n) {
-		while (--n >= 0) {
-			var v = x * this[i++] + w[j] + c;
-			c = Math.floor(v / 0x4000000);
-			w[j++] = v & 0x3ffffff;
-		}
-		return c;
-	}
-	// am2 avoids a big mult-and-extract completely.
-	// Max digit bits should be <= 30 because we do bitwise ops
-	// on values up to 2*hdvalue^2-hdvalue-1 (< 2^31)
-	function am2(i, x, w, j, c, n) {
-		var xl = x & 0x7fff, xh = x >> 15;
-		while (--n >= 0) {
-			var l = this[i] & 0x7fff;
-			var h = this[i++] >> 15;
-			var m = xh * l + h * xl;
-			l = xl * l + ((m & 0x7fff) << 15) + w[j] + (c & 0x3fffffff);
-			c = (l >>> 30) + (m >>> 15) + xh * h + (c >>> 30);
-			w[j++] = l & 0x3fffffff;
-		}
-		return c;
-	}
-	// Alternately, set max digit bits to 28 since some
-	// browsers slow down when dealing with 32-bit numbers.
-	function am3(i, x, w, j, c, n) {
-		var xl = x & 0x3fff, xh = x >> 14;
-		while (--n >= 0) {
-			var l = this[i] & 0x3fff;
-			var h = this[i++] >> 14;
-			var m = xh * l + h * xl;
-			l = xl * l + ((m & 0x3fff) << 14) + w[j] + c;
-			c = (l >> 28) + (m >> 14) + xh * h;
-			w[j++] = l & 0xfffffff;
-		}
-		return c;
-	}
-	if (j_lm && (navigator.appName == "Microsoft Internet Explorer")) {
-		BigInteger.prototype.am = am2;
-		dbits = 30;
-	}
-	else if (j_lm && (navigator.appName != "Netscape")) {
-		BigInteger.prototype.am = am1;
-		dbits = 26;
-	}
-	else { // Mozilla/Netscape seems to prefer am3
-		BigInteger.prototype.am = am3;
-		dbits = 28;
-	}
-
-	BigInteger.prototype.DB = dbits;
-	BigInteger.prototype.DM = ((1 << dbits) - 1);
-	BigInteger.prototype.DV = (1 << dbits);
-
-	var BI_FP = 52;
-	BigInteger.prototype.FV = Math.pow(2, BI_FP);
-	BigInteger.prototype.F1 = BI_FP - dbits;
-	BigInteger.prototype.F2 = 2 * dbits - BI_FP;
-
-	// Digit conversions
-	var BI_RM = "0123456789abcdefghijklmnopqrstuvwxyz";
-	var BI_RC = new Array();
-	var rr, vv;
-	rr = "0".charCodeAt(0);
-	for (vv = 0; vv <= 9; ++vv) BI_RC[rr++] = vv;
-	rr = "a".charCodeAt(0);
-	for (vv = 10; vv < 36; ++vv) BI_RC[rr++] = vv;
-	rr = "A".charCodeAt(0);
-	for (vv = 10; vv < 36; ++vv) BI_RC[rr++] = vv;
-
-	function int2char(n) { return BI_RM.charAt(n); }
-	function intAt(s, i) {
-		var c = BI_RC[s.charCodeAt(i)];
-		return (c == null) ? -1 : c;
-	}
-
-
-
-	// return bigint initialized to value
-	function nbv(i) { var r = nbi(); r.fromInt(i); return r; }
-
-
-	// returns bit length of the integer x
-	function nbits(x) {
-		var r = 1, t;
-		if ((t = x >>> 16) != 0) { x = t; r += 16; }
-		if ((t = x >> 8) != 0) { x = t; r += 8; }
-		if ((t = x >> 4) != 0) { x = t; r += 4; }
-		if ((t = x >> 2) != 0) { x = t; r += 2; }
-		if ((t = x >> 1) != 0) { x = t; r += 1; }
-		return r;
-	}
-
-
-
-
-
-
-
-	// (protected) copy this to r
-	BigInteger.prototype.copyTo = function (r) {
-		for (var i = this.t - 1; i >= 0; --i) r[i] = this[i];
-		r.t = this.t;
-		r.s = this.s;
-	};
-
-
-	// (protected) set from integer value x, -DV <= x < DV
-	BigInteger.prototype.fromInt = function (x) {
-		this.t = 1;
-		this.s = (x < 0) ? -1 : 0;
-		if (x > 0) this[0] = x;
-		else if (x < -1) this[0] = x + this.DV;
-		else this.t = 0;
-	};
-
-	// (protected) set from string and radix
-	BigInteger.prototype.fromString = function (s, b) {
-		var k;
-		if (b == 16) k = 4;
-		else if (b == 8) k = 3;
-		else if (b == 256) k = 8; // byte array
-		else if (b == 2) k = 1;
-		else if (b == 32) k = 5;
-		else if (b == 4) k = 2;
-		else { this.fromRadix(s, b); return; }
-		this.t = 0;
-		this.s = 0;
-		var i = s.length, mi = false, sh = 0;
-		while (--i >= 0) {
-			var x = (k == 8) ? s[i] & 0xff : intAt(s, i);
-			if (x < 0) {
-				if (s.charAt(i) == "-") mi = true;
-				continue;
-			}
-			mi = false;
-			if (sh == 0)
-				this[this.t++] = x;
-			else if (sh + k > this.DB) {
-				this[this.t - 1] |= (x & ((1 << (this.DB - sh)) - 1)) << sh;
-				this[this.t++] = (x >> (this.DB - sh));
-			}
-			else
-				this[this.t - 1] |= x << sh;
-			sh += k;
-			if (sh >= this.DB) sh -= this.DB;
-		}
-		if (k == 8 && (s[0] & 0x80) != 0) {
-			this.s = -1;
-			if (sh > 0) this[this.t - 1] |= ((1 << (this.DB - sh)) - 1) << sh;
-		}
-		this.clamp();
-		if (mi) BigInteger.ZERO.subTo(this, this);
-	};
-
-
-	// (protected) clamp off excess high words
-	BigInteger.prototype.clamp = function () {
-		var c = this.s & this.DM;
-		while (this.t > 0 && this[this.t - 1] == c) --this.t;
-	};
-
-	// (protected) r = this << n*DB
-	BigInteger.prototype.dlShiftTo = function (n, r) {
-		var i;
-		for (i = this.t - 1; i >= 0; --i) r[i + n] = this[i];
-		for (i = n - 1; i >= 0; --i) r[i] = 0;
-		r.t = this.t + n;
-		r.s = this.s;
-	};
-
-	// (protected) r = this >> n*DB
-	BigInteger.prototype.drShiftTo = function (n, r) {
-		for (var i = n; i < this.t; ++i) r[i - n] = this[i];
-		r.t = Math.max(this.t - n, 0);
-		r.s = this.s;
-	};
-
-
-	// (protected) r = this << n
-	BigInteger.prototype.lShiftTo = function (n, r) {
-		var bs = n % this.DB;
-		var cbs = this.DB - bs;
-		var bm = (1 << cbs) - 1;
-		var ds = Math.floor(n / this.DB), c = (this.s << bs) & this.DM, i;
-		for (i = this.t - 1; i >= 0; --i) {
-			r[i + ds + 1] = (this[i] >> cbs) | c;
-			c = (this[i] & bm) << bs;
-		}
-		for (i = ds - 1; i >= 0; --i) r[i] = 0;
-		r[ds] = c;
-		r.t = this.t + ds + 1;
-		r.s = this.s;
-		r.clamp();
-	};
-
-
-	// (protected) r = this >> n
-	BigInteger.prototype.rShiftTo = function (n, r) {
-		r.s = this.s;
-		var ds = Math.floor(n / this.DB);
-		if (ds >= this.t) { r.t = 0; return; }
-		var bs = n % this.DB;
-		var cbs = this.DB - bs;
-		var bm = (1 << bs) - 1;
-		r[0] = this[ds] >> bs;
-		for (var i = ds + 1; i < this.t; ++i) {
-			r[i - ds - 1] |= (this[i] & bm) << cbs;
-			r[i - ds] = this[i] >> bs;
-		}
-		if (bs > 0) r[this.t - ds - 1] |= (this.s & bm) << cbs;
-		r.t = this.t - ds;
-		r.clamp();
-	};
-
-
-	// (protected) r = this - a
-	BigInteger.prototype.subTo = function (a, r) {
-		var i = 0, c = 0, m = Math.min(a.t, this.t);
-		while (i < m) {
-			c += this[i] - a[i];
-			r[i++] = c & this.DM;
-			c >>= this.DB;
-		}
-		if (a.t < this.t) {
-			c -= a.s;
-			while (i < this.t) {
-				c += this[i];
-				r[i++] = c & this.DM;
-				c >>= this.DB;
-			}
-			c += this.s;
-		}
-		else {
-			c += this.s;
-			while (i < a.t) {
-				c -= a[i];
-				r[i++] = c & this.DM;
-				c >>= this.DB;
-			}
-			c -= a.s;
-		}
-		r.s = (c < 0) ? -1 : 0;
-		if (c < -1) r[i++] = this.DV + c;
-		else if (c > 0) r[i++] = c;
-		r.t = i;
-		r.clamp();
-	};
-
-
-	// (protected) r = this * a, r != this,a (HAC 14.12)
-	// "this" should be the larger one if appropriate.
-	BigInteger.prototype.multiplyTo = function (a, r) {
-		var x = this.abs(), y = a.abs();
-		var i = x.t;
-		r.t = i + y.t;
-		while (--i >= 0) r[i] = 0;
-		for (i = 0; i < y.t; ++i) r[i + x.t] = x.am(0, y[i], r, i, 0, x.t);
-		r.s = 0;
-		r.clamp();
-		if (this.s != a.s) BigInteger.ZERO.subTo(r, r);
-	};
-
-
-	// (protected) r = this^2, r != this (HAC 14.16)
-	BigInteger.prototype.squareTo = function (r) {
-		var x = this.abs();
-		var i = r.t = 2 * x.t;
-		while (--i >= 0) r[i] = 0;
-		for (i = 0; i < x.t - 1; ++i) {
-			var c = x.am(i, x[i], r, 2 * i, 0, 1);
-			if ((r[i + x.t] += x.am(i + 1, 2 * x[i], r, 2 * i + 1, c, x.t - i - 1)) >= x.DV) {
-				r[i + x.t] -= x.DV;
-				r[i + x.t + 1] = 1;
-			}
-		}
-		if (r.t > 0) r[r.t - 1] += x.am(i, x[i], r, 2 * i, 0, 1);
-		r.s = 0;
-		r.clamp();
-	};
-
-
-
-	// (protected) divide this by m, quotient and remainder to q, r (HAC 14.20)
-	// r != q, this != m.  q or r may be null.
-	BigInteger.prototype.divRemTo = function (m, q, r) {
-		var pm = m.abs();
-		if (pm.t <= 0) return;
-		var pt = this.abs();
-		if (pt.t < pm.t) {
-			if (q != null) q.fromInt(0);
-			if (r != null) this.copyTo(r);
-			return;
-		}
-		if (r == null) r = nbi();
-		var y = nbi(), ts = this.s, ms = m.s;
-		var nsh = this.DB - nbits(pm[pm.t - 1]); // normalize modulus
-		if (nsh > 0) { pm.lShiftTo(nsh, y); pt.lShiftTo(nsh, r); }
-		else { pm.copyTo(y); pt.copyTo(r); }
-		var ys = y.t;
-		var y0 = y[ys - 1];
-		if (y0 == 0) return;
-		var yt = y0 * (1 << this.F1) + ((ys > 1) ? y[ys - 2] >> this.F2 : 0);
-		var d1 = this.FV / yt, d2 = (1 << this.F1) / yt, e = 1 << this.F2;
-		var i = r.t, j = i - ys, t = (q == null) ? nbi() : q;
-		y.dlShiftTo(j, t);
-		if (r.compareTo(t) >= 0) {
-			r[r.t++] = 1;
-			r.subTo(t, r);
-		}
-		BigInteger.ONE.dlShiftTo(ys, t);
-		t.subTo(y, y); // "negative" y so we can replace sub with am later
-		while (y.t < ys) y[y.t++] = 0;
-		while (--j >= 0) {
-			// Estimate quotient digit
-			var qd = (r[--i] == y0) ? this.DM : Math.floor(r[i] * d1 + (r[i - 1] + e) * d2);
-			if ((r[i] += y.am(0, qd, r, j, 0, ys)) < qd) {	// Try it out
-				y.dlShiftTo(j, t);
-				r.subTo(t, r);
-				while (r[i] < --qd) r.subTo(t, r);
-			}
-		}
-		if (q != null) {
-			r.drShiftTo(ys, q);
-			if (ts != ms) BigInteger.ZERO.subTo(q, q);
-		}
-		r.t = ys;
-		r.clamp();
-		if (nsh > 0) r.rShiftTo(nsh, r); // Denormalize remainder
-		if (ts < 0) BigInteger.ZERO.subTo(r, r);
-	};
-
-
-	// (protected) return "-1/this % 2^DB"; useful for Mont. reduction
-	// justification:
-	//         xy == 1 (mod m)
-	//         xy =  1+km
-	//   xy(2-xy) = (1+km)(1-km)
-	// x[y(2-xy)] = 1-k^2m^2
-	// x[y(2-xy)] == 1 (mod m^2)
-	// if y is 1/x mod m, then y(2-xy) is 1/x mod m^2
-	// should reduce x and y(2-xy) by m^2 at each step to keep size bounded.
-	// JS multiply "overflows" differently from C/C++, so care is needed here.
-	BigInteger.prototype.invDigit = function () {
-		if (this.t < 1) return 0;
-		var x = this[0];
-		if ((x & 1) == 0) return 0;
-		var y = x & 3; 	// y == 1/x mod 2^2
-		y = (y * (2 - (x & 0xf) * y)) & 0xf; // y == 1/x mod 2^4
-		y = (y * (2 - (x & 0xff) * y)) & 0xff; // y == 1/x mod 2^8
-		y = (y * (2 - (((x & 0xffff) * y) & 0xffff))) & 0xffff; // y == 1/x mod 2^16
-		// last step - calculate inverse mod DV directly;
-		// assumes 16 < DB <= 32 and assumes ability to handle 48-bit ints
-		y = (y * (2 - x * y % this.DV)) % this.DV; 	// y == 1/x mod 2^dbits
-		// we really want the negative inverse, and -DV < y < DV
-		return (y > 0) ? this.DV - y : -y;
-	};
-
-
-	// (protected) true iff this is even
-	BigInteger.prototype.isEven = function () { return ((this.t > 0) ? (this[0] & 1) : this.s) == 0; };
-
-
-	// (protected) this^e, e < 2^32, doing sqr and mul with "r" (HAC 14.79)
-	BigInteger.prototype.exp = function (e, z) {
-		if (e > 0xffffffff || e < 1) return BigInteger.ONE;
-		var r = nbi(), r2 = nbi(), g = z.convert(this), i = nbits(e) - 1;
-		g.copyTo(r);
-		while (--i >= 0) {
-			z.sqrTo(r, r2);
-			if ((e & (1 << i)) > 0) z.mulTo(r2, g, r);
-			else { var t = r; r = r2; r2 = t; }
-		}
-		return z.revert(r);
-	};
-
-
-	// (public) return string representation in given radix
-	BigInteger.prototype.toString = function (b) {
-		if (this.s < 0) return "-" + this.negate().toString(b);
-		var k;
-		if (b == 16) k = 4;
-		else if (b == 8) k = 3;
-		else if (b == 2) k = 1;
-		else if (b == 32) k = 5;
-		else if (b == 4) k = 2;
-		else return this.toRadix(b);
-		var km = (1 << k) - 1, d, m = false, r = "", i = this.t;
-		var p = this.DB - (i * this.DB) % k;
-		if (i-- > 0) {
-			if (p < this.DB && (d = this[i] >> p) > 0) { m = true; r = int2char(d); }
-			while (i >= 0) {
-				if (p < k) {
-					d = (this[i] & ((1 << p) - 1)) << (k - p);
-					d |= this[--i] >> (p += this.DB - k);
-				}
-				else {
-					d = (this[i] >> (p -= k)) & km;
-					if (p <= 0) { p += this.DB; --i; }
-				}
-				if (d > 0) m = true;
-				if (m) r += int2char(d);
-			}
-		}
-		return m ? r : "0";
-	};
-
-
-	// (public) -this
-	BigInteger.prototype.negate = function () { var r = nbi(); BigInteger.ZERO.subTo(this, r); return r; };
-
-	// (public) |this|
-	BigInteger.prototype.abs = function () { return (this.s < 0) ? this.negate() : this; };
-
-	// (public) return + if this > a, - if this < a, 0 if equal
-	BigInteger.prototype.compareTo = function (a) {
-		var r = this.s - a.s;
-		if (r != 0) return r;
-		var i = this.t;
-		r = i - a.t;
-		if (r != 0) return (this.s < 0) ? -r : r;
-		while (--i >= 0) if ((r = this[i] - a[i]) != 0) return r;
-		return 0;
-	}
-
-	// (public) return the number of bits in "this"
-	BigInteger.prototype.bitLength = function () {
-		if (this.t <= 0) return 0;
-		return this.DB * (this.t - 1) + nbits(this[this.t - 1] ^ (this.s & this.DM));
-	};
-
-	// (public) this mod a
-	BigInteger.prototype.mod = function (a) {
-		var r = nbi();
-		this.abs().divRemTo(a, null, r);
-		if (this.s < 0 && r.compareTo(BigInteger.ZERO) > 0) a.subTo(r, r);
-		return r;
-	}
-
-	// (public) this^e % m, 0 <= e < 2^32
-	BigInteger.prototype.modPowInt = function (e, m) {
-		var z;
-		if (e < 256 || m.isEven()) z = new Classic(m); else z = new Montgomery(m);
-		return this.exp(e, z);
-	};
-
-	// "constants"
-	BigInteger.ZERO = nbv(0);
-	BigInteger.ONE = nbv(1);
-
-
-
-
-
-
-
-	// Copyright (c) 2005-2009  Tom Wu
-	// All Rights Reserved.
-	// See "LICENSE" for details.
-	// Extended JavaScript BN functions, required for RSA private ops.
-	// Version 1.1: new BigInteger("0", 10) returns "proper" zero
-	// Version 1.2: square() API, isProbablePrime fix
-
-
-	// return index of lowest 1-bit in x, x < 2^31
-	function lbit(x) {
-		if (x == 0) return -1;
-		var r = 0;
-		if ((x & 0xffff) == 0) { x >>= 16; r += 16; }
-		if ((x & 0xff) == 0) { x >>= 8; r += 8; }
-		if ((x & 0xf) == 0) { x >>= 4; r += 4; }
-		if ((x & 3) == 0) { x >>= 2; r += 2; }
-		if ((x & 1) == 0) ++r;
-		return r;
-	}
-
-	// return number of 1 bits in x
-	function cbit(x) {
-		var r = 0;
-		while (x != 0) { x &= x - 1; ++r; }
-		return r;
-	}
-
-	var lowprimes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293, 307, 311, 313, 317, 331, 337, 347, 349, 353, 359, 367, 373, 379, 383, 389, 397, 401, 409, 419, 421, 431, 433, 439, 443, 449, 457, 461, 463, 467, 479, 487, 491, 499, 503, 509, 521, 523, 541, 547, 557, 563, 569, 571, 577, 587, 593, 599, 601, 607, 613, 617, 619, 631, 641, 643, 647, 653, 659, 661, 673, 677, 683, 691, 701, 709, 719, 727, 733, 739, 743, 751, 757, 761, 769, 773, 787, 797, 809, 811, 821, 823, 827, 829, 839, 853, 857, 859, 863, 877, 881, 883, 887, 907, 911, 919, 929, 937, 941, 947, 953, 967, 971, 977, 983, 991, 997];
-	var lplim = (1 << 26) / lowprimes[lowprimes.length - 1];
-
-
-
-	// (protected) return x s.t. r^x < DV
-	BigInteger.prototype.chunkSize = function (r) { return Math.floor(Math.LN2 * this.DB / Math.log(r)); };
-
-	// (protected) convert to radix string
-	BigInteger.prototype.toRadix = function (b) {
-		if (b == null) b = 10;
-		if (this.signum() == 0 || b < 2 || b > 36) return "0";
-		var cs = this.chunkSize(b);
-		var a = Math.pow(b, cs);
-		var d = nbv(a), y = nbi(), z = nbi(), r = "";
-		this.divRemTo(d, y, z);
-		while (y.signum() > 0) {
-			r = (a + z.intValue()).toString(b).substr(1) + r;
-			y.divRemTo(d, y, z);
-		}
-		return z.intValue().toString(b) + r;
-	};
-
-	// (protected) convert from radix string
-	BigInteger.prototype.fromRadix = function (s, b) {
-		this.fromInt(0);
-		if (b == null) b = 10;
-		var cs = this.chunkSize(b);
-		var d = Math.pow(b, cs), mi = false, j = 0, w = 0;
-		for (var i = 0; i < s.length; ++i) {
-			var x = intAt(s, i);
-			if (x < 0) {
-				if (s.charAt(i) == "-" && this.signum() == 0) mi = true;
-				continue;
-			}
-			w = b * w + x;
-			if (++j >= cs) {
-				this.dMultiply(d);
-				this.dAddOffset(w, 0);
-				j = 0;
-				w = 0;
-			}
-		}
-		if (j > 0) {
-			this.dMultiply(Math.pow(b, j));
-			this.dAddOffset(w, 0);
-		}
-		if (mi) BigInteger.ZERO.subTo(this, this);
-	};
-
-	// (protected) alternate constructor
-	BigInteger.prototype.fromNumber = function (a, b, c) {
-		if ("number" == typeof b) {
-			// new BigInteger(int,int,RNG)
-			if (a < 2) this.fromInt(1);
-			else {
-				this.fromNumber(a, c);
-				if (!this.testBit(a - 1))	// force MSB set
-					this.bitwiseTo(BigInteger.ONE.shiftLeft(a - 1), op_or, this);
-				if (this.isEven()) this.dAddOffset(1, 0); // force odd
-				while (!this.isProbablePrime(b)) {
-					this.dAddOffset(2, 0);
-					if (this.bitLength() > a) this.subTo(BigInteger.ONE.shiftLeft(a - 1), this);
-				}
-			}
-		}
-		else {
-			// new BigInteger(int,RNG)
-			var x = new Array(), t = a & 7;
-			x.length = (a >> 3) + 1;
-			b.nextBytes(x);
-			if (t > 0) x[0] &= ((1 << t) - 1); else x[0] = 0;
-			this.fromString(x, 256);
-		}
-	};
-
-	// (protected) r = this op a (bitwise)
-	BigInteger.prototype.bitwiseTo = function (a, op, r) {
-		var i, f, m = Math.min(a.t, this.t);
-		for (i = 0; i < m; ++i) r[i] = op(this[i], a[i]);
-		if (a.t < this.t) {
-			f = a.s & this.DM;
-			for (i = m; i < this.t; ++i) r[i] = op(this[i], f);
-			r.t = this.t;
-		}
-		else {
-			f = this.s & this.DM;
-			for (i = m; i < a.t; ++i) r[i] = op(f, a[i]);
-			r.t = a.t;
-		}
-		r.s = op(this.s, a.s);
-		r.clamp();
-	};
-
-	// (protected) this op (1<<n)
-	BigInteger.prototype.changeBit = function (n, op) {
-		var r = BigInteger.ONE.shiftLeft(n);
-		this.bitwiseTo(r, op, r);
-		return r;
-	};
-
-	// (protected) r = this + a
-	BigInteger.prototype.addTo = function (a, r) {
-		var i = 0, c = 0, m = Math.min(a.t, this.t);
-		while (i < m) {
-			c += this[i] + a[i];
-			r[i++] = c & this.DM;
-			c >>= this.DB;
-		}
-		if (a.t < this.t) {
-			c += a.s;
-			while (i < this.t) {
-				c += this[i];
-				r[i++] = c & this.DM;
-				c >>= this.DB;
-			}
-			c += this.s;
-		}
-		else {
-			c += this.s;
-			while (i < a.t) {
-				c += a[i];
-				r[i++] = c & this.DM;
-				c >>= this.DB;
-			}
-			c += a.s;
-		}
-		r.s = (c < 0) ? -1 : 0;
-		if (c > 0) r[i++] = c;
-		else if (c < -1) r[i++] = this.DV + c;
-		r.t = i;
-		r.clamp();
-	};
-
-	// (protected) this *= n, this >= 0, 1 < n < DV
-	BigInteger.prototype.dMultiply = function (n) {
-		this[this.t] = this.am(0, n - 1, this, 0, 0, this.t);
-		++this.t;
-		this.clamp();
-	};
-
-	// (protected) this += n << w words, this >= 0
-	BigInteger.prototype.dAddOffset = function (n, w) {
-		if (n == 0) return;
-		while (this.t <= w) this[this.t++] = 0;
-		this[w] += n;
-		while (this[w] >= this.DV) {
-			this[w] -= this.DV;
-			if (++w >= this.t) this[this.t++] = 0;
-			++this[w];
-		}
-	};
-
-	// (protected) r = lower n words of "this * a", a.t <= n
-	// "this" should be the larger one if appropriate.
-	BigInteger.prototype.multiplyLowerTo = function (a, n, r) {
-		var i = Math.min(this.t + a.t, n);
-		r.s = 0; // assumes a,this >= 0
-		r.t = i;
-		while (i > 0) r[--i] = 0;
-		var j;
-		for (j = r.t - this.t; i < j; ++i) r[i + this.t] = this.am(0, a[i], r, i, 0, this.t);
-		for (j = Math.min(a.t, n); i < j; ++i) this.am(0, a[i], r, i, 0, n - i);
-		r.clamp();
-	};
-
-
-	// (protected) r = "this * a" without lower n words, n > 0
-	// "this" should be the larger one if appropriate.
-	BigInteger.prototype.multiplyUpperTo = function (a, n, r) {
-		--n;
-		var i = r.t = this.t + a.t - n;
-		r.s = 0; // assumes a,this >= 0
-		while (--i >= 0) r[i] = 0;
-		for (i = Math.max(n - this.t, 0); i < a.t; ++i)
-			r[this.t + i - n] = this.am(n - i, a[i], r, 0, 0, this.t + i - n);
-		r.clamp();
-		r.drShiftTo(1, r);
-	};
-
-	// (protected) this % n, n < 2^26
-	BigInteger.prototype.modInt = function (n) {
-		if (n <= 0) return 0;
-		var d = this.DV % n, r = (this.s < 0) ? n - 1 : 0;
-		if (this.t > 0)
-			if (d == 0) r = this[0] % n;
-			else for (var i = this.t - 1; i >= 0; --i) r = (d * r + this[i]) % n;
-		return r;
-	};
-
-
-	// (protected) true if probably prime (HAC 4.24, Miller-Rabin)
-	BigInteger.prototype.millerRabin = function (t) {
-		var n1 = this.subtract(BigInteger.ONE);
-		var k = n1.getLowestSetBit();
-		if (k <= 0) return false;
-		var r = n1.shiftRight(k);
-		t = (t + 1) >> 1;
-		if (t > lowprimes.length) t = lowprimes.length;
-		var a = nbi();
-		var _mrBuf = new Uint8Array(1);
-		for (var i = 0; i < t; ++i) {
-			// Pick a random base for Miller-Rabin using CSPRNG
-			window.crypto.getRandomValues(_mrBuf);
-			a.fromInt(lowprimes[_mrBuf[0] % lowprimes.length]);
-			var y = a.modPow(r, this);
-			if (y.compareTo(BigInteger.ONE) != 0 && y.compareTo(n1) != 0) {
-				var j = 1;
-				while (j++ < k && y.compareTo(n1) != 0) {
-					y = y.modPowInt(2, this);
-					if (y.compareTo(BigInteger.ONE) == 0) return false;
-				}
-				if (y.compareTo(n1) != 0) return false;
-			}
-		}
-		return true;
-	};
-
-
-
-	// (public)
-	BigInteger.prototype.clone = function () { var r = nbi(); this.copyTo(r); return r; };
-
-	// (public) return value as integer
-	BigInteger.prototype.intValue = function () {
-		if (this.s < 0) {
-			if (this.t == 1) return this[0] - this.DV;
-			else if (this.t == 0) return -1;
-		}
-		else if (this.t == 1) return this[0];
-		else if (this.t == 0) return 0;
-		// assumes 16 < DB < 32
-		return ((this[1] & ((1 << (32 - this.DB)) - 1)) << this.DB) | this[0];
-	};
-
-
-	// (public) return value as byte
-	BigInteger.prototype.byteValue = function () { return (this.t == 0) ? this.s : (this[0] << 24) >> 24; };
-
-	// (public) return value as short (assumes DB>=16)
-	BigInteger.prototype.shortValue = function () { return (this.t == 0) ? this.s : (this[0] << 16) >> 16; };
-
-	// (public) 0 if this == 0, 1 if this > 0
-	BigInteger.prototype.signum = function () {
-		if (this.s < 0) return -1;
-		else if (this.t <= 0 || (this.t == 1 && this[0] <= 0)) return 0;
-		else return 1;
-	};
-
-
-	// (public) convert to bigendian byte array
-	BigInteger.prototype.toByteArray = function () {
-		var i = this.t, r = new Array();
-		r[0] = this.s;
-		var p = this.DB - (i * this.DB) % 8, d, k = 0;
-		if (i-- > 0) {
-			if (p < this.DB && (d = this[i] >> p) != (this.s & this.DM) >> p)
-				r[k++] = d | (this.s << (this.DB - p));
-			while (i >= 0) {
-				if (p < 8) {
-					d = (this[i] & ((1 << p) - 1)) << (8 - p);
-					d |= this[--i] >> (p += this.DB - 8);
-				}
-				else {
-					d = (this[i] >> (p -= 8)) & 0xff;
-					if (p <= 0) { p += this.DB; --i; }
-				}
-				if ((d & 0x80) != 0) d |= -256;
-				if (k == 0 && (this.s & 0x80) != (d & 0x80)) ++k;
-				if (k > 0 || d != this.s) r[k++] = d;
-			}
-		}
-		return r;
-	};
-
-	BigInteger.prototype.equals = function (a) { return (this.compareTo(a) == 0); };
-	BigInteger.prototype.min = function (a) { return (this.compareTo(a) < 0) ? this : a; };
-	BigInteger.prototype.max = function (a) { return (this.compareTo(a) > 0) ? this : a; };
-
-	// (public) this & a
-	function op_and(x, y) { return x & y; }
-	BigInteger.prototype.and = function (a) { var r = nbi(); this.bitwiseTo(a, op_and, r); return r; };
-
-	// (public) this | a
-	function op_or(x, y) { return x | y; }
-	BigInteger.prototype.or = function (a) { var r = nbi(); this.bitwiseTo(a, op_or, r); return r; };
-
-	// (public) this ^ a
-	function op_xor(x, y) { return x ^ y; }
-	BigInteger.prototype.xor = function (a) { var r = nbi(); this.bitwiseTo(a, op_xor, r); return r; };
-
-	// (public) this & ~a
-	function op_andnot(x, y) { return x & ~y; }
-	BigInteger.prototype.andNot = function (a) { var r = nbi(); this.bitwiseTo(a, op_andnot, r); return r; };
-
-	// (public) ~this
-	BigInteger.prototype.not = function () {
-		var r = nbi();
-		for (var i = 0; i < this.t; ++i) r[i] = this.DM & ~this[i];
-		r.t = this.t;
-		r.s = ~this.s;
-		return r;
-	};
-
-	// (public) this << n
-	BigInteger.prototype.shiftLeft = function (n) {
-		var r = nbi();
-		if (n < 0) this.rShiftTo(-n, r); else this.lShiftTo(n, r);
-		return r;
-	};
-
-	// (public) this >> n
-	BigInteger.prototype.shiftRight = function (n) {
-		var r = nbi();
-		if (n < 0) this.lShiftTo(-n, r); else this.rShiftTo(n, r);
-		return r;
-	};
-
-	// (public) returns index of lowest 1-bit (or -1 if none)
-	BigInteger.prototype.getLowestSetBit = function () {
-		for (var i = 0; i < this.t; ++i)
-			if (this[i] != 0) return i * this.DB + lbit(this[i]);
-		if (this.s < 0) return this.t * this.DB;
-		return -1;
-	};
-
-	// (public) return number of set bits
-	BigInteger.prototype.bitCount = function () {
-		var r = 0, x = this.s & this.DM;
-		for (var i = 0; i < this.t; ++i) r += cbit(this[i] ^ x);
-		return r;
-	};
-
-	// (public) true iff nth bit is set
-	BigInteger.prototype.testBit = function (n) {
-		var j = Math.floor(n / this.DB);
-		if (j >= this.t) return (this.s != 0);
-		return ((this[j] & (1 << (n % this.DB))) != 0);
-	};
-
-	// (public) this | (1<<n)
-	BigInteger.prototype.setBit = function (n) { return this.changeBit(n, op_or); };
-	// (public) this & ~(1<<n)
-	BigInteger.prototype.clearBit = function (n) { return this.changeBit(n, op_andnot); };
-	// (public) this ^ (1<<n)
-	BigInteger.prototype.flipBit = function (n) { return this.changeBit(n, op_xor); };
-	// (public) this + a
-	BigInteger.prototype.add = function (a) { var r = nbi(); this.addTo(a, r); return r; };
-	// (public) this - a
-	BigInteger.prototype.subtract = function (a) { var r = nbi(); this.subTo(a, r); return r; };
-	// (public) this * a
-	BigInteger.prototype.multiply = function (a) { var r = nbi(); this.multiplyTo(a, r); return r; };
-	// (public) this / a
-	BigInteger.prototype.divide = function (a) { var r = nbi(); this.divRemTo(a, r, null); return r; };
-	// (public) this % a
-	BigInteger.prototype.remainder = function (a) { var r = nbi(); this.divRemTo(a, null, r); return r; };
-	// (public) [this/a,this%a]
-	BigInteger.prototype.divideAndRemainder = function (a) {
-		var q = nbi(), r = nbi();
-		this.divRemTo(a, q, r);
-		return new Array(q, r);
-	};
-
-	// (public) this^e % m (HAC 14.85)
-	BigInteger.prototype.modPow = function (e, m) {
-		var i = e.bitLength(), k, r = nbv(1), z;
-		if (i <= 0) return r;
-		else if (i < 18) k = 1;
-		else if (i < 48) k = 3;
-		else if (i < 144) k = 4;
-		else if (i < 768) k = 5;
-		else k = 6;
-		if (i < 8)
-			z = new Classic(m);
-		else if (m.isEven())
-			z = new Barrett(m);
-		else
-			z = new Montgomery(m);
-
-		// precomputation
-		var g = new Array(), n = 3, k1 = k - 1, km = (1 << k) - 1;
-		g[1] = z.convert(this);
-		if (k > 1) {
-			var g2 = nbi();
-			z.sqrTo(g[1], g2);
-			while (n <= km) {
-				g[n] = nbi();
-				z.mulTo(g2, g[n - 2], g[n]);
-				n += 2;
-			}
-		}
-
-		var j = e.t - 1, w, is1 = true, r2 = nbi(), t;
-		i = nbits(e[j]) - 1;
-		while (j >= 0) {
-			if (i >= k1) w = (e[j] >> (i - k1)) & km;
-			else {
-				w = (e[j] & ((1 << (i + 1)) - 1)) << (k1 - i);
-				if (j > 0) w |= e[j - 1] >> (this.DB + i - k1);
-			}
-
-			n = k;
-			while ((w & 1) == 0) { w >>= 1; --n; }
-			if ((i -= n) < 0) { i += this.DB; --j; }
-			if (is1) {	// ret == 1, don't bother squaring or multiplying it
-				g[w].copyTo(r);
-				is1 = false;
-			}
-			else {
-				while (n > 1) { z.sqrTo(r, r2); z.sqrTo(r2, r); n -= 2; }
-				if (n > 0) z.sqrTo(r, r2); else { t = r; r = r2; r2 = t; }
-				z.mulTo(r2, g[w], r);
-			}
-
-			while (j >= 0 && (e[j] & (1 << i)) == 0) {
-				z.sqrTo(r, r2); t = r; r = r2; r2 = t;
-				if (--i < 0) { i = this.DB - 1; --j; }
-			}
-		}
-		return z.revert(r);
-	};
-
-	// (public) 1/this % m (HAC 14.61)
-	BigInteger.prototype.modInverse = function (m) {
-		var ac = m.isEven();
-		if (this.signum() === 0) throw new Error('division by zero');
-		if ((this.isEven() && ac) || m.signum() == 0) return BigInteger.ZERO;
-		var u = m.clone(), v = this.clone();
-		var a = nbv(1), b = nbv(0), c = nbv(0), d = nbv(1);
-		while (u.signum() != 0) {
-			while (u.isEven()) {
-				u.rShiftTo(1, u);
-				if (ac) {
-					if (!a.isEven() || !b.isEven()) { a.addTo(this, a); b.subTo(m, b); }
-					a.rShiftTo(1, a);
-				}
-				else if (!b.isEven()) b.subTo(m, b);
-				b.rShiftTo(1, b);
-			}
-			while (v.isEven()) {
-				v.rShiftTo(1, v);
-				if (ac) {
-					if (!c.isEven() || !d.isEven()) { c.addTo(this, c); d.subTo(m, d); }
-					c.rShiftTo(1, c);
-				}
-				else if (!d.isEven()) d.subTo(m, d);
-				d.rShiftTo(1, d);
-			}
-			if (u.compareTo(v) >= 0) {
-				u.subTo(v, u);
-				if (ac) a.subTo(c, a);
-				b.subTo(d, b);
-			}
-			else {
-				v.subTo(u, v);
-				if (ac) c.subTo(a, c);
-				d.subTo(b, d);
-			}
-		}
-		if (v.compareTo(BigInteger.ONE) != 0) return BigInteger.ZERO;
-		while (d.compareTo(m) >= 0) d.subTo(m, d);
-		while (d.signum() < 0) d.addTo(m, d);
-		return d;
-	};
-
-
-	// (public) this^e
-	BigInteger.prototype.pow = function (e) { return this.exp(e, new NullExp()); };
-
-	// (public) gcd(this,a) (HAC 14.54)
-	BigInteger.prototype.gcd = function (a) {
-		var x = (this.s < 0) ? this.negate() : this.clone();
-		var y = (a.s < 0) ? a.negate() : a.clone();
-		if (x.compareTo(y) < 0) { var t = x; x = y; y = t; }
-		var i = x.getLowestSetBit(), g = y.getLowestSetBit();
-		if (g < 0) return x;
-		if (i < g) g = i;
-		if (g > 0) {
-			x.rShiftTo(g, x);
-			y.rShiftTo(g, y);
-		}
-		while (x.signum() > 0) {
-			if ((i = x.getLowestSetBit()) > 0) x.rShiftTo(i, x);
-			if ((i = y.getLowestSetBit()) > 0) y.rShiftTo(i, y);
-			if (x.compareTo(y) >= 0) {
-				x.subTo(y, x);
-				x.rShiftTo(1, x);
-			}
-			else {
-				y.subTo(x, y);
-				y.rShiftTo(1, y);
-			}
-		}
-		if (g > 0) y.lShiftTo(g, y);
-		return y;
-	};
-
-	// (public) test primality with certainty >= 1-.5^t
-	BigInteger.prototype.isProbablePrime = function (t) {
-		var i, x = this.abs();
-		if (x.t == 1 && x[0] <= lowprimes[lowprimes.length - 1]) {
-			for (i = 0; i < lowprimes.length; ++i)
-				if (x[0] == lowprimes[i]) return true;
-			return false;
-		}
-		if (x.isEven()) return false;
-		i = 1;
-		while (i < lowprimes.length) {
-			var m = lowprimes[i], j = i + 1;
-			while (j < lowprimes.length && m < lplim) m *= lowprimes[j++];
-			m = x.modInt(m);
-			while (i < j) if (m % lowprimes[i++] == 0) return false;
-		}
-		return x.millerRabin(t);
-	};
-
-
-	// JSBN-specific extension
-
-	// (public) this^2
-	BigInteger.prototype.square = function () { var r = nbi(); this.squareTo(r); return r; };
-
-
-	// NOTE: BigInteger interfaces not implemented in jsbn:
-	// BigInteger(int signum, byte[] magnitude)
-	// double doubleValue()
-	// float floatValue()
-	// int hashCode()
-	// long longValue()
-	// static BigInteger valueOf(long val)
-
-
-
-	// Copyright Stephan Thomas (start) --- //
-	// https://raw.github.com/bitcoinjs/bitcoinjs-lib/07f9d55ccb6abd962efb6befdd37671f85ea4ff9/src/util.js
-	// BigInteger monkey patching
-	BigInteger.valueOf = nbv;
-
-	/**
-	* Returns a byte array representation of the big integer.
-	*
-	* This returns the absolute of the contained value in big endian
-	* form. A value of zero results in an empty array.
-	*/
-	BigInteger.prototype.toByteArrayUnsigned = function () {
-		var ba = this.abs().toByteArray();
-		if (ba.length) {
-			if (ba[0] == 0) {
-				ba = ba.slice(1);
-			}
-			return ba.map(function (v) {
-				return (v < 0) ? v + 256 : v;
-			});
-		} else {
-			// Empty array, nothing to do
-			return ba;
-		}
-	};
-
-	/**
-	* Turns a byte array into a big integer.
-	*
-	* This function will interpret a byte array as a big integer in big
-	* endian notation and ignore leading zeros.
-	*/
-	BigInteger.fromByteArrayUnsigned = function (ba) {
-		if (!ba.length) {
-			return ba.valueOf(0);
-		} else if (ba[0] & 0x80) {
-			// Prepend a zero so the BigInteger class doesn't mistake this
-			// for a negative integer.
-			return new BigInteger([0].concat(ba));
-		} else {
-			return new BigInteger(ba);
-		}
-	};
-
-	/**
-	* Converts big integer to signed byte representation.
-	*
-	* The format for this value uses a the most significant bit as a sign
-	* bit. If the most significant bit is already occupied by the
-	* absolute value, an extra byte is prepended and the sign bit is set
-	* there.
-	*
-	* Examples:
-	*
-	*      0 =>     0x00
-	*      1 =>     0x01
-	*     -1 =>     0x81
-	*    127 =>     0x7f
-	*   -127 =>     0xff
-	*    128 =>   0x0080
-	*   -128 =>   0x8080
-	*    255 =>   0x00ff
-	*   -255 =>   0x80ff
-	*  16300 =>   0x3fac
-	* -16300 =>   0xbfac
-	*  62300 => 0x00f35c
-	* -62300 => 0x80f35c
-	*/
-	BigInteger.prototype.toByteArraySigned = function () {
-		var val = this.abs().toByteArrayUnsigned();
-		var neg = this.compareTo(BigInteger.ZERO) < 0;
-
-		if (neg) {
-			if (val[0] & 0x80) {
-				val.unshift(0x80);
-			} else {
-				val[0] |= 0x80;
-			}
-		} else {
-			if (val[0] & 0x80) {
-				val.unshift(0x00);
-			}
-		}
-
-		return val;
-	};
-
-	/**
-	* Parse a signed big integer byte representation.
-	*
-	* For details on the format please see BigInteger.toByteArraySigned.
-	*/
-	BigInteger.fromByteArraySigned = function (ba) {
-		// Check for negative value
-		if (ba[0] & 0x80) {
-			// Remove sign bit
-			ba[0] &= 0x7f;
-
-			return BigInteger.fromByteArrayUnsigned(ba).negate();
-		} else {
-			return BigInteger.fromByteArrayUnsigned(ba);
-		}
-	};
-	// Copyright Stephan Thomas (end) --- //
-
-
-
-
-	// ****** REDUCTION ******* //
-
-	// Modular reduction using "classic" algorithm
-	var Classic = window.Classic = function Classic(m) { this.m = m; }
-	Classic.prototype.convert = function (x) {
-		if (x.s < 0 || x.compareTo(this.m) >= 0) return x.mod(this.m);
-		else return x;
-	};
-	Classic.prototype.revert = function (x) { return x; };
-	Classic.prototype.reduce = function (x) { x.divRemTo(this.m, null, x); };
-	Classic.prototype.mulTo = function (x, y, r) { x.multiplyTo(y, r); this.reduce(r); };
-	Classic.prototype.sqrTo = function (x, r) { x.squareTo(r); this.reduce(r); };
-
-
-
-
-
-	// Montgomery reduction
-	var Montgomery = window.Montgomery = function Montgomery(m) {
-		this.m = m;
-		this.mp = m.invDigit();
-		this.mpl = this.mp & 0x7fff;
-		this.mph = this.mp >> 15;
-		this.um = (1 << (m.DB - 15)) - 1;
-		this.mt2 = 2 * m.t;
-	}
-	// xR mod m
-	Montgomery.prototype.convert = function (x) {
-		var r = nbi();
-		x.abs().dlShiftTo(this.m.t, r);
-		r.divRemTo(this.m, null, r);
-		if (x.s < 0 && r.compareTo(BigInteger.ZERO) > 0) this.m.subTo(r, r);
-		return r;
-	}
-	// x/R mod m
-	Montgomery.prototype.revert = function (x) {
-		var r = nbi();
-		x.copyTo(r);
-		this.reduce(r);
-		return r;
-	};
-	// x = x/R mod m (HAC 14.32)
-	Montgomery.prototype.reduce = function (x) {
-		while (x.t <= this.mt2)	// pad x so am has enough room later
-			x[x.t++] = 0;
-		for (var i = 0; i < this.m.t; ++i) {
-			// faster way of calculating u0 = x[i]*mp mod DV
-			var j = x[i] & 0x7fff;
-			var u0 = (j * this.mpl + (((j * this.mph + (x[i] >> 15) * this.mpl) & this.um) << 15)) & x.DM;
-			// use am to combine the multiply-shift-add into one call
-			j = i + this.m.t;
-			x[j] += this.m.am(0, u0, x, i, 0, this.m.t);
-			// propagate carry
-			while (x[j] >= x.DV) { x[j] -= x.DV; x[++j]++; }
-		}
-		x.clamp();
-		x.drShiftTo(this.m.t, x);
-		if (x.compareTo(this.m) >= 0) x.subTo(this.m, x);
-	};
-	// r = "xy/R mod m"; x,y != r
-	Montgomery.prototype.mulTo = function (x, y, r) { x.multiplyTo(y, r); this.reduce(r); };
-	// r = "x^2/R mod m"; x != r
-	Montgomery.prototype.sqrTo = function (x, r) { x.squareTo(r); this.reduce(r); };
-
-
-
-
-
-	// A "null" reducer
-	var NullExp = window.NullExp = function NullExp() { }
-	NullExp.prototype.convert = function (x) { return x; };
-	NullExp.prototype.revert = function (x) { return x; };
-	NullExp.prototype.mulTo = function (x, y, r) { x.multiplyTo(y, r); };
-	NullExp.prototype.sqrTo = function (x, r) { x.squareTo(r); };
-
-
-
-
-
-	// Barrett modular reduction
-	var Barrett = window.Barrett = function Barrett(m) {
-		// setup Barrett
-		this.r2 = nbi();
-		this.q3 = nbi();
-		BigInteger.ONE.dlShiftTo(2 * m.t, this.r2);
-		this.mu = this.r2.divide(m);
-		this.m = m;
-	}
-	Barrett.prototype.convert = function (x) {
-		if (x.s < 0 || x.t > 2 * this.m.t) return x.mod(this.m);
-		else if (x.compareTo(this.m) < 0) return x;
-		else { var r = nbi(); x.copyTo(r); this.reduce(r); return r; }
-	};
-	Barrett.prototype.revert = function (x) { return x; };
-	// x = x mod m (HAC 14.42)
-	Barrett.prototype.reduce = function (x) {
-		x.drShiftTo(this.m.t - 1, this.r2);
-		if (x.t > this.m.t + 1) { x.t = this.m.t + 1; x.clamp(); }
-		this.mu.multiplyUpperTo(this.r2, this.m.t + 1, this.q3);
-		this.m.multiplyLowerTo(this.q3, this.m.t + 1, this.r2);
-		while (x.compareTo(this.r2) < 0) x.dAddOffset(1, this.m.t + 1);
-		x.subTo(this.r2, x);
-		while (x.compareTo(this.m) >= 0) x.subTo(this.m, x);
-	};
-	// r = x*y mod m; x,y != r
-	Barrett.prototype.mulTo = function (x, y, r) { x.multiplyTo(y, r); this.reduce(r); };
-	// r = x^2 mod m; x != r
-	Barrett.prototype.sqrTo = function (x, r) { x.squareTo(r); this.reduce(r); };
-
-})();
 	</script>
 	<script type="text/javascript">
 //---------------------------------------------------------------------
@@ -5991,70 +4290,38 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 );
 	</script>
 	<script type="text/javascript">
-//https://raw.github.com/bitcoinjs/bitcoinjs-lib/c952aaeb3ee472e3776655b8ea07299ebed702c7/src/base58.js
 (function (Bitcoin) {
 	Bitcoin.Base58 = {
 		alphabet: "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz",
 		validRegex: /^[1-9A-HJ-NP-Za-km-z]+$/,
-		base: BigInteger.valueOf(58),
 
-		/**
-		* Convert a byte array to a base58-encoded string.
-		*
-		* Written by Mike Hearn for BitcoinJ.
-		*   Copyright (c) 2011 Google Inc.
-		*
-		* Ported to JavaScript by Stefan Thomas.
-		*/
 		encode: function (input) {
-			var bi = BigInteger.fromByteArrayUnsigned(input);
-			var chars = [];
-
-			while (bi.compareTo(B58.base) >= 0) {
-				var mod = bi.mod(B58.base);
-				chars.unshift(B58.alphabet[mod.intValue()]);
-				bi = bi.subtract(mod).divide(B58.base);
+			var leadingZeros = 0;
+			for (var i = 0; i < input.length && input[i] === 0; i++) leadingZeros++;
+			var hex = input.map(function (b) { return ('0' + b.toString(16)).slice(-2); }).join('');
+			var n = hex.length ? BigInt('0x' + hex) : 0n;
+			var result = '';
+			while (n > 0n) {
+				result = B58.alphabet[Number(n % 58n)] + result;
+				n /= 58n;
 			}
-			chars.unshift(B58.alphabet[bi.intValue()]);
-
-			// Convert leading zeros too.
-			for (var i = 0; i < input.length; i++) {
-				if (input[i] == 0x00) {
-					chars.unshift(B58.alphabet[0]);
-				} else break;
-			}
-
-			return chars.join('');
+			for (var i = 0; i < leadingZeros; i++) result = '1' + result;
+			return result;
 		},
 
-		/**
-		* Convert a base58-encoded string to a byte array.
-		*
-		* Written by Mike Hearn for BitcoinJ.
-		*   Copyright (c) 2011 Google Inc.
-		*
-		* Ported to JavaScript by Stefan Thomas.
-		*/
 		decode: function (input) {
-			var bi = BigInteger.valueOf(0);
-			var leadingZerosNum = 0;
-			for (var i = input.length - 1; i >= 0; i--) {
-				var alphaIndex = B58.alphabet.indexOf(input[i]);
-				if (alphaIndex < 0) {
-					throw "Invalid character";
-				}
-				bi = bi.add(BigInteger.valueOf(alphaIndex)
-								.multiply(B58.base.pow(input.length - 1 - i)));
-
-				// This counts leading zero bytes
-				if (input[i] == "1") leadingZerosNum++;
-				else leadingZerosNum = 0;
+			var leadingZeros = 0;
+			for (var i = 0; i < input.length && input[i] === '1'; i++) leadingZeros++;
+			var n = 0n;
+			for (var i = 0; i < input.length; i++) {
+				var idx = B58.alphabet.indexOf(input[i]);
+				if (idx < 0) throw "Invalid Base58 character: '" + input[i] + "'";
+				n = n * 58n + BigInt(idx);
 			}
-			var bytes = bi.toByteArrayUnsigned();
-
-			// Add leading zeros
-			while (leadingZerosNum-- > 0) bytes.unshift(0);
-
+			var hex = n.toString(16);
+			if (hex.length % 2) hex = '0' + hex;
+			var bytes = n > 0n ? hex.match(/.{2}/g).map(function (h) { return parseInt(h, 16); }) : [];
+			while (leadingZeros-- > 0) bytes.unshift(0);
 			return bytes;
 		}
 	};
@@ -6063,6 +4330,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 })(
 	'undefined' != typeof Bitcoin ? Bitcoin : module.exports
 );
+
 	</script>
 	<script type="text/javascript">
 //https://raw.github.com/bitcoinjs/bitcoinjs-lib/09e8c6e184d6501a0c2c59d73ca64db5c0d3eb95/src/address.js
@@ -6189,13 +4457,9 @@ Bitcoin.Bech32 = (function () {
 /*
  * Bitcoin ECDSA — backed by noble-secp256k1 (MIT, audited)
  * https://github.com/paulmillr/noble-secp256k1
- *
- * Note: signSync() requires a synchronous HMAC-SHA256 implementation for RFC 6979
- * nonce generation.  We bridge noble to CryptoJS (loaded before this script) below.
  */
 
-// Bridge: provide noble with a synchronous HMAC-SHA256 using CryptoJS
-// This is required for signSync() to work (RFC 6979 deterministic nonce).
+// Bridge: synchronous HMAC-SHA256 for noble's RFC 6979 nonce generation
 (function () {
 	if (typeof nobleSecp256k1 !== 'undefined' && typeof Crypto !== 'undefined') {
 		nobleSecp256k1.utils.hmacSha256Sync = function (key) {
@@ -6206,155 +4470,47 @@ Bitcoin.Bech32 = (function () {
 				var m = msgs[i];
 				for (var j = 0; j < m.length; j++) data.push(m[j]);
 			}
-			var result = Crypto.HMAC(Crypto.SHA256, keyArr, data, { asBytes: true });
-			return new Uint8Array(result);
+			return new Uint8Array(Crypto.HMAC(Crypto.SHA256, keyArr, data, { asBytes: true }));
 		};
 	}
 })();
 
 Bitcoin.ECDSA = (function () {
-	var ecparams = EllipticCurve.getSECCurveByName("secp256k1");
-
-	// BigInteger private key → 32-byte Uint8Array
-	function privToBytes(bi) {
-		var bytes = bi.toByteArrayUnsigned();
-		while (bytes.length < 32) bytes.unshift(0);
-		var ua = new Uint8Array(32);
-		for (var i = 0; i < 32; i++) ua[i] = bytes[i];
-		return ua;
-	}
-
-	// Plain byte array or Uint8Array → Uint8Array
-	function toUint8Array(arr) {
-		if (arr instanceof Uint8Array) return arr;
-		var ua = new Uint8Array(arr.length);
-		for (var i = 0; i < arr.length; i++) ua[i] = arr[i];
-		return ua;
-	}
-
-	// Byte array → upper-case hex string
 	function toHex(arr) {
 		return Crypto.util.bytesToHex(arr instanceof Uint8Array ? Array.from(arr) : arr).toUpperCase();
 	}
 
-	var ECDSA = {
-
+	return {
 		/*
-		 * Sign a hash with a private key.
-		 * Uses noble signSync: deterministic RFC 6979 nonce, constant-time scalar
-		 * multiplication, low-s normalisation (canonical = true).
-		 * der:false requests the compact 64-byte (r||s) format for consistent parsing.
+		 * Sign a hash. priv is a Uint8Array (32 bytes).
+		 * noble signSync: deterministic RFC 6979, constant-time, low-s.
+		 * Returns DER-encoded signature as a plain byte array.
 		 */
 		sign: function (hash, priv) {
-			var privBytes = privToBytes(priv);
-			var hashBytes = toUint8Array(hash);
-			var compact = nobleSecp256k1.signSync(hashBytes, privBytes, { canonical: true, der: false });
-			var rArr = Array.from(compact.slice(0, 32));
-			var sArr = Array.from(compact.slice(32, 64));
-			var r = BigInteger.fromByteArrayUnsigned(rArr);
-			var s = BigInteger.fromByteArrayUnsigned(sArr);
-			return ECDSA.serializeSig(r, s);
+			var sig = nobleSecp256k1.signSync(
+				new Uint8Array(hash),
+				priv instanceof Uint8Array ? priv : new Uint8Array(priv),
+				{ canonical: true, der: true }
+			);
+			return Array.from(sig);
 		},
 
 		/*
-		 * Verify a DER or compact signature against a hash and a public key.
-		 * Noble validates the public key (prefix, coordinates, on-curve) before
-		 * verifying — prevents invalid-curve and point-at-infinity attacks.
+		 * Verify a DER signature. pubkey is a plain byte array.
+		 * noble validates the public key (on-curve, non-infinity) before verifying.
 		 */
 		verify: function (hash, sig, pubkey) {
-			var sigBytes, pubBytes;
-
-			if (Bitcoin.Util.isArray(sig)) {
-				sigBytes = sig;
-			} else if ("object" === typeof sig && sig.r && sig.s) {
-				sigBytes = ECDSA.serializeSig(sig.r, sig.s);
-			} else {
+			if (!Bitcoin.Util.isArray(sig) && !(sig instanceof Uint8Array))
 				throw "Invalid value for signature";
-			}
-
-			if (pubkey instanceof EllipticCurve.PointFp) {
-				pubBytes = pubkey.getEncoded(pubkey.compressed ? 1 : 0);
-			} else if (Bitcoin.Util.isArray(pubkey)) {
-				pubBytes = pubkey;
-			} else {
-				throw "Invalid format for pubkey value, must be byte array or ec.PointFp";
-			}
-
+			if (!Bitcoin.Util.isArray(pubkey) && !(pubkey instanceof Uint8Array))
+				throw "Invalid format for pubkey value";
 			try {
-				return nobleSecp256k1.verify(toHex(sigBytes), toHex(hash), toHex(pubBytes));
+				return nobleSecp256k1.verify(toHex(sig), toHex(hash), toHex(pubkey));
 			} catch (e) {
 				return false;
 			}
-		},
-
-		/*
-		 * Serialize (r, s) BigIntegers into a DER-encoded byte array.
-		 */
-		serializeSig: function (r, s) {
-			var rBa = r.toByteArraySigned();
-			var sBa = s.toByteArraySigned();
-
-			var sequence = [];
-			sequence.push(0x02);
-			sequence.push(rBa.length);
-			sequence = sequence.concat(rBa);
-
-			sequence.push(0x02);
-			sequence.push(sBa.length);
-			sequence = sequence.concat(sBa);
-
-			sequence.unshift(sequence.length);
-			sequence.unshift(0x30); // SEQUENCE
-			return sequence;
-		},
-
-		/*
-		 * Parse a DER-encoded signature byte array into {r, s} BigIntegers.
-		 */
-		parseSig: function (sig) {
-			if (sig[0] !== 0x30) throw new Error("Signature not a valid DERSequence");
-			var cursor = 2;
-			if (sig[cursor] !== 0x02) throw new Error("First element in signature must be a DERInteger");
-			var rLen = sig[cursor + 1];
-			var rBa = sig.slice(cursor + 2, cursor + 2 + rLen);
-			cursor += 2 + rLen;
-			if (sig[cursor] !== 0x02) throw new Error("Second element in signature must be a DERInteger");
-			var sLen = sig[cursor + 1];
-			var sBa = sig.slice(cursor + 2, cursor + 2 + sLen);
-			return {
-				r: BigInteger.fromByteArrayUnsigned(rBa),
-				s: BigInteger.fromByteArrayUnsigned(sBa)
-			};
-		},
-
-		/*
-		 * Recover a public key from an ECDSA signature (SEC 1 §4.1.6).
-		 * Delegates to noble-secp256k1 for the actual recovery and validation.
-		 */
-		recoverPubKey: function (r, s, hash, i) {
-			var recovery = i & 3;
-			var sigBytes = ECDSA.serializeSig(r, s);
-			var pubBytes = nobleSecp256k1.recoverPublicKey(toHex(hash), toHex(sigBytes), recovery, false);
-			if (!pubBytes) throw "Pubkey recovery unsuccessful";
-			var pubKey = new Bitcoin.ECKey();
-			pubKey.pub = ecparams.getCurve().decodePointHex(toHex(Array.from(pubBytes)));
-			return pubKey;
-		},
-
-		calcPubkeyRecoveryParam: function (address, r, s, hash) {
-			for (var i = 0; i < 4; i++) {
-				try {
-					var pubkey = Bitcoin.ECDSA.recoverPubKey(r, s, hash, i);
-					if (pubkey.getBitcoinAddress().toString() == address) {
-						return i;
-					}
-				} catch (e) { }
-			}
-			throw "Unable to find valid recovery factor";
 		}
 	};
-
-	return ECDSA;
 })();
 
 	</script>
@@ -6366,7 +4522,6 @@ Bitcoin.KeyPool = (function () {
 		this.push = function (item) {
 			if (item == null || item.priv == null) return;
 			var doAdd = true;
-			// prevent duplicates from being added to the array
 			for (var index in this.keyArray) {
 				var currentItem = this.keyArray[index];
 				if (currentItem != null && currentItem.priv != null && item.getBitcoinAddress() == currentItem.getBitcoinAddress()) {
@@ -6384,22 +4539,10 @@ Bitcoin.KeyPool = (function () {
 			}
 		};
 
-		this.reset = function () {
-			this.keyArray = [];
-		};
-
-		this.getArray = function () {
-			// copy array
-			return this.keyArray.slice(0);
-		};
-
-		this.setArray = function (ka) {
-			this.keyArray = ka;
-		};
-
-		this.length = function () {
-			return this.keyArray.length;
-		};
+		this.reset = function () { this.keyArray = []; };
+		this.getArray = function () { return this.keyArray.slice(0); };
+		this.setArray = function (ka) { this.keyArray = ka; };
+		this.length = function () { return this.keyArray.length; };
 
 		this.toString = function () {
 			var keyPoolString = "# = " + this.length() + "\n";
@@ -6421,7 +4564,6 @@ Bitcoin.KeyPool = (function () {
 					}
 				}
 			}
-
 			return keyPoolString;
 		};
 
@@ -6437,36 +4579,24 @@ Bitcoin.Bip38Key = (function () {
 		this.priv = encryptedKey;
 	};
 
-	Bip38.prototype.getBitcoinAddress = function () {
-		return this.address;
-	};
-
-	Bip38.prototype.toString = function () {
-		return this.priv;
-	};
+	Bip38.prototype.getBitcoinAddress = function () { return this.address; };
+	Bip38.prototype.toString = function () { return this.priv; };
 
 	return Bip38;
 })();
 
-//https://raw.github.com/pointbiz/bitcoinjs-lib/9b2f94a028a7bc9bed94e0722563e9ff1d8e8db8/src/eckey.js
 Bitcoin.ECKey = (function () {
 	var ECDSA = Bitcoin.ECDSA;
 	var KeyPool = Bitcoin.KeyPool;
-	var ecparams = EllipticCurve.getSECCurveByName("secp256k1");
 
 	var ECKey = function (input) {
 		if (!input) {
-			// Generate a new random private key using noble-secp256k1.
-			// utils.randomPrivateKey() uses window.crypto.getRandomValues and
-			// rejects values outside [1, n-1] — no BigInteger RNG needed.
-			var privBytes = nobleSecp256k1.utils.randomPrivateKey();
-			this.priv = BigInteger.fromByteArrayUnsigned(Array.from(privBytes));
-		} else if (input instanceof BigInteger) {
-			// Input is a private key value
-			this.priv = input;
-		} else if (Bitcoin.Util.isArray(input)) {
-			// Prepend zero byte to prevent interpretation as negative integer
-			this.priv = BigInteger.fromByteArrayUnsigned(input);
+			// Random key — noble uses window.crypto.getRandomValues, rejects invalid scalars
+			this.priv = nobleSecp256k1.utils.randomPrivateKey(); // Uint8Array(32)
+		} else if (Bitcoin.Util.isArray(input) || input instanceof Uint8Array) {
+			var arr = Array.from(input);
+			while (arr.length < 32) arr.unshift(0);
+			this.priv = new Uint8Array(arr.slice(arr.length - 32));
 		} else if ("string" == typeof input) {
 			var bytes = null;
 			try {
@@ -6485,22 +4615,14 @@ Bitcoin.ECKey = (function () {
 			if (bytes == null || bytes.length != 32) {
 				this.priv = null;
 			} else {
-				// Prepend zero byte to prevent interpretation as negative integer
-				this.priv = BigInteger.fromByteArrayUnsigned(bytes);
+				this.priv = new Uint8Array(bytes);
 			}
 		}
 
 		this.compressed = (this.compressed == undefined) ? !!ECKey.compressByDefault : this.compressed;
 		try {
-			if (this.priv != null) {
-				// Validate using noble: checks 0 < k < n (secp256k1 order)
-				var privBytes = this.priv.toByteArrayUnsigned();
-				while (privBytes.length < 32) privBytes.unshift(0);
-				var ua = new Uint8Array(32);
-				for (var i = 0; i < 32; i++) ua[i] = privBytes[i];
-				if (!nobleSecp256k1.utils.isValidPrivateKey(ua)) {
-					this.setError("Error: private key is outside the valid secp256k1 range [1, n-1].");
-				}
+			if (this.priv != null && !nobleSecp256k1.utils.isValidPrivateKey(this.priv)) {
+				this.setError("Error: private key is outside the valid secp256k1 range [1, n-1].");
 			}
 			if (this.priv != null) {
 				KeyPool.push(this);
@@ -6511,57 +4633,27 @@ Bitcoin.ECKey = (function () {
 	};
 
 	ECKey.privateKeyPrefix = 0x80; // mainnet 0x80    testnet 0xEF
-
-	/**
-	* Whether public keys should be returned compressed by default.
-	*/
 	ECKey.compressByDefault = false;
 
-	/**
-	* Set whether the public key should be returned compressed or not.
-	*/
 	ECKey.prototype.setError = function (err) {
 		this.error = err;
 		this.priv = null;
 		return this;
 	};
 
-	/**
-	* Set whether the public key should be returned compressed or not.
-	*/
 	ECKey.prototype.setCompressed = function (v) {
 		this.compressed = !!v;
-		if (this.pubPoint) this.pubPoint.compressed = this.compressed;
+		this._pubCache = null; // invalidate cached public key bytes
 		return this;
 	};
 
-	/*
-	* Return public key as a byte array in DER encoding
-	*/
+	// Return public key bytes — noble performs point multiplication
 	ECKey.prototype.getPub = function () {
-		return this.getPubPoint().getEncoded(this.compressed ? 1 : 0);
-	};
-
-	/**
-	* Return public point as ECPoint object.
-	* Uses noble-secp256k1 for point multiplication (precomputed, window-based,
-	* constant-time) and reconstructs an EllipticCurve.PointFp for API compatibility.
-	*/
-	ECKey.prototype.getPubPoint = function () {
-		if (!this.pubPoint) {
-			// Derive public key bytes via noble (compressed = true for the Point constructor)
-			var privBytes = this.priv.toByteArrayUnsigned();
-			while (privBytes.length < 32) privBytes.unshift(0);
-			var ua = new Uint8Array(32);
-			for (var i = 0; i < 32; i++) ua[i] = privBytes[i];
-			// Get uncompressed public key bytes (65 bytes: 04 || x || y)
-			var pubBytesUncomp = nobleSecp256k1.getPublicKey(ua, false);
-			var pubHex = Crypto.util.bytesToHex(Array.from(pubBytesUncomp)).toUpperCase();
-			// Decode into PointFp (decodePointHex now validates on-curve via noble)
-			this.pubPoint = ecparams.getCurve().decodePointHex(pubHex);
-			this.pubPoint.compressed = this.compressed;
+		if (!this._pubCache || this._pubCacheComp !== this.compressed) {
+			this._pubCache = Array.from(nobleSecp256k1.getPublicKey(this.priv, this.compressed));
+			this._pubCacheComp = this.compressed;
 		}
-		return this.pubPoint;
+		return this._pubCache;
 	};
 
 	ECKey.prototype.getPubKeyHex = function () {
@@ -6573,12 +4665,9 @@ Bitcoin.ECKey = (function () {
 	};
 
 	ECKey.prototype.getBitcoinAddress = function () {
-		var hash = this.getPubKeyHash();
-		var addr = new Bitcoin.Address(hash);
-		return addr.toString();
+		return new Bitcoin.Address(this.getPubKeyHash()).toString();
 	};
 
-	// Address type tracked at generation time so the key pool log shows the correct format
 	ECKey.prototype.addressType = "legacy";
 
 	ECKey.prototype.setAddressType = function (type) {
@@ -6601,7 +4690,6 @@ Bitcoin.ECKey = (function () {
 		this.setCompressed(true);
 		var pubKeyHash = Bitcoin.Util.sha256ripe160(this.getPub());
 		this.setCompressed(savedComp);
-		// Redeem script: OP_0 <20-byte pubkey hash>
 		var redeemScript = [0x00, 0x14].concat(pubKeyHash);
 		var scriptHash = Bitcoin.Util.sha256ripe160(redeemScript);
 		var addr = new Bitcoin.Address(scriptHash);
@@ -6625,52 +4713,33 @@ Bitcoin.ECKey = (function () {
 		var compPub = this.getPub().slice();
 		this.setCompressed(savedComp);
 
-		// lift_x: force even-Y variant (key-path spend uses x-only internal key)
+		// lift_x: force even-Y
 		compPub[0] = 0x02;
 		var pubHex = Crypto.util.bytesToHex(compPub).toUpperCase();
-
-		// x-only internal key bytes (32 bytes)
-		var xBytes = compPub.slice(1);
+		var xBytes = compPub.slice(1); // 32-byte x-only internal key
 
 		// tagged_hash("TapTweak", xBytes) per BIP340
 		var tagHash = Crypto.SHA256("TapTweak", { asBytes: true });
 		var tweakBytes = Crypto.SHA256(tagHash.concat(tagHash).concat(xBytes), { asBytes: true });
 		var tweakHex = Crypto.util.bytesToHex(tweakBytes);
 
-		// Output key Q = P + tweak*G via noble (constant-time, audited)
+		// Q = P + tweak·G via noble
 		var nobleP = nobleSecp256k1.Point.fromHex(pubHex);
 		var nobleQ = nobleP.add(nobleSecp256k1.Point.BASE.multiply(BigInt('0x' + tweakHex)));
-
-		// Witness program = x-coordinate of Q (32 bytes)
 		var qXBytes = Crypto.util.hexToBytes(nobleQ.x.toString(16).padStart(64, '0'));
 
 		return Bitcoin.Bech32.segwitAddress('bc', 1, qXBytes);
 	};
 
-	/*
-	* Takes a public point as a hex string or byte array
-	*/
-	ECKey.prototype.setPub = function (pub) {
-		// byte array
-		if (Bitcoin.Util.isArray(pub)) {
-			pub = Crypto.util.bytesToHex(pub).toString().toUpperCase();
-		}
-		var ecPoint = ecparams.getCurve().decodePointHex(pub);
-		this.setCompressed(ecPoint.compressed);
-		this.pubPoint = ecPoint;
-		return this;
-	};
-
-	// Sipa Private Key Wallet Import Format 
+	// Sipa Private Key Wallet Import Format
 	ECKey.prototype.getBitcoinWalletImportFormat = function () {
 		var bytes = this.getBitcoinPrivateKeyByteArray();
 		if (bytes == null) return "";
-		bytes.unshift(ECKey.privateKeyPrefix); // prepend 0x80 byte
-		if (this.compressed) bytes.push(0x01); // append 0x01 byte for compressed format
+		bytes.unshift(ECKey.privateKeyPrefix);
+		if (this.compressed) bytes.push(0x01);
 		var checksum = Crypto.SHA256(Crypto.SHA256(bytes, { asBytes: true }), { asBytes: true });
 		bytes = bytes.concat(checksum.slice(0, 4));
-		var privWif = Bitcoin.Base58.encode(bytes);
-		return privWif;
+		return Bitcoin.Base58.encode(bytes);
 	};
 
 	// Private Key Hex Format
@@ -6680,11 +4749,7 @@ Bitcoin.ECKey = (function () {
 
 	ECKey.prototype.getBitcoinPrivateKeyByteArray = function () {
 		if (this.priv == null) return null;
-		// Get a copy of private key as a byte array
-		var bytes = this.priv.toByteArrayUnsigned();
-		// zero pad if private key is less than 32 bytes 
-		while (bytes.length < 32) bytes.unshift(0x00);
-		return bytes;
+		return Array.from(this.priv); // Uint8Array(32) → plain Array
 	};
 
 	ECKey.prototype.toString = function (format) {
@@ -6702,71 +4767,57 @@ Bitcoin.ECKey = (function () {
 		return ECDSA.verify(hash, sig, this.getPub());
 	};
 
-	/**
-	* Parse a wallet import format private key contained in a string.
-	*/
 	ECKey.decodeWalletImportFormat = function (privStr) {
 		var bytes = Bitcoin.Base58.decode(privStr);
 		var hash = bytes.slice(0, 33);
 		var checksum = Crypto.SHA256(Crypto.SHA256(hash, { asBytes: true }), { asBytes: true });
-		if (checksum[0] != bytes[33] ||
-					checksum[1] != bytes[34] ||
-					checksum[2] != bytes[35] ||
-					checksum[3] != bytes[36]) {
+		if (checksum[0] != bytes[33] || checksum[1] != bytes[34] ||
+		    checksum[2] != bytes[35] || checksum[3] != bytes[36]) {
 			throw "Checksum validation failed!";
 		}
 		var version = hash.shift();
-		if (version != ECKey.privateKeyPrefix) {
-			throw "Version " + version + " not supported!";
-		}
+		if (version != ECKey.privateKeyPrefix) throw "Version " + version + " not supported!";
 		return hash;
 	};
 
-	/**
-	* Parse a compressed wallet import format private key contained in a string.
-	*/
 	ECKey.decodeCompressedWalletImportFormat = function (privStr) {
 		var bytes = Bitcoin.Base58.decode(privStr);
 		var hash = bytes.slice(0, 34);
 		var checksum = Crypto.SHA256(Crypto.SHA256(hash, { asBytes: true }), { asBytes: true });
-		if (checksum[0] != bytes[34] ||
-					checksum[1] != bytes[35] ||
-					checksum[2] != bytes[36] ||
-					checksum[3] != bytes[37]) {
+		if (checksum[0] != bytes[34] || checksum[1] != bytes[35] ||
+		    checksum[2] != bytes[36] || checksum[3] != bytes[37]) {
 			throw "Checksum validation failed!";
 		}
 		var version = hash.shift();
-		if (version != ECKey.privateKeyPrefix) {
-			throw "Version " + version + " not supported!";
-		}
+		if (version != ECKey.privateKeyPrefix) throw "Version " + version + " not supported!";
 		hash.pop();
 		return hash;
 	};
 
-	// 64 characters [0-9A-F]
+	// 64 hex characters [0-9A-F]
 	ECKey.isHexFormat = function (key) {
-		key = key.toString();
-		return /^[A-Fa-f0-9]{64}$/.test(key);
+		return /^[A-Fa-f0-9]{64}$/.test(key.toString());
 	};
 
-	// 51 characters base58, always starts with a '5'
+	// 51 base58 chars, starts with '5' (mainnet) or '9' (testnet)
 	ECKey.isWalletImportFormat = function (key) {
 		key = key.toString();
 		return (ECKey.privateKeyPrefix == 0x80) ?
-							(/^5[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{50}$/.test(key)) :
-							(/^9[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{50}$/.test(key));
+			(/^5[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{50}$/.test(key)) :
+			(/^9[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{50}$/.test(key));
 	};
 
-	// 52 characters base58
+	// 52 base58 chars, starts with 'L' or 'K' (mainnet) or 'c' (testnet)
 	ECKey.isCompressedWalletImportFormat = function (key) {
 		key = key.toString();
 		return (ECKey.privateKeyPrefix == 0x80) ?
-							(/^[LK][123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{51}$/.test(key)) :
-							(/^c[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{51}$/.test(key));
+			(/^[LK][123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{51}$/.test(key)) :
+			(/^c[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{51}$/.test(key));
 	};
 
 	return ECKey;
 })();
+
 	</script>
 	<script type="text/javascript">
 //https://raw.github.com/bitcoinjs/bitcoinjs-lib/09e8c6e184d6501a0c2c59d73ca64db5c0d3eb95/src/util.js
@@ -6811,29 +4862,11 @@ Bitcoin.Util = {
 			return [0xff].concat(Crypto.util.wordsToBytes([i >>> 32, i]));
 		}
 	},
-	/**
-	* Parse a Bitcoin value byte array, returning a BigInteger.
-	*/
-	valueToBigInt: function (valueBuffer) {
-		if (valueBuffer instanceof BigInteger) return valueBuffer;
-
-		// Prepend zero byte to prevent interpretation as negative integer
-		return BigInteger.fromByteArrayUnsigned(valueBuffer);
-	},
-	/**
-	* Format a Bitcoin value as a string.
-	*
-	* Takes a BigInteger or byte-array and returns that amount of Bitcoins in a
-	* nice standard formatting.
-	*
-	* Examples:
-	* 12.3555
-	* 0.1234
-	* 900.99998888
-	* 34.00
-	*/
+	// Format a satoshi value (native BigInt or byte array) as a BTC string
 	formatValue: function (valueBuffer) {
-		var value = this.valueToBigInt(valueBuffer).toString();
+		var n = typeof valueBuffer === 'bigint' ? valueBuffer :
+			BigInt('0x' + Array.from(valueBuffer).map(function (b) { return ('0' + b.toString(16)).slice(-2); }).join('') || '0');
+		var value = n.toString();
 		var integerPart = value.length > 8 ? value.substr(0, value.length - 8) : '0';
 		var decimalPart = value.length > 8 ? value.substr(value.length - 8) : value;
 		while (decimalPart.length < 8) decimalPart = "0" + decimalPart;
@@ -6841,24 +4874,14 @@ Bitcoin.Util = {
 		while (decimalPart.length < 2) decimalPart += "0";
 		return integerPart + "." + decimalPart;
 	},
-	/**
-	* Parse a floating point string as a Bitcoin value.
-	*
-	* Keep in mind that parsing user input is messy. You should always display
-	* the parsed value back to the user to make sure we understood his input
-	* correctly.
-	*/
+	// Parse a BTC string into satoshis (native BigInt)
 	parseValue: function (valueString) {
-		// TODO: Detect other number formats (e.g. comma as decimal separator)
 		var valueComp = valueString.split('.');
-		var integralPart = valueComp[0];
-		var fractionalPart = valueComp[1] || "0";
+		var integralPart = valueComp[0] || '0';
+		var fractionalPart = valueComp[1] || '0';
 		while (fractionalPart.length < 8) fractionalPart += "0";
-		fractionalPart = fractionalPart.replace(/^0+/g, '');
-		var value = BigInteger.valueOf(parseInt(integralPart));
-		value = value.multiply(BigInteger.valueOf(100000000));
-		value = value.add(BigInteger.valueOf(parseInt(fractionalPart)));
-		return value;
+		fractionalPart = (fractionalPart.replace(/^0+/, '') || '0').slice(0, 8);
+		return BigInt(integralPart) * 100000000n + BigInt(fractionalPart);
 	},
 	/**
 	* Calculate RIPEMD160(SHA256(data)).
@@ -8245,6 +6268,16 @@ input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; p
 	<script type="text/javascript">
 var ninja = { wallets: {} };
 
+// Helper: byte array (or Uint8Array) → native BigInt
+function _privBytesToBigInt(bytes) {
+	var hex = Array.from(bytes).map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
+	return hex.length ? BigInt('0x' + hex) : 0n;
+}
+// Helper: native BigInt → 32-byte plain Array (big-endian, zero-padded)
+function _bigIntToPrivBytes(n) {
+	return Crypto.util.hexToBytes(n.toString(16).padStart(64, '0'));
+}
+
 ninja.privateKey = {
 	isPrivateKey: function (key) {
 		return (
@@ -8254,28 +6287,26 @@ ninja.privateKey = {
 				);
 	},
 	getECKeyFromAdding: function (privKey1, privKey2) {
-		var n = EllipticCurve.getSECCurveByName("secp256k1").getN();
 		var ecKey1 = new Bitcoin.ECKey(privKey1);
 		var ecKey2 = new Bitcoin.ECKey(privKey2);
-		// if both keys are the same return null
 		if (ecKey1.getBitcoinHexFormat() == ecKey2.getBitcoinHexFormat()) return null;
 		if (ecKey1 == null || ecKey2 == null) return null;
-		var combinedPrivateKey = new Bitcoin.ECKey(ecKey1.priv.add(ecKey2.priv).mod(n));
-		// compressed when both keys are compressed
-		if (ecKey1.compressed && ecKey2.compressed) combinedPrivateKey.setCompressed(true);
-		return combinedPrivateKey;
+		var n = nobleSecp256k1.CURVE.n;
+		var combined = _bigIntToPrivBytes((_privBytesToBigInt(ecKey1.priv) + _privBytesToBigInt(ecKey2.priv)) % n);
+		var combinedKey = new Bitcoin.ECKey(combined);
+		if (ecKey1.compressed && ecKey2.compressed) combinedKey.setCompressed(true);
+		return combinedKey;
 	},
 	getECKeyFromMultiplying: function (privKey1, privKey2) {
-		var n = EllipticCurve.getSECCurveByName("secp256k1").getN();
 		var ecKey1 = new Bitcoin.ECKey(privKey1);
 		var ecKey2 = new Bitcoin.ECKey(privKey2);
-		// if both keys are the same return null
 		if (ecKey1.getBitcoinHexFormat() == ecKey2.getBitcoinHexFormat()) return null;
 		if (ecKey1 == null || ecKey2 == null) return null;
-		var combinedPrivateKey = new Bitcoin.ECKey(ecKey1.priv.multiply(ecKey2.priv).mod(n));
-		// compressed when both keys are compressed
-		if (ecKey1.compressed && ecKey2.compressed) combinedPrivateKey.setCompressed(true);
-		return combinedPrivateKey;
+		var n = nobleSecp256k1.CURVE.n;
+		var combined = _bigIntToPrivBytes((_privBytesToBigInt(ecKey1.priv) * _privBytesToBigInt(ecKey2.priv)) % n);
+		var combinedKey = new Bitcoin.ECKey(combined);
+		if (ecKey1.compressed && ecKey2.compressed) combinedKey.setCompressed(true);
+		return combinedKey;
 	},
 	// 58 base58 characters starting with 6P
 	isBIP38Format: function (key) {
@@ -8399,10 +6430,11 @@ ninja.privateKey = {
 
 					var factorb = Bitcoin.Util.dsha256(seedb);
 
-					var ps = EllipticCurve.getSECCurveByName("secp256k1");
-					var privateKey = BigInteger.fromByteArrayUnsigned(passfactor).multiply(BigInteger.fromByteArrayUnsigned(factorb)).remainder(ps.getN());
-
-					decrypted = privateKey.toByteArrayUnsigned();
+					// privateKey = passfactor * factorb (mod n)
+					var decryptedN = nobleSecp256k1.CURVE.n;
+					decrypted = _bigIntToPrivBytes(
+						(_privBytesToBigInt(passfactor) * _privBytesToBigInt(factorb)) % decryptedN
+					);
 					verifyHashAndReturn();
 				});
 			});
@@ -8449,7 +6481,8 @@ ninja.privateKey = {
 
 			// 2)  Encode the lot and sequence numbers as a 4 byte quantity (big-endian):
 			// lotnumber * 4096 + sequencenumber. Call these four bytes lotsequence.
-			var lotSequence = BigInteger(4096 * lotNum + sequenceNum).toByteArrayUnsigned();
+			var lotSeqNum = (4096 * lotNum + sequenceNum) >>> 0;
+			var lotSequence = [(lotSeqNum >>> 24) & 0xff, (lotSeqNum >>> 16) & 0xff, (lotSeqNum >>> 8) & 0xff, lotSeqNum & 0xff];
 
 			// 3) Concatenate ownersalt + lotsequence and call this ownerentropy.
 			var ownerEntropy = ownerSalt.concat(lotSequence);
@@ -8460,11 +6493,9 @@ ninja.privateKey = {
 		Crypto_scrypt(passphrase, ownerSalt, 16384, 8, 8, 32, function (prefactor) {
 			// Take SHA256(SHA256(prefactor + ownerentropy)) and call this passfactor
 			var passfactorBytes = noNumbers ? prefactor : Bitcoin.Util.dsha256(prefactor.concat(ownerEntropy));
-			var passfactor = BigInteger.fromByteArrayUnsigned(passfactorBytes);
 
-			// 5) Compute the elliptic curve point G * passfactor, and convert the result to compressed notation (33 bytes)
-			var ellipticCurve = EllipticCurve.getSECCurveByName("secp256k1");
-			var passpoint = ellipticCurve.getG().multiply(passfactor).getEncoded(1);
+			// 5) G * passfactor (compressed) — equivalent to ECKey public key derivation
+			var passpoint = Array.from(nobleSecp256k1.getPublicKey(new Uint8Array(passfactorBytes), true));
 
 			// 6) Convey ownersalt and passpoint to the party generating the keys, along with a checksum to ensure integrity.
 			// magic bytes "2C E9 B3 E1 FF 39 E2 51" followed by ownerentropy, and then passpoint
@@ -8505,9 +6536,9 @@ ninja.privateKey = {
 		// 3) ECMultiply passpoint by factorb. Use the resulting EC point as a public key and hash it into a Bitcoin
 		// address using either compressed or uncompressed public key methodology (specify which methodology is used
 		// inside flagbyte). This is the generated Bitcoin address, call it generatedaddress.
-		var ec = EllipticCurve.getSECCurveByName("secp256k1").getCurve();
-		var generatedPoint = ec.decodePointHex(ninja.publicKey.getHexFromByteArray(passpoint));
-		var generatedBytes = generatedPoint.multiply(BigInteger.fromByteArrayUnsigned(factorB)).getEncoded(compressed);
+		var passpointHex = ninja.publicKey.getHexFromByteArray(passpoint);
+		var factorBNative = _privBytesToBigInt(factorB);
+		var generatedBytes = Array.from(nobleSecp256k1.Point.fromHex(passpointHex).multiply(factorBNative).toRawBytes(compressed));
 		var generatedAddress = (new Bitcoin.Address(Bitcoin.Util.sha256ripe160(generatedBytes))).toString();
 
 		// 4) Take the first four bytes of SHA256(SHA256(generatedaddress)) and call it addresshash.
@@ -8594,34 +6625,26 @@ ninja.publicKey = {
 		return Crypto.util.bytesToHex(pubKeyByteArray).toString().toUpperCase();
 	},
 	getByteArrayFromAdding: function (pubKeyHex1, pubKeyHex2) {
-		var ecparams = EllipticCurve.getSECCurveByName("secp256k1");
-		var curve = ecparams.getCurve();
-		var ecPoint1 = curve.decodePointHex(pubKeyHex1);
-		var ecPoint2 = curve.decodePointHex(pubKeyHex2);
-		// if both points are the same return null
-		if (ecPoint1.equals(ecPoint2)) return null;
-		var compressed = (ecPoint1.compressed && ecPoint2.compressed);
-		var pubKey = ecPoint1.add(ecPoint2).getEncoded(compressed);
-		return pubKey;
+		var p1 = nobleSecp256k1.Point.fromHex(pubKeyHex1.toUpperCase());
+		var p2 = nobleSecp256k1.Point.fromHex(pubKeyHex2.toUpperCase());
+		if (p1.equals(p2)) return null;
+		var compressed = (pubKeyHex1.length === 66 && pubKeyHex2.length === 66);
+		return Array.from(p1.add(p2).toRawBytes(compressed));
 	},
 	getByteArrayFromMultiplying: function (pubKeyHex, ecKey) {
-		var ecparams = EllipticCurve.getSECCurveByName("secp256k1");
-		var ecPoint = ecparams.getCurve().decodePointHex(pubKeyHex);
-		var compressed = (ecPoint.compressed && ecKey.compressed);
-		// if both points are the same return null
-		ecKey.setCompressed(false);
-		if (ecPoint.equals(ecKey.getPubPoint())) {
-			return null;
-		}
-		var bigInt = ecKey.priv;
-		var pubKey = ecPoint.multiply(bigInt).getEncoded(compressed);
-		return pubKey;
+		var noblePoint = nobleSecp256k1.Point.fromHex(pubKeyHex.toUpperCase());
+		var inputIsCompressed = (pubKeyHex.length === 66);
+		// same key check: compare uncompressed representations
+		var ecKeyUncompHex = Crypto.util.bytesToHex(Array.from(nobleSecp256k1.getPublicKey(ecKey.priv, false))).toUpperCase();
+		var inputUncompHex = Crypto.util.bytesToHex(Array.from(noblePoint.toRawBytes(false))).toUpperCase();
+		if (ecKeyUncompHex === inputUncompHex) return null;
+		var compressed = inputIsCompressed && ecKey.compressed;
+		var scalar = _privBytesToBigInt(Array.from(ecKey.priv));
+		return Array.from(noblePoint.multiply(scalar).toRawBytes(compressed));
 	},
 	// used by unit test
 	getDecompressedPubKeyHex: function (pubKeyHexComp) {
-		var ecparams = EllipticCurve.getSECCurveByName("secp256k1");
-		var ecPoint = ecparams.getCurve().decodePointHex(pubKeyHexComp);
-		var pubByteArray = ecPoint.getEncoded(0);
+		var pubByteArray = Array.from(nobleSecp256k1.Point.fromHex(pubKeyHexComp.toUpperCase()).toRawBytes(false));
 		var pubHexUncompressed = ninja.publicKey.getHexFromByteArray(pubByteArray);
 		return pubHexUncompressed;
 	}
@@ -12096,9 +10119,7 @@ ninja.wallets.vanitywallet = {
 		// SegWit / Taproot require a compressed public key (33 bytes)
 		var compBytes = pubKeyByteArray;
 		if (pubKeyByteArray.length !== 33) {
-			var ecparams = EllipticCurve.getSECCurveByName("secp256k1");
-			var pt = ecparams.getCurve().decodePointHex(Crypto.util.bytesToHex(pubKeyByteArray).toUpperCase());
-			compBytes = pt.getEncoded(1);
+			compBytes = Array.from(nobleSecp256k1.Point.fromHex(Crypto.util.bytesToHex(pubKeyByteArray).toUpperCase()).toRawBytes(true));
 		}
 		switch (type) {
 			case "p2sh":    return ninja.publicKey.getP2SHAddressFromByteArray(compBytes);
@@ -12816,7 +10837,7 @@ ninja.wallets.splitwallet = {
 				}
 				return true;
 			},
-			// confirms multiplication is working and BigInteger was created correctly (Pub Key B vs Priv Key A)
+			// confirms multiplication is working (Pub Key B vs Priv Key A)
 			testGetPubHexFromMultiplyingPrivAPubB: function () {
 				var keyPub = "04F04BF260DCCC46061B5868F60FE962C77B5379698658C98A93C3129F5F98938020F36EBBDE6F1BEAF98E5BD0E425747E68B0F2FB7A2A59EDE93F43C0D78156FF";
 				var keyPriv = "B1202A137E917536B3B4C5010C3FF5DDD4784917B3EEF21D3A3BF21B2E03310C";
@@ -12827,7 +10848,7 @@ ninja.wallets.splitwallet = {
 				}
 				return true;
 			},
-			// confirms multiplication is working and BigInteger was created correctly (Pub Key A vs Priv Key B)
+			// confirms multiplication is working (Pub Key A vs Priv Key B)
 			testGetPubHexFromMultiplyingPrivBPubA: function () {
 				var keyPub = "0429BF26C0AF7D31D608474CEBD49DA6E7C541B8FAD95404B897643476CE621CFD05E24F7AE8DE8033AADE5857DB837E0B704A31FDDFE574F6ECA879643A0D3709";
 				var keyPriv = "7DE52819F1553C2BFEDE6A2628B6FDDF03C2A07EB21CF77ACA6C2C3D252E1FD9";
@@ -12888,7 +10909,7 @@ ninja.wallets.splitwallet = {
 				var key = "5J8QhiQtAiozKwyk3GCycAscg1tNaYhNdiiLey8vaDK8Bzm4znb";
 				var btcKey = new Bitcoin.ECKey(key);
 				if (btcKey.getPubKeyHex() != "0478982F40FA0C0B7A55717583AFC99A4EDFD301A2729DC59B0B8EB9E18692BCB521F054FAD982AF4CC1933AFD1F1B563EA779A6AA6CCE36A30B947DD653E63E44"
-						|| btcKey.getPubPoint().compressed != false) {
+						|| btcKey.compressed != false) {
 					return false;
 				}
 				return true;
@@ -12898,7 +10919,7 @@ ninja.wallets.splitwallet = {
 				var btcKey = new Bitcoin.ECKey(key);
 				btcKey.setCompressed(true);
 				if (btcKey.getPubKeyHex() != "0278982F40FA0C0B7A55717583AFC99A4EDFD301A2729DC59B0B8EB9E18692BCB5"
-						|| btcKey.getPubPoint().compressed != true) {
+						|| btcKey.compressed != true) {
 					return false;
 				}
 				return true;
@@ -12915,7 +10936,6 @@ ninja.wallets.splitwallet = {
 				var key = "KxbhchnQquYQ2dfSxz7rrEaQTCukF4uCV57TkamyTbLzjFWcdi3S";
 				var btcKey = new Bitcoin.ECKey(key);
 				if (btcKey.getBitcoinWalletImportFormat() != "KxbhchnQquYQ2dfSxz7rrEaQTCukF4uCV57TkamyTbLzjFWcdi3S"
-						|| btcKey.getPubPoint().compressed != true
 						|| btcKey.compressed != true) {
 					return false;
 				}
@@ -13042,16 +11062,13 @@ ninja.wallets.splitwallet = {
 				return ecKey.priv == null;
 			},
 
-			// EllipticCurve tests
+			// noble point decoding tests
 			testDecodePointEqualsDecodeFrom: function () {
+				// Decoding from bytes and from hex must yield the same point
 				var key = "04F04BF260DCCC46061B5868F60FE962C77B5379698658C98A93C3129F5F98938020F36EBBDE6F1BEAF98E5BD0E425747E68B0F2FB7A2A59EDE93F43C0D78156FF";
-				var ecparams = EllipticCurve.getSECCurveByName("secp256k1");
-				var ecPoint1 = EllipticCurve.PointFp.decodeFrom(ecparams.getCurve(), Crypto.util.hexToBytes(key));
-				var ecPoint2 = ecparams.getCurve().decodePointHex(key);
-				if (!ecPoint1.equals(ecPoint2)) {
-					return false;
-				}
-				return true;
+				var fromHex = nobleSecp256k1.Point.fromHex(key);
+				var fromBytes = nobleSecp256k1.Point.fromHex(Crypto.util.bytesToHex(Crypto.util.hexToBytes(key)).toUpperCase());
+				return fromHex.equals(fromBytes);
 			},
 			testDecodePointHexForCompressedPublicKey: function () {
 				var key = "03F04BF260DCCC46061B5868F60FE962C77B5379698658C98A93C3129F5F989380";
@@ -13226,212 +11243,6 @@ ninja.wallets.splitwallet = {
 				return true;
 			},
 
-			//BigInteger tests
-			testBigIntegerShouldWorkWithoutNew: function () {
-				var bi = BigInteger('12345')
-				if (bi.toString(10) != '12345') {
-					return false;
-				}
-				return true;
-			},
-			testBigIntegerShouldWorkWithStringInput: function () {
-				if (new BigInteger('12345').toString(16) != '3039') return false;
-				if (new BigInteger('29048849665247').toString(16) != '1a6b765d8cdf') return false;
-				if (new BigInteger('-29048849665247').toString(16) != '-1a6b765d8cdf') return false;
-				if (new BigInteger('1A6B765D8CDF', 16).toString(16) != '1a6b765d8cdf') return false;
-				if (new BigInteger('FF', 16).toString() != '255') return false;
-				if (new BigInteger('1A6B765D8CDF', 16).toString() != '29048849665247') return false;
-				if (new BigInteger('a89c e5af8724 c0a23e0e 0ff77500', 16).toString(16) != 'a89ce5af8724c0a23e0e0ff77500') return false;
-				if (new BigInteger('123456789abcdef123456789abcdef123456789abcdef', 16).toString(16) != '123456789abcdef123456789abcdef123456789abcdef') return false;
-				if (new BigInteger('10654321').toString() != '10654321') return false;
-				if (new BigInteger('10000000000000000').toString(10) != '10000000000000000') return false;
-
-				return true;
-			},
-			testBigIntegerShouldImportExportTwosComplementBigEndian: function () {
-				if (new BigInteger([1, 2, 3], 256).toString(16) != '10203') return false;
-				if (new BigInteger([1, 2, 3, 4], 256).toString(16) != '1020304') return false;
-				if (new BigInteger([1, 2, 3, 4, 5], 256).toString(16) != '102030405') return false;
-				if (new BigInteger([1, 2, 3, 4, 5, 6, 7, 8], 256).toString(16) != '102030405060708') return false;
-				if (new BigInteger([1, 2, 3, 4], 256).toByteArray().join(',') != '1,2,3,4') return false;
-				if (new BigInteger([1, 2, 3, 4, 5, 6, 7, 8], 256).toByteArray().join(',') != '1,2,3,4,5,6,7,8') return false;
-
-				return true;
-			},
-			testBigIntegerShouldReturnProperBitLength: function () {
-				if (new BigInteger('0').bitLength() != 0) return false;
-				if (new BigInteger('1', 16).bitLength() != 1) return false;
-				if (new BigInteger('2', 16).bitLength() != 2) return false;
-				if (new BigInteger('3', 16).bitLength() != 2) return false;
-				if (new BigInteger('4', 16).bitLength() != 3) return false;
-				if (new BigInteger('8', 16).bitLength() != 4) return false;
-				if (new BigInteger('10', 16).bitLength() != 5) return false;
-				if (new BigInteger('100', 16).bitLength() != 9) return false;
-				if (new BigInteger('123456', 16).bitLength() != 21) return false;
-				if (new BigInteger('123456789', 16).bitLength() != 33) return false;
-				if (new BigInteger('8023456789', 16).bitLength() != 40) return false;
-
-				return true;
-			},
-			testBigIntegerShouldAddNumbers: function () {
-				// test 1
-				if (new BigInteger('14').add(new BigInteger('26')).toString(16) != '28') return false;
-
-				// test 2
-				var k = new BigInteger('1234', 16);
-				var r = k;
-				for (var i = 0; i < 257; i++) r = r.add(k);
-				if (r.toString(16) != '125868') return false;
-
-				// test 3
-				var k = new BigInteger('abcdefabcdefabcdef', 16);
-				var r = new BigInteger('deadbeef', 16);
-				for (var i = 0; i < 257; i++) {
-					r = r.add(k);
-				}
-				if (r.toString(16) != 'ac79bd9b79be7a277bde') return false;
-
-				return true;
-			},
-			testBigIntegerShouldSubtractNumbers: function () {
-				// test 1
-				if (new BigInteger('14').subtract(new BigInteger('26')).toString(16) != '-c') return false;
-				// test 2
-				if (new BigInteger('26').subtract(new BigInteger('14')).toString(16) != 'c') return false;
-				// test 3
-				if (new BigInteger('26').subtract(new BigInteger('26')).toString(16) != '0') return false;
-				// test 4
-				if (new BigInteger('-26').subtract(new BigInteger('26')).toString(16) != '-34') return false;
-				// test 5
-				var a = new BigInteger('31ff3c61db2db84b9823d320907a573f6ad37c437abe458b1802cda041d6384a7d8daef41395491e2', 16);
-				var b = new BigInteger('6f0e4d9f1d6071c183677f601af9305721c91d31b0bbbae8fb790000', 16);
-				var r = new BigInteger('31ff3c61db2db84b9823d3208989726578fd75276287cd9516533a9acfb9a6776281f34583ddb91e2', 16);
-				if (a.subtract(b).compareTo(r) != 0) return false;
-				// test 6
-				var r = b.subtract(new BigInteger('14'));
-				if (b.clone().subtract(new BigInteger('14')).compareTo(r) != 0) return false;
-				// test 7
-				var r = new BigInteger('7fffffffffffffffffffffffffffffff5d576e7357a4501ddfe92f46681b', 16);
-				if (r.subtract(new BigInteger('-1')).toString(16) != '7fffffffffffffffffffffffffffffff5d576e7357a4501ddfe92f46681c') return false;
-				// test 8
-				// Carry and copy
-				var a = new BigInteger('12345', 16);
-				var b = new BigInteger('1000000000000', 16);
-				if (a.subtract(b).toString(16) != '-fffffffedcbb') return false;
-				// test 9
-				var a = new BigInteger('12345', 16);
-				var b = new BigInteger('1000000000000', 16);
-				if (b.subtract(a).toString(16) != 'fffffffedcbb') return false;
-				
-				return true;
-			},
-			testBigIntegerShouldMultiplyNumbers: function () {
-				if (new BigInteger('1001', 16).multiply(new BigInteger('1234', 16)).toString(16) != '1235234') return false;
-				if (new BigInteger('-1001', 16).multiply(new BigInteger('1234', 16)).toString(16) != '-1235234') return false;
-				if (new BigInteger('-1001', 16).multiply(new BigInteger('-1234', 16)).toString(16) != '1235234') return false;
-
-				// test 4
-				var n = new BigInteger('1001', 16);
-				var r = n;
-				for (var i = 0; i < 4; i++) {
-					r = r.multiply(n);
-				}
-				if (r.toString(16) != '100500a00a005001') return false;
-
-				var n = new BigInteger('79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798', 16);
-				if (n.multiply(n).toString(16) != '39e58a8055b6fb264b75ec8c646509784204ac15a8c24e05babc9729ab9b055c3a9458e4ce3289560a38e08ba8175a9446ce14e608245ab3a9978a8bd8acaa40') return false;
-				if (n.multiply(n).multiply(n).toString(16) != '1b888e01a06e974017a28a5b4da436169761c9730b7aeedf75fc60f687b46e0cf2cb11667f795d5569482640fe5f628939467a01a612b023500d0161e9730279a7561043af6197798e41b7432458463e64fa81158907322dc330562697d0d600') return false;
-
-				if (new BigInteger('-100000000000').multiply(new BigInteger('3').divide(new BigInteger('4'))).toString(16) != '0') return false;
-
-				return true;
-			},
-			testBigIntegerShouldDivideNumbers: function () {
-				if (new BigInteger('10').divide(new BigInteger('256')).toString(16) != '0') return false;
-				if (new BigInteger('69527932928').divide(new BigInteger('16974594')).toString(16) != 'fff') return false;
-				if (new BigInteger('-69527932928').divide(new BigInteger('16974594')).toString(16) != '-fff') return false;
-
-				var b = new BigInteger('39e58a8055b6fb264b75ec8c646509784204ac15a8c24e05babc9729ab9b055c3a9458e4ce3289560a38e08ba8175a9446ce14e608245ab3a9978a8bd8acaa40', 16);
-				var n = new BigInteger('79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798', 16);
-				if (b.divide(n).toString(16) != n.toString(16)) return false;
-
-				if (new BigInteger('1').divide(new BigInteger('-5')).toString(10) != '0') return false;
-
-				//	// Regression after moving to word div
-				var p = new BigInteger('fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f', 16);
-				var a = new BigInteger('79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798', 16);
-				var as = a.square();
-				if (as.divide(p).toString(16) != '39e58a8055b6fb264b75ec8c646509784204ac15a8c24e05babc9729e58090b9') return false;
-
-				var p = new BigInteger('ffffffff00000001000000000000000000000000ffffffffffffffffffffffff', 16);
-				var a = new BigInteger('fffffffe00000003fffffffd0000000200000001fffffffe00000002ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff', 16);
-				if (a.divide(p).toString(16) != 'ffffffff00000002000000000000000000000001000000000000000000000001') return false;
-				
-				return true;
-			},
-			testBigIntegerShouldModNumbers: function () {
-				if (new BigInteger('10').mod(new BigInteger('256')).toString(16) != 'a') return false;
-				if (new BigInteger('69527932928').mod(new BigInteger('16974594')).toString(16) != '102f302') return false;
-				if (new BigInteger('-69527932928').mod(new BigInteger('16974594')).toString(16) != '1000') return false;
-				if (new BigInteger('10', 16).mod(new BigInteger('256')).toString(16) != '10') return false;
-				if (new BigInteger('100', 16).mod(new BigInteger('256')).toString(16) != '0') return false;
-				if (new BigInteger('1001', 16).mod(new BigInteger('256')).toString(16) != '1') return false;
-				if (new BigInteger('100000000001', 16).mod(new BigInteger('256')).toString(16) != '1') return false;
-				if (new BigInteger('100000000001', 16).mod(new BigInteger('257')).toString(16) != new BigInteger('100000000001', 16).mod(new BigInteger('257')).toString(16)) return false;
-				if (new BigInteger('123456789012', 16).mod(new BigInteger('3')).toString(16) != new BigInteger('123456789012', 16).mod(new BigInteger('3')).toString(16)) return false;
-
-				var p = new BigInteger('ffffffff00000001000000000000000000000000ffffffffffffffffffffffff', 16);
-				var a = new BigInteger('fffffffe00000003fffffffd0000000200000001fffffffe00000002ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff', 16);
-				if (a.mod(p).toString(16) != '0') return false;
-				
-				return true;
-			},
-			testBigIntegerShouldShiftLeftNumbers: function () {
-				if (new BigInteger('69527932928').shiftLeft(13).toString(16) != '2060602000000') return false;
-				if (new BigInteger('69527932928').shiftLeft(45).toString(16) != '206060200000000000000') return false;
-				
-				return true;
-			},
-			testBigIntegerShouldShiftRightNumbers: function () {
-				if (new BigInteger('69527932928').shiftRight(13).toString(16) != '818180') return false;
-				if (new BigInteger('69527932928').shiftRight(17).toString(16) != '81818') return false;
-				if (new BigInteger('69527932928').shiftRight(256).toString(16) != '0') return false;
-				
-				return true;
-			},
-			testBigIntegerShouldModInverseNumbers: function () {
-				var p = new BigInteger('257');
-				var a = new BigInteger('3');
-				var b = a.modInverse(p);
-				if (a.multiply(b).mod(p).toString(16) != '1') return false;
-
-				var p192 = new BigInteger('fffffffffffffffffffffffffffffffeffffffffffffffff', 16);
-				var a = new BigInteger('deadbeef', 16);
-				var b = a.modInverse(p192);
-				if (a.multiply(b).mod(p192).toString(16) != '1') return false;
-				
-				return true;
-			},
-			testBigIntegerShouldThrowOnModInverseOfZero: function () {
-				var p = new BigInteger('257');
-				var a = new BigInteger('0');
-				//division by zero
-				try {
-					a.modInverse(p);
-				}
-				catch (e) {
-					return true;
-				}
-				return false;
-			},
-			testBigIntegerShouldAlwaysReturnPositiveNumber: function () {
-				var z = new BigInteger('cc61934972bba029382f0bef146b228ca15d54f7e38b6cd5f6b382398b7a97a8', 16);
-				var p = new BigInteger('fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f', 16);
-				var zInv = z.modInverse(p);
-				if (zInv.signum() !== 1) return false; //zInv should be positive
-				
-				return true;
-			},
 			testECKeyDoesntHangWithSpecificKey: function () {
 				var key = "848b39bbe4c9ddf978d3d8f786315bdc3ba71237d5f780399e0026e1269313ef";
 				var btcKey = new Bitcoin.ECKey(key);
@@ -13463,42 +11274,6 @@ ninja.wallets.splitwallet = {
 				return true;
 
 			},
-			// test range of valid private key values for the secp256k1 curve, when specified in hex is 
-			// [0x1, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364140]
-			testBigIntegerZeroShouldSetError: function () {
-				var key = "0000000000000000000000000000000000000000000000000000000000000000";
-				var btcKey = new Bitcoin.ECKey(key);
-				if (btcKey.error == null) { 
-					return false;
-				}
-				return true;
-
-			},
-			testBigIntegerOutOfCurveRangeShouldSetError1: function () {
-				var key = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141";
-				var btcKey = new Bitcoin.ECKey(key);
-				if (btcKey.error == null) {
-					return false;
-				}
-				return true;
-			},
-			testBigIntegerOutOfCurveRangeShouldSetError2: function () {
-				var key = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364142";
-				var btcKey = new Bitcoin.ECKey(key);
-				if (btcKey.error == null) {
-					return false;
-				}
-				return true;
-			},
-			testBigIntegerOutOfCurveRangeShouldSetError3: function () {
-				var key = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-				var btcKey = new Bitcoin.ECKey(key);
-				if (btcKey.error == null) {
-					return false;
-				}
-				return true;
-			},
-
 			// ---- Bech32 / SegWit / Taproot address tests ----
 
 			// Known test vector: compressed WIF → P2WPKH (bc1q...)
@@ -13590,11 +11365,8 @@ ninja.wallets.splitwallet = {
 			testRandomKeyIsInValidRange: function () {
 				var btcKey = new Bitcoin.ECKey(false);
 				if (btcKey.error || btcKey.priv == null) return false;
-				var privBytes = btcKey.priv.toByteArrayUnsigned();
-				while (privBytes.length < 32) privBytes.unshift(0);
-				var ua = new Uint8Array(32);
-				for (var i = 0; i < 32; i++) ua[i] = privBytes[i];
-				return nobleSecp256k1.utils.isValidPrivateKey(ua);
+				// priv is now a Uint8Array(32) — validate directly
+				return nobleSecp256k1.utils.isValidPrivateKey(btcKey.priv);
 			},
 
 			// A zero private key must be rejected
@@ -13622,29 +11394,24 @@ ninja.wallets.splitwallet = {
 			// An uncompressed public key that is NOT on the secp256k1 curve must be rejected
 			// We flip the last byte of a valid uncompressed key — the point (x, y') is off-curve.
 			testOffCurvePublicKeyIsRejected: function () {
-				// Valid uncompressed key for 5J8QhiQtAiozKwyk3GCycAscg1tNaYhNdiiLey8vaDK8Bzm4znb
 				var validHex = "0478982F40FA0C0B7A55717583AFC99A4EDFD301A2729DC59B0B8EB9E18692BCB521F054FAD982AF4CC1933AFD1F1B563EA779A6AA6CCE36A30B947DD653E63E44";
-				// Corrupt the last byte: E44 → E45 — no longer on the curve
-				var invalidHex = validHex.slice(0, -2) + "45";
+				var invalidHex = validHex.slice(0, -2) + "45"; // corrupt last byte
 				try {
-					var ecparams = EllipticCurve.getSECCurveByName("secp256k1");
-					ecparams.getCurve().decodePointHex(invalidHex);
-					return false; // should have thrown
+					nobleSecp256k1.Point.fromHex(invalidHex);
+					return false;
 				} catch (e) {
-					return true; // correctly rejected
+					return true;
 				}
 			},
 
 			// Hybrid-encoded points (prefix 06/07) must be rejected — non-canonical encoding
 			testHybridEncodedPointIsRejected: function () {
-				// Same key as above but with prefix 06 instead of 04
 				var hybridHex = "0678982F40FA0C0B7A55717583AFC99A4EDFD301A2729DC59B0B8EB9E18692BCB521F054FAD982AF4CC1933AFD1F1B563EA779A6AA6CCE36A30B947DD653E63E44";
 				try {
-					var ecparams = EllipticCurve.getSECCurveByName("secp256k1");
-					ecparams.getCurve().decodePointHex(hybridHex);
-					return false; // should have thrown
+					nobleSecp256k1.Point.fromHex(hybridHex);
+					return false;
 				} catch (e) {
-					return true; // correctly rejected
+					return true;
 				}
 			},
 
@@ -13664,12 +11431,15 @@ ninja.wallets.splitwallet = {
 				return btcKey.verify(hash, sig) === true;
 			},
 
-			// ECPoint.validate() must accept a valid on-curve point
+			// noble must accept a valid on-curve point without throwing
 			testValidPointPassesValidation: function () {
 				var validHex = "0478982F40FA0C0B7A55717583AFC99A4EDFD301A2729DC59B0B8EB9E18692BCB521F054FAD982AF4CC1933AFD1F1B563EA779A6AA6CCE36A30B947DD653E63E44";
-				var ecparams = EllipticCurve.getSECCurveByName("secp256k1");
-				var pt = ecparams.getCurve().decodePointHex(validHex);
-				return pt.validate() === true;
+				try {
+					nobleSecp256k1.Point.fromHex(validHex);
+					return true;
+				} catch (e) {
+					return false;
+				}
 			}
 		},
 

@@ -196,7 +196,7 @@
 				}
 				return true;
 			},
-			// confirms multiplication is working and BigInteger was created correctly (Pub Key B vs Priv Key A)
+			// confirms multiplication is working (Pub Key B vs Priv Key A)
 			testGetPubHexFromMultiplyingPrivAPubB: function () {
 				var keyPub = "04F04BF260DCCC46061B5868F60FE962C77B5379698658C98A93C3129F5F98938020F36EBBDE6F1BEAF98E5BD0E425747E68B0F2FB7A2A59EDE93F43C0D78156FF";
 				var keyPriv = "B1202A137E917536B3B4C5010C3FF5DDD4784917B3EEF21D3A3BF21B2E03310C";
@@ -207,7 +207,7 @@
 				}
 				return true;
 			},
-			// confirms multiplication is working and BigInteger was created correctly (Pub Key A vs Priv Key B)
+			// confirms multiplication is working (Pub Key A vs Priv Key B)
 			testGetPubHexFromMultiplyingPrivBPubA: function () {
 				var keyPub = "0429BF26C0AF7D31D608474CEBD49DA6E7C541B8FAD95404B897643476CE621CFD05E24F7AE8DE8033AADE5857DB837E0B704A31FDDFE574F6ECA879643A0D3709";
 				var keyPriv = "7DE52819F1553C2BFEDE6A2628B6FDDF03C2A07EB21CF77ACA6C2C3D252E1FD9";
@@ -268,7 +268,7 @@
 				var key = "5J8QhiQtAiozKwyk3GCycAscg1tNaYhNdiiLey8vaDK8Bzm4znb";
 				var btcKey = new Bitcoin.ECKey(key);
 				if (btcKey.getPubKeyHex() != "0478982F40FA0C0B7A55717583AFC99A4EDFD301A2729DC59B0B8EB9E18692BCB521F054FAD982AF4CC1933AFD1F1B563EA779A6AA6CCE36A30B947DD653E63E44"
-						|| btcKey.getPubPoint().compressed != false) {
+						|| btcKey.compressed != false) {
 					return false;
 				}
 				return true;
@@ -278,7 +278,7 @@
 				var btcKey = new Bitcoin.ECKey(key);
 				btcKey.setCompressed(true);
 				if (btcKey.getPubKeyHex() != "0278982F40FA0C0B7A55717583AFC99A4EDFD301A2729DC59B0B8EB9E18692BCB5"
-						|| btcKey.getPubPoint().compressed != true) {
+						|| btcKey.compressed != true) {
 					return false;
 				}
 				return true;
@@ -295,7 +295,6 @@
 				var key = "KxbhchnQquYQ2dfSxz7rrEaQTCukF4uCV57TkamyTbLzjFWcdi3S";
 				var btcKey = new Bitcoin.ECKey(key);
 				if (btcKey.getBitcoinWalletImportFormat() != "KxbhchnQquYQ2dfSxz7rrEaQTCukF4uCV57TkamyTbLzjFWcdi3S"
-						|| btcKey.getPubPoint().compressed != true
 						|| btcKey.compressed != true) {
 					return false;
 				}
@@ -422,16 +421,13 @@
 				return ecKey.priv == null;
 			},
 
-			// EllipticCurve tests
+			// noble point decoding tests
 			testDecodePointEqualsDecodeFrom: function () {
+				// Decoding from bytes and from hex must yield the same point
 				var key = "04F04BF260DCCC46061B5868F60FE962C77B5379698658C98A93C3129F5F98938020F36EBBDE6F1BEAF98E5BD0E425747E68B0F2FB7A2A59EDE93F43C0D78156FF";
-				var ecparams = EllipticCurve.getSECCurveByName("secp256k1");
-				var ecPoint1 = EllipticCurve.PointFp.decodeFrom(ecparams.getCurve(), Crypto.util.hexToBytes(key));
-				var ecPoint2 = ecparams.getCurve().decodePointHex(key);
-				if (!ecPoint1.equals(ecPoint2)) {
-					return false;
-				}
-				return true;
+				var fromHex = nobleSecp256k1.Point.fromHex(key);
+				var fromBytes = nobleSecp256k1.Point.fromHex(Crypto.util.bytesToHex(Crypto.util.hexToBytes(key)).toUpperCase());
+				return fromHex.equals(fromBytes);
 			},
 			testDecodePointHexForCompressedPublicKey: function () {
 				var key = "03F04BF260DCCC46061B5868F60FE962C77B5379698658C98A93C3129F5F989380";
@@ -606,212 +602,6 @@
 				return true;
 			},
 
-			//BigInteger tests
-			testBigIntegerShouldWorkWithoutNew: function () {
-				var bi = BigInteger('12345')
-				if (bi.toString(10) != '12345') {
-					return false;
-				}
-				return true;
-			},
-			testBigIntegerShouldWorkWithStringInput: function () {
-				if (new BigInteger('12345').toString(16) != '3039') return false;
-				if (new BigInteger('29048849665247').toString(16) != '1a6b765d8cdf') return false;
-				if (new BigInteger('-29048849665247').toString(16) != '-1a6b765d8cdf') return false;
-				if (new BigInteger('1A6B765D8CDF', 16).toString(16) != '1a6b765d8cdf') return false;
-				if (new BigInteger('FF', 16).toString() != '255') return false;
-				if (new BigInteger('1A6B765D8CDF', 16).toString() != '29048849665247') return false;
-				if (new BigInteger('a89c e5af8724 c0a23e0e 0ff77500', 16).toString(16) != 'a89ce5af8724c0a23e0e0ff77500') return false;
-				if (new BigInteger('123456789abcdef123456789abcdef123456789abcdef', 16).toString(16) != '123456789abcdef123456789abcdef123456789abcdef') return false;
-				if (new BigInteger('10654321').toString() != '10654321') return false;
-				if (new BigInteger('10000000000000000').toString(10) != '10000000000000000') return false;
-
-				return true;
-			},
-			testBigIntegerShouldImportExportTwosComplementBigEndian: function () {
-				if (new BigInteger([1, 2, 3], 256).toString(16) != '10203') return false;
-				if (new BigInteger([1, 2, 3, 4], 256).toString(16) != '1020304') return false;
-				if (new BigInteger([1, 2, 3, 4, 5], 256).toString(16) != '102030405') return false;
-				if (new BigInteger([1, 2, 3, 4, 5, 6, 7, 8], 256).toString(16) != '102030405060708') return false;
-				if (new BigInteger([1, 2, 3, 4], 256).toByteArray().join(',') != '1,2,3,4') return false;
-				if (new BigInteger([1, 2, 3, 4, 5, 6, 7, 8], 256).toByteArray().join(',') != '1,2,3,4,5,6,7,8') return false;
-
-				return true;
-			},
-			testBigIntegerShouldReturnProperBitLength: function () {
-				if (new BigInteger('0').bitLength() != 0) return false;
-				if (new BigInteger('1', 16).bitLength() != 1) return false;
-				if (new BigInteger('2', 16).bitLength() != 2) return false;
-				if (new BigInteger('3', 16).bitLength() != 2) return false;
-				if (new BigInteger('4', 16).bitLength() != 3) return false;
-				if (new BigInteger('8', 16).bitLength() != 4) return false;
-				if (new BigInteger('10', 16).bitLength() != 5) return false;
-				if (new BigInteger('100', 16).bitLength() != 9) return false;
-				if (new BigInteger('123456', 16).bitLength() != 21) return false;
-				if (new BigInteger('123456789', 16).bitLength() != 33) return false;
-				if (new BigInteger('8023456789', 16).bitLength() != 40) return false;
-
-				return true;
-			},
-			testBigIntegerShouldAddNumbers: function () {
-				// test 1
-				if (new BigInteger('14').add(new BigInteger('26')).toString(16) != '28') return false;
-
-				// test 2
-				var k = new BigInteger('1234', 16);
-				var r = k;
-				for (var i = 0; i < 257; i++) r = r.add(k);
-				if (r.toString(16) != '125868') return false;
-
-				// test 3
-				var k = new BigInteger('abcdefabcdefabcdef', 16);
-				var r = new BigInteger('deadbeef', 16);
-				for (var i = 0; i < 257; i++) {
-					r = r.add(k);
-				}
-				if (r.toString(16) != 'ac79bd9b79be7a277bde') return false;
-
-				return true;
-			},
-			testBigIntegerShouldSubtractNumbers: function () {
-				// test 1
-				if (new BigInteger('14').subtract(new BigInteger('26')).toString(16) != '-c') return false;
-				// test 2
-				if (new BigInteger('26').subtract(new BigInteger('14')).toString(16) != 'c') return false;
-				// test 3
-				if (new BigInteger('26').subtract(new BigInteger('26')).toString(16) != '0') return false;
-				// test 4
-				if (new BigInteger('-26').subtract(new BigInteger('26')).toString(16) != '-34') return false;
-				// test 5
-				var a = new BigInteger('31ff3c61db2db84b9823d320907a573f6ad37c437abe458b1802cda041d6384a7d8daef41395491e2', 16);
-				var b = new BigInteger('6f0e4d9f1d6071c183677f601af9305721c91d31b0bbbae8fb790000', 16);
-				var r = new BigInteger('31ff3c61db2db84b9823d3208989726578fd75276287cd9516533a9acfb9a6776281f34583ddb91e2', 16);
-				if (a.subtract(b).compareTo(r) != 0) return false;
-				// test 6
-				var r = b.subtract(new BigInteger('14'));
-				if (b.clone().subtract(new BigInteger('14')).compareTo(r) != 0) return false;
-				// test 7
-				var r = new BigInteger('7fffffffffffffffffffffffffffffff5d576e7357a4501ddfe92f46681b', 16);
-				if (r.subtract(new BigInteger('-1')).toString(16) != '7fffffffffffffffffffffffffffffff5d576e7357a4501ddfe92f46681c') return false;
-				// test 8
-				// Carry and copy
-				var a = new BigInteger('12345', 16);
-				var b = new BigInteger('1000000000000', 16);
-				if (a.subtract(b).toString(16) != '-fffffffedcbb') return false;
-				// test 9
-				var a = new BigInteger('12345', 16);
-				var b = new BigInteger('1000000000000', 16);
-				if (b.subtract(a).toString(16) != 'fffffffedcbb') return false;
-				
-				return true;
-			},
-			testBigIntegerShouldMultiplyNumbers: function () {
-				if (new BigInteger('1001', 16).multiply(new BigInteger('1234', 16)).toString(16) != '1235234') return false;
-				if (new BigInteger('-1001', 16).multiply(new BigInteger('1234', 16)).toString(16) != '-1235234') return false;
-				if (new BigInteger('-1001', 16).multiply(new BigInteger('-1234', 16)).toString(16) != '1235234') return false;
-
-				// test 4
-				var n = new BigInteger('1001', 16);
-				var r = n;
-				for (var i = 0; i < 4; i++) {
-					r = r.multiply(n);
-				}
-				if (r.toString(16) != '100500a00a005001') return false;
-
-				var n = new BigInteger('79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798', 16);
-				if (n.multiply(n).toString(16) != '39e58a8055b6fb264b75ec8c646509784204ac15a8c24e05babc9729ab9b055c3a9458e4ce3289560a38e08ba8175a9446ce14e608245ab3a9978a8bd8acaa40') return false;
-				if (n.multiply(n).multiply(n).toString(16) != '1b888e01a06e974017a28a5b4da436169761c9730b7aeedf75fc60f687b46e0cf2cb11667f795d5569482640fe5f628939467a01a612b023500d0161e9730279a7561043af6197798e41b7432458463e64fa81158907322dc330562697d0d600') return false;
-
-				if (new BigInteger('-100000000000').multiply(new BigInteger('3').divide(new BigInteger('4'))).toString(16) != '0') return false;
-
-				return true;
-			},
-			testBigIntegerShouldDivideNumbers: function () {
-				if (new BigInteger('10').divide(new BigInteger('256')).toString(16) != '0') return false;
-				if (new BigInteger('69527932928').divide(new BigInteger('16974594')).toString(16) != 'fff') return false;
-				if (new BigInteger('-69527932928').divide(new BigInteger('16974594')).toString(16) != '-fff') return false;
-
-				var b = new BigInteger('39e58a8055b6fb264b75ec8c646509784204ac15a8c24e05babc9729ab9b055c3a9458e4ce3289560a38e08ba8175a9446ce14e608245ab3a9978a8bd8acaa40', 16);
-				var n = new BigInteger('79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798', 16);
-				if (b.divide(n).toString(16) != n.toString(16)) return false;
-
-				if (new BigInteger('1').divide(new BigInteger('-5')).toString(10) != '0') return false;
-
-				//	// Regression after moving to word div
-				var p = new BigInteger('fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f', 16);
-				var a = new BigInteger('79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798', 16);
-				var as = a.square();
-				if (as.divide(p).toString(16) != '39e58a8055b6fb264b75ec8c646509784204ac15a8c24e05babc9729e58090b9') return false;
-
-				var p = new BigInteger('ffffffff00000001000000000000000000000000ffffffffffffffffffffffff', 16);
-				var a = new BigInteger('fffffffe00000003fffffffd0000000200000001fffffffe00000002ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff', 16);
-				if (a.divide(p).toString(16) != 'ffffffff00000002000000000000000000000001000000000000000000000001') return false;
-				
-				return true;
-			},
-			testBigIntegerShouldModNumbers: function () {
-				if (new BigInteger('10').mod(new BigInteger('256')).toString(16) != 'a') return false;
-				if (new BigInteger('69527932928').mod(new BigInteger('16974594')).toString(16) != '102f302') return false;
-				if (new BigInteger('-69527932928').mod(new BigInteger('16974594')).toString(16) != '1000') return false;
-				if (new BigInteger('10', 16).mod(new BigInteger('256')).toString(16) != '10') return false;
-				if (new BigInteger('100', 16).mod(new BigInteger('256')).toString(16) != '0') return false;
-				if (new BigInteger('1001', 16).mod(new BigInteger('256')).toString(16) != '1') return false;
-				if (new BigInteger('100000000001', 16).mod(new BigInteger('256')).toString(16) != '1') return false;
-				if (new BigInteger('100000000001', 16).mod(new BigInteger('257')).toString(16) != new BigInteger('100000000001', 16).mod(new BigInteger('257')).toString(16)) return false;
-				if (new BigInteger('123456789012', 16).mod(new BigInteger('3')).toString(16) != new BigInteger('123456789012', 16).mod(new BigInteger('3')).toString(16)) return false;
-
-				var p = new BigInteger('ffffffff00000001000000000000000000000000ffffffffffffffffffffffff', 16);
-				var a = new BigInteger('fffffffe00000003fffffffd0000000200000001fffffffe00000002ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff', 16);
-				if (a.mod(p).toString(16) != '0') return false;
-				
-				return true;
-			},
-			testBigIntegerShouldShiftLeftNumbers: function () {
-				if (new BigInteger('69527932928').shiftLeft(13).toString(16) != '2060602000000') return false;
-				if (new BigInteger('69527932928').shiftLeft(45).toString(16) != '206060200000000000000') return false;
-				
-				return true;
-			},
-			testBigIntegerShouldShiftRightNumbers: function () {
-				if (new BigInteger('69527932928').shiftRight(13).toString(16) != '818180') return false;
-				if (new BigInteger('69527932928').shiftRight(17).toString(16) != '81818') return false;
-				if (new BigInteger('69527932928').shiftRight(256).toString(16) != '0') return false;
-				
-				return true;
-			},
-			testBigIntegerShouldModInverseNumbers: function () {
-				var p = new BigInteger('257');
-				var a = new BigInteger('3');
-				var b = a.modInverse(p);
-				if (a.multiply(b).mod(p).toString(16) != '1') return false;
-
-				var p192 = new BigInteger('fffffffffffffffffffffffffffffffeffffffffffffffff', 16);
-				var a = new BigInteger('deadbeef', 16);
-				var b = a.modInverse(p192);
-				if (a.multiply(b).mod(p192).toString(16) != '1') return false;
-				
-				return true;
-			},
-			testBigIntegerShouldThrowOnModInverseOfZero: function () {
-				var p = new BigInteger('257');
-				var a = new BigInteger('0');
-				//division by zero
-				try {
-					a.modInverse(p);
-				}
-				catch (e) {
-					return true;
-				}
-				return false;
-			},
-			testBigIntegerShouldAlwaysReturnPositiveNumber: function () {
-				var z = new BigInteger('cc61934972bba029382f0bef146b228ca15d54f7e38b6cd5f6b382398b7a97a8', 16);
-				var p = new BigInteger('fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f', 16);
-				var zInv = z.modInverse(p);
-				if (zInv.signum() !== 1) return false; //zInv should be positive
-				
-				return true;
-			},
 			testECKeyDoesntHangWithSpecificKey: function () {
 				var key = "848b39bbe4c9ddf978d3d8f786315bdc3ba71237d5f780399e0026e1269313ef";
 				var btcKey = new Bitcoin.ECKey(key);
@@ -843,42 +633,6 @@
 				return true;
 
 			},
-			// test range of valid private key values for the secp256k1 curve, when specified in hex is 
-			// [0x1, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364140]
-			testBigIntegerZeroShouldSetError: function () {
-				var key = "0000000000000000000000000000000000000000000000000000000000000000";
-				var btcKey = new Bitcoin.ECKey(key);
-				if (btcKey.error == null) { 
-					return false;
-				}
-				return true;
-
-			},
-			testBigIntegerOutOfCurveRangeShouldSetError1: function () {
-				var key = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141";
-				var btcKey = new Bitcoin.ECKey(key);
-				if (btcKey.error == null) {
-					return false;
-				}
-				return true;
-			},
-			testBigIntegerOutOfCurveRangeShouldSetError2: function () {
-				var key = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364142";
-				var btcKey = new Bitcoin.ECKey(key);
-				if (btcKey.error == null) {
-					return false;
-				}
-				return true;
-			},
-			testBigIntegerOutOfCurveRangeShouldSetError3: function () {
-				var key = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-				var btcKey = new Bitcoin.ECKey(key);
-				if (btcKey.error == null) {
-					return false;
-				}
-				return true;
-			},
-
 			// ---- Bech32 / SegWit / Taproot address tests ----
 
 			// Known test vector: compressed WIF → P2WPKH (bc1q...)
@@ -970,11 +724,8 @@
 			testRandomKeyIsInValidRange: function () {
 				var btcKey = new Bitcoin.ECKey(false);
 				if (btcKey.error || btcKey.priv == null) return false;
-				var privBytes = btcKey.priv.toByteArrayUnsigned();
-				while (privBytes.length < 32) privBytes.unshift(0);
-				var ua = new Uint8Array(32);
-				for (var i = 0; i < 32; i++) ua[i] = privBytes[i];
-				return nobleSecp256k1.utils.isValidPrivateKey(ua);
+				// priv is now a Uint8Array(32) — validate directly
+				return nobleSecp256k1.utils.isValidPrivateKey(btcKey.priv);
 			},
 
 			// A zero private key must be rejected
@@ -1002,29 +753,24 @@
 			// An uncompressed public key that is NOT on the secp256k1 curve must be rejected
 			// We flip the last byte of a valid uncompressed key — the point (x, y') is off-curve.
 			testOffCurvePublicKeyIsRejected: function () {
-				// Valid uncompressed key for 5J8QhiQtAiozKwyk3GCycAscg1tNaYhNdiiLey8vaDK8Bzm4znb
 				var validHex = "0478982F40FA0C0B7A55717583AFC99A4EDFD301A2729DC59B0B8EB9E18692BCB521F054FAD982AF4CC1933AFD1F1B563EA779A6AA6CCE36A30B947DD653E63E44";
-				// Corrupt the last byte: E44 → E45 — no longer on the curve
-				var invalidHex = validHex.slice(0, -2) + "45";
+				var invalidHex = validHex.slice(0, -2) + "45"; // corrupt last byte
 				try {
-					var ecparams = EllipticCurve.getSECCurveByName("secp256k1");
-					ecparams.getCurve().decodePointHex(invalidHex);
-					return false; // should have thrown
+					nobleSecp256k1.Point.fromHex(invalidHex);
+					return false;
 				} catch (e) {
-					return true; // correctly rejected
+					return true;
 				}
 			},
 
 			// Hybrid-encoded points (prefix 06/07) must be rejected — non-canonical encoding
 			testHybridEncodedPointIsRejected: function () {
-				// Same key as above but with prefix 06 instead of 04
 				var hybridHex = "0678982F40FA0C0B7A55717583AFC99A4EDFD301A2729DC59B0B8EB9E18692BCB521F054FAD982AF4CC1933AFD1F1B563EA779A6AA6CCE36A30B947DD653E63E44";
 				try {
-					var ecparams = EllipticCurve.getSECCurveByName("secp256k1");
-					ecparams.getCurve().decodePointHex(hybridHex);
-					return false; // should have thrown
+					nobleSecp256k1.Point.fromHex(hybridHex);
+					return false;
 				} catch (e) {
-					return true; // correctly rejected
+					return true;
 				}
 			},
 
@@ -1044,12 +790,15 @@
 				return btcKey.verify(hash, sig) === true;
 			},
 
-			// ECPoint.validate() must accept a valid on-curve point
+			// noble must accept a valid on-curve point without throwing
 			testValidPointPassesValidation: function () {
 				var validHex = "0478982F40FA0C0B7A55717583AFC99A4EDFD301A2729DC59B0B8EB9E18692BCB521F054FAD982AF4CC1933AFD1F1B563EA779A6AA6CCE36A30B947DD653E63E44";
-				var ecparams = EllipticCurve.getSECCurveByName("secp256k1");
-				var pt = ecparams.getCurve().decodePointHex(validHex);
-				return pt.validate() === true;
+				try {
+					nobleSecp256k1.Point.fromHex(validHex);
+					return true;
+				} catch (e) {
+					return false;
+				}
 			}
 		},
 

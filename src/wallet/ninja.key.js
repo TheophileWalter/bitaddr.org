@@ -1,5 +1,15 @@
 var ninja = { wallets: {} };
 
+// Helper: byte array (or Uint8Array) → native BigInt
+function _privBytesToBigInt(bytes) {
+	var hex = Array.from(bytes).map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
+	return hex.length ? BigInt('0x' + hex) : 0n;
+}
+// Helper: native BigInt → 32-byte plain Array (big-endian, zero-padded)
+function _bigIntToPrivBytes(n) {
+	return Crypto.util.hexToBytes(n.toString(16).padStart(64, '0'));
+}
+
 ninja.privateKey = {
 	isPrivateKey: function (key) {
 		return (
@@ -9,28 +19,26 @@ ninja.privateKey = {
 				);
 	},
 	getECKeyFromAdding: function (privKey1, privKey2) {
-		var n = EllipticCurve.getSECCurveByName("secp256k1").getN();
 		var ecKey1 = new Bitcoin.ECKey(privKey1);
 		var ecKey2 = new Bitcoin.ECKey(privKey2);
-		// if both keys are the same return null
 		if (ecKey1.getBitcoinHexFormat() == ecKey2.getBitcoinHexFormat()) return null;
 		if (ecKey1 == null || ecKey2 == null) return null;
-		var combinedPrivateKey = new Bitcoin.ECKey(ecKey1.priv.add(ecKey2.priv).mod(n));
-		// compressed when both keys are compressed
-		if (ecKey1.compressed && ecKey2.compressed) combinedPrivateKey.setCompressed(true);
-		return combinedPrivateKey;
+		var n = nobleSecp256k1.CURVE.n;
+		var combined = _bigIntToPrivBytes((_privBytesToBigInt(ecKey1.priv) + _privBytesToBigInt(ecKey2.priv)) % n);
+		var combinedKey = new Bitcoin.ECKey(combined);
+		if (ecKey1.compressed && ecKey2.compressed) combinedKey.setCompressed(true);
+		return combinedKey;
 	},
 	getECKeyFromMultiplying: function (privKey1, privKey2) {
-		var n = EllipticCurve.getSECCurveByName("secp256k1").getN();
 		var ecKey1 = new Bitcoin.ECKey(privKey1);
 		var ecKey2 = new Bitcoin.ECKey(privKey2);
-		// if both keys are the same return null
 		if (ecKey1.getBitcoinHexFormat() == ecKey2.getBitcoinHexFormat()) return null;
 		if (ecKey1 == null || ecKey2 == null) return null;
-		var combinedPrivateKey = new Bitcoin.ECKey(ecKey1.priv.multiply(ecKey2.priv).mod(n));
-		// compressed when both keys are compressed
-		if (ecKey1.compressed && ecKey2.compressed) combinedPrivateKey.setCompressed(true);
-		return combinedPrivateKey;
+		var n = nobleSecp256k1.CURVE.n;
+		var combined = _bigIntToPrivBytes((_privBytesToBigInt(ecKey1.priv) * _privBytesToBigInt(ecKey2.priv)) % n);
+		var combinedKey = new Bitcoin.ECKey(combined);
+		if (ecKey1.compressed && ecKey2.compressed) combinedKey.setCompressed(true);
+		return combinedKey;
 	},
 	// 58 base58 characters starting with 6P
 	isBIP38Format: function (key) {
@@ -154,10 +162,11 @@ ninja.privateKey = {
 
 					var factorb = Bitcoin.Util.dsha256(seedb);
 
-					var ps = EllipticCurve.getSECCurveByName("secp256k1");
-					var privateKey = BigInteger.fromByteArrayUnsigned(passfactor).multiply(BigInteger.fromByteArrayUnsigned(factorb)).remainder(ps.getN());
-
-					decrypted = privateKey.toByteArrayUnsigned();
+					// privateKey = passfactor * factorb (mod n)
+					var decryptedN = nobleSecp256k1.CURVE.n;
+					decrypted = _bigIntToPrivBytes(
+						(_privBytesToBigInt(passfactor) * _privBytesToBigInt(factorb)) % decryptedN
+					);
 					verifyHashAndReturn();
 				});
 			});
@@ -204,7 +213,8 @@ ninja.privateKey = {
 
 			// 2)  Encode the lot and sequence numbers as a 4 byte quantity (big-endian):
 			// lotnumber * 4096 + sequencenumber. Call these four bytes lotsequence.
-			var lotSequence = BigInteger(4096 * lotNum + sequenceNum).toByteArrayUnsigned();
+			var lotSeqNum = (4096 * lotNum + sequenceNum) >>> 0;
+			var lotSequence = [(lotSeqNum >>> 24) & 0xff, (lotSeqNum >>> 16) & 0xff, (lotSeqNum >>> 8) & 0xff, lotSeqNum & 0xff];
 
 			// 3) Concatenate ownersalt + lotsequence and call this ownerentropy.
 			var ownerEntropy = ownerSalt.concat(lotSequence);
@@ -215,11 +225,9 @@ ninja.privateKey = {
 		Crypto_scrypt(passphrase, ownerSalt, 16384, 8, 8, 32, function (prefactor) {
 			// Take SHA256(SHA256(prefactor + ownerentropy)) and call this passfactor
 			var passfactorBytes = noNumbers ? prefactor : Bitcoin.Util.dsha256(prefactor.concat(ownerEntropy));
-			var passfactor = BigInteger.fromByteArrayUnsigned(passfactorBytes);
 
-			// 5) Compute the elliptic curve point G * passfactor, and convert the result to compressed notation (33 bytes)
-			var ellipticCurve = EllipticCurve.getSECCurveByName("secp256k1");
-			var passpoint = ellipticCurve.getG().multiply(passfactor).getEncoded(1);
+			// 5) G * passfactor (compressed) — equivalent to ECKey public key derivation
+			var passpoint = Array.from(nobleSecp256k1.getPublicKey(new Uint8Array(passfactorBytes), true));
 
 			// 6) Convey ownersalt and passpoint to the party generating the keys, along with a checksum to ensure integrity.
 			// magic bytes "2C E9 B3 E1 FF 39 E2 51" followed by ownerentropy, and then passpoint
@@ -260,9 +268,9 @@ ninja.privateKey = {
 		// 3) ECMultiply passpoint by factorb. Use the resulting EC point as a public key and hash it into a Bitcoin
 		// address using either compressed or uncompressed public key methodology (specify which methodology is used
 		// inside flagbyte). This is the generated Bitcoin address, call it generatedaddress.
-		var ec = EllipticCurve.getSECCurveByName("secp256k1").getCurve();
-		var generatedPoint = ec.decodePointHex(ninja.publicKey.getHexFromByteArray(passpoint));
-		var generatedBytes = generatedPoint.multiply(BigInteger.fromByteArrayUnsigned(factorB)).getEncoded(compressed);
+		var passpointHex = ninja.publicKey.getHexFromByteArray(passpoint);
+		var factorBNative = _privBytesToBigInt(factorB);
+		var generatedBytes = Array.from(nobleSecp256k1.Point.fromHex(passpointHex).multiply(factorBNative).toRawBytes(compressed));
 		var generatedAddress = (new Bitcoin.Address(Bitcoin.Util.sha256ripe160(generatedBytes))).toString();
 
 		// 4) Take the first four bytes of SHA256(SHA256(generatedaddress)) and call it addresshash.
@@ -349,34 +357,26 @@ ninja.publicKey = {
 		return Crypto.util.bytesToHex(pubKeyByteArray).toString().toUpperCase();
 	},
 	getByteArrayFromAdding: function (pubKeyHex1, pubKeyHex2) {
-		var ecparams = EllipticCurve.getSECCurveByName("secp256k1");
-		var curve = ecparams.getCurve();
-		var ecPoint1 = curve.decodePointHex(pubKeyHex1);
-		var ecPoint2 = curve.decodePointHex(pubKeyHex2);
-		// if both points are the same return null
-		if (ecPoint1.equals(ecPoint2)) return null;
-		var compressed = (ecPoint1.compressed && ecPoint2.compressed);
-		var pubKey = ecPoint1.add(ecPoint2).getEncoded(compressed);
-		return pubKey;
+		var p1 = nobleSecp256k1.Point.fromHex(pubKeyHex1.toUpperCase());
+		var p2 = nobleSecp256k1.Point.fromHex(pubKeyHex2.toUpperCase());
+		if (p1.equals(p2)) return null;
+		var compressed = (pubKeyHex1.length === 66 && pubKeyHex2.length === 66);
+		return Array.from(p1.add(p2).toRawBytes(compressed));
 	},
 	getByteArrayFromMultiplying: function (pubKeyHex, ecKey) {
-		var ecparams = EllipticCurve.getSECCurveByName("secp256k1");
-		var ecPoint = ecparams.getCurve().decodePointHex(pubKeyHex);
-		var compressed = (ecPoint.compressed && ecKey.compressed);
-		// if both points are the same return null
-		ecKey.setCompressed(false);
-		if (ecPoint.equals(ecKey.getPubPoint())) {
-			return null;
-		}
-		var bigInt = ecKey.priv;
-		var pubKey = ecPoint.multiply(bigInt).getEncoded(compressed);
-		return pubKey;
+		var noblePoint = nobleSecp256k1.Point.fromHex(pubKeyHex.toUpperCase());
+		var inputIsCompressed = (pubKeyHex.length === 66);
+		// same key check: compare uncompressed representations
+		var ecKeyUncompHex = Crypto.util.bytesToHex(Array.from(nobleSecp256k1.getPublicKey(ecKey.priv, false))).toUpperCase();
+		var inputUncompHex = Crypto.util.bytesToHex(Array.from(noblePoint.toRawBytes(false))).toUpperCase();
+		if (ecKeyUncompHex === inputUncompHex) return null;
+		var compressed = inputIsCompressed && ecKey.compressed;
+		var scalar = _privBytesToBigInt(Array.from(ecKey.priv));
+		return Array.from(noblePoint.multiply(scalar).toRawBytes(compressed));
 	},
 	// used by unit test
 	getDecompressedPubKeyHex: function (pubKeyHexComp) {
-		var ecparams = EllipticCurve.getSECCurveByName("secp256k1");
-		var ecPoint = ecparams.getCurve().decodePointHex(pubKeyHexComp);
-		var pubByteArray = ecPoint.getEncoded(0);
+		var pubByteArray = Array.from(nobleSecp256k1.Point.fromHex(pubKeyHexComp.toUpperCase()).toRawBytes(false));
 		var pubHexUncompressed = ninja.publicKey.getHexFromByteArray(pubByteArray);
 		return pubHexUncompressed;
 	}

@@ -5,15 +5,14 @@
 const fs = require('fs');
 
 // Module layout:
-//   src/crypto/   — cryptographic primitives (noble, biginteger, CryptoJS, ECC, ECDSA)
+//   src/crypto/   — cryptographic primitives (noble, CryptoJS, ECC, ECDSA)
 //   src/wallet/   — wallet logic (address formats, ECKey, BIP38, key helpers)
 //   src/ui/       — wallet UI wallets, CSS, HTML template, translations
 //   src/tests/    — unit tests
 
 const tokens = [
-	// noble-secp256k1 must be loaded first — ECDSA, ECKey and EllipticCurve all depend on it
+	// noble-secp256k1 must be loaded first — ECDSA and ECKey depend on it
 	{ token: '//noble-secp256k1.js',       file: './src/crypto/noble-secp256k1.js' },
-	{ token: '//biginteger.js',            file: './src/crypto/biginteger.js' },
 	{ token: '//bitcoinjs-lib.js',         file: './src/wallet/bitcoinjs-lib.js' },
 	{ token: '//bitcoinjs-lib.address.js', file: './src/wallet/bitcoinjs-lib.address.js' },
 	{ token: '//bitcoinjs-lib.base58.js',  file: './src/wallet/bitcoinjs-lib.base58.js' },
@@ -28,7 +27,6 @@ const tokens = [
 	{ token: '//cryptojs.blockmodes.js',   file: './src/crypto/cryptojs.blockmodes.js' },
 	{ token: '//cryptojs.ripemd160.js',    file: './src/crypto/cryptojs.ripemd160.js' },
 	{ token: '//crypto-scrypt.js',         file: './src/crypto/crypto-scrypt.js' },
-	{ token: '//ellipticcurve.js',         file: './src/crypto/ellipticcurve.js' },
 	{ token: '//secrets.js',               file: './src/wallet/secrets.js' },
 	{ token: '//ninja.key.js',             file: './src/wallet/ninja.key.js' },
 	{ token: '//ninja.misc.js',            file: './src/ui/ninja.misc.js' },

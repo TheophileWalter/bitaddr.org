@@ -32,9 +32,7 @@ ninja.wallets.vanitywallet = {
 		// SegWit / Taproot require a compressed public key (33 bytes)
 		var compBytes = pubKeyByteArray;
 		if (pubKeyByteArray.length !== 33) {
-			var ecparams = EllipticCurve.getSECCurveByName("secp256k1");
-			var pt = ecparams.getCurve().decodePointHex(Crypto.util.bytesToHex(pubKeyByteArray).toUpperCase());
-			compBytes = pt.getEncoded(1);
+			compBytes = Array.from(nobleSecp256k1.Point.fromHex(Crypto.util.bytesToHex(pubKeyByteArray).toUpperCase()).toRawBytes(true));
 		}
 		switch (type) {
 			case "p2sh":    return ninja.publicKey.getP2SHAddressFromByteArray(compBytes);
