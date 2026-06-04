@@ -53,7 +53,7 @@
 		"footerlabelversion": "Historie verzí",
 		"footerlabelgithub": "GitHub Repository",
 		"footerlabelgithubzip": "zip",
-		"footerlabelsig": "sig",
+		"footerlabelsig": "Bitcoinový podpis zdrojového kódu",
 		"footerlabelcopyright1": "Copyright bitaddr.org.",
 		"footerlabelcopyright2": "Copyright JavaScriptu je uveden ve zdrojovém kódu.",
 		"footerlabelnowarranty": "Bez záruky.",

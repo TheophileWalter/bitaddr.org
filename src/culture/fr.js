@@ -167,7 +167,7 @@
 		"footerlabelversion": "Historique des Versions",
 		"footerlabelgithub": "Dépôt GitHub",
 		"footerlabelgithubzip": "zip",
-		"footerlabelsig": "sig",
+		"footerlabelsig": "Signature Bitcoin du code source",
 		"footerlabelcopyright1": "Copyright bitaddr.org.",
 		"footerlabelcopyright2": "Les droits d'auteur JavaScript sont inclus dans le code source.",
 		"footerlabelnowarranty": "Aucune garantie.",

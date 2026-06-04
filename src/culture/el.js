@@ -53,7 +53,7 @@
 		"footerlabelversion": "ιστορικό εκδόσεων",
 		"footerlabelgithub": "Αποθετήριο GitHub",
 		"footerlabelgithubzip": "zip",
-		"footerlabelsig": "sig",
+		"footerlabelsig": "Υπογραφή Bitcoin του πηγαίου κώδικα",
 		"footerlabelcopyright1": "Copyright bitaddr.org.",
 		"footerlabelcopyright2": "Τα πνευματικά δικαιώματα της JavaScript περιλαμβάνονται στον κώδικα.",
 		"footerlabelnowarranty": "Καμία εγγύηση.",

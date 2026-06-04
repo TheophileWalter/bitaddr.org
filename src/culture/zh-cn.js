@@ -53,7 +53,7 @@
 		"footerlabelversion": "版本历史",
 		"footerlabelgithub": "GitHub页面",
 		"footerlabelgithubzip": "zip",
-		"footerlabelsig": "sig",
+		"footerlabelsig": "源代码的Bitcoin签名",
 		"footerlabelcopyright1": "Copyright bitaddr.org.",
 		"footerlabelcopyright2": "JavaScript的版权信息已经包含在源代码中。",
 		"footerlabelnowarranty": "No warranty",

@@ -222,7 +222,7 @@
 				"footerlabelversion": "Version History",
 				"footerlabelgithub": "GitHub Repository",
 				"footerlabelgithubzip": "zip",
-				"footerlabelsig": "sig",
+				"footerlabelsig": "Source code Bitcoin signature",
 				"footerlabelcopyright1": "Copyright bitaddr.org.",
 				"footerlabelcopyright2": "JavaScript copyrights are included in the source.",
 				"footerlabelnowarranty": "No warranty.",

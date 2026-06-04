@@ -53,7 +53,7 @@
 		"footerlabelversion": "История версий",
 		"footerlabelgithub": "Проект на GitHub",
 		"footerlabelgithubzip": "zip",
-		"footerlabelsig": "sig",
+		"footerlabelsig": "Bitcoin-подпись исходного кода",
 		"footerlabelcopyright1": "Копирайт bitaddr.org.",
 		"footerlabelcopyright2": "Информация о копирайте на JavaScript в исходниках.",
 		"footerlabelnowarranty": "Без гарантий.",

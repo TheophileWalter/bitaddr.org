@@ -54,7 +54,7 @@
 		"footerlabelversion": "Változatok története",
 		"footerlabelgithub": "GitHub kódtár",
 		"footerlabelgithubzip": "zip",
-		"footerlabelsig": "sig",
+		"footerlabelsig": "Bitcoin-aláírás a forráskódhoz",
 		"footerlabelcopyright1": "Copyright bitaddr.org.",
 		"footerlabelcopyright2": "Az egyes JavaScript kódok szerzőinek jogai a forráskódon belül találhatók meg.",
 		"footerlabelnowarranty": "Garancia nincs.",

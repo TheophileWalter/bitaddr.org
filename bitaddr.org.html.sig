@@ -1,0 +1,6 @@
+-----BEGIN BITCOIN SIGNED MESSAGE-----
+422861417fd8e6dde922aa1cce2a4410b3314f6661ce994bffb3bb9fa6543b84  bitaddr.org.html
+-----BEGIN BITCOIN SIGNATURE-----
+bc1qx4z2w9lmudccutv79jze0zzdcmg7mxxj7jd3k4
+ICa074LOHm2/1wA9BV2Nr4M1yu32+TZaz/HsrkKAwoi0QLJiC+1gopOKvQxnUEC1b/o1tfTrr68az4sh+GlSJWk=
+-----END BITCOIN SIGNATURE-----
