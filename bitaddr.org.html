@@ -12188,6 +12188,7 @@ ninja.wallets.splitwallet = {
 				}
 				else {
 					var passFailStr = "<b>FAIL " + exceptionMsg + "</b>";
+					console.error("[unit test FAIL] " + test + (exceptionMsg ? " — " + exceptionMsg : ""));
 				}
 				testCount++;
 				testResults += test + ": " + passFailStr + "<br/>";
@@ -12195,6 +12196,7 @@ ninja.wallets.splitwallet = {
 			testResults += passCount + " of " + testCount + " synchronous tests passed";
 			if (passCount < testCount) {
 				testResults += "<br/><b>" + (testCount - passCount) + " unit test(s) failed</b>";
+				console.error("[unit tests] " + (testCount - passCount) + " of " + testCount + " synchronous test(s) FAILED");
 			}
 			if (showOutput) {
 				div.innerHTML = "<h3>Unit Tests</h3><div id=\"unittestresults\">" + testResults + "<br/><br/></div>";
@@ -12485,7 +12487,7 @@ ninja.wallets.splitwallet = {
 				return true;
 			},
 			testBrainToECKey: function () {
-				var key = "bitaddr.org unit test";
+				var key = "bitaddress.org unit test";
 				var bytes = Crypto.SHA256(key, { asBytes: true });
 				var btcKey = new Bitcoin.ECKey(bytes);
 				if (btcKey.getBitcoinWalletImportFormat() != "5J8QhiQtAiozKwyk3GCycAscg1tNaYhNdiiLey8vaDK8Bzm4znb") {
