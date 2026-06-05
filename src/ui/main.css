@@ -238,6 +238,7 @@ hr { margin: 20px 0; border: none; border-top: 1px solid var(--border); }
 .menu .tab:hover { background: var(--bg-hover); color: var(--text); }
 .menu .tab.selected { background: var(--accent); color: #0f1117; font-weight: 700; cursor: default; }
 .menu .tab.selected:hover { color: #0f1117; }
+.menu.seeding .tab { pointer-events: none; opacity: 0.35; cursor: not-allowed; }
 
 /* ── Wallet Areas ─────────────────────────────────────────────────────── */
 .walletarea {

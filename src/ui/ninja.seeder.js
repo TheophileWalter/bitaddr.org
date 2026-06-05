@@ -89,6 +89,8 @@ ninja.seeder = {
 		ninja.seeder.isStillSeeding = false;
 		var gen = document.getElementById("generate");
 		if (gen) gen.style.display = "none";
+		var menu = document.getElementById("menu");
+		if (menu) menu.classList.remove("seeding");
 		ninja.status.unitTests();
 		var walletType = ninja.tab.whichIsOpen();
 		if (walletType == null) {
