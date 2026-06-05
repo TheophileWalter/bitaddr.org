@@ -88,13 +88,13 @@ ninja.wallets.brainwallet = {
 	showToggle: function (element) {
 		if (element.checked) {
 			document.getElementById("brainpassphrase").setAttribute("type", "text");
-			document.getElementById("brainpassphraseconfirm").style.visibility = "hidden";
-			document.getElementById("brainlabelconfirm").style.visibility = "hidden";
+			document.getElementById("brainpassphraseconfirm").style.display = "none";
+			document.getElementById("brainlabelconfirm").style.display = "none";
 		}
 		else {
 			document.getElementById("brainpassphrase").setAttribute("type", "password");
-			document.getElementById("brainpassphraseconfirm").style.visibility = "visible";
-			document.getElementById("brainlabelconfirm").style.visibility = "visible";
+			document.getElementById("brainpassphraseconfirm").style.display = "";
+			document.getElementById("brainlabelconfirm").style.display = "";
 		}
 	}
 };

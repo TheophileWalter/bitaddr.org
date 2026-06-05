@@ -18,14 +18,26 @@ ninja.wallets.splitwallet = {
 		var label = document.createElement("label");
 		label.innerHTML = lbltxt;
 		var qr = document.createElement("div");
+		var outputId = id + "_val";
 		var output = document.createElement("span");
 		output.setAttribute("class", "output");
+		output.setAttribute("id", outputId);
 		output.innerHTML = s;
+
+		var copyBtn = document.createElement("button");
+		copyBtn.className = "copy-btn";
+		copyBtn.innerHTML = ninja.copy._icon;
+		copyBtn.setAttribute("onclick", "ninja.copy(this,'" + outputId + "')");
+
+		var copyRow = document.createElement("div");
+		copyRow.className = "copy-row";
+		copyRow.appendChild(output);
+		copyRow.appendChild(copyBtn);
 
 		qr.setAttribute("id", id);
 		row.setAttribute("class", "splitsharerow");
 		row.appendChild(label);
-		row.appendChild(output);
+		row.appendChild(copyRow);
 		row.appendChild(qr);
 		row.appendChild(document.createElement("br"));
 

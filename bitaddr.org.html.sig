@@ -1,6 +1,6 @@
 -----BEGIN BITCOIN SIGNED MESSAGE-----
-bitaddr.org.html sha256: 97b9caf8a281e3d5c9ad1d4813f07e088d6455d1c0a5cef3b58945136e00b106
+bitaddr.org.html sha256: f137df06b75a1d025afa6e3145e897a86cc62a4115ecd42f94c4d1f8677432e3
 -----BEGIN BITCOIN SIGNATURE-----
 bc1qx4z2w9lmudccutv79jze0zzdcmg7mxxj7jd3k4
-IK8NP0PUnrGXYqaTuT/EPclOb6siAksLW1WYCHJ6azz+D1sZ9Nj+y2DkjOtnFcrJMAt5fU21+By032ztxQWL9PY=
+H3ZQawAs4ezyErA5oFe9vVB+HMAelLbWuhm9EUjjSsG/PbL/X5Zh/fT+rtxyfxvO1TqmCjN+6yp3zQ98ImQ/n50=
 -----END BITCOIN SIGNATURE-----

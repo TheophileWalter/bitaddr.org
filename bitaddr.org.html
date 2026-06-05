@@ -5524,9 +5524,27 @@ hr { margin: 20px 0; border: none; border-top: 1px solid var(--border); }
 .commands .row.extra { padding-top: 10px; }
 .commands span { display: inline-flex; align-items: center; gap: 6px; }
 .commands span.print { margin-left: auto; }
+input[type="button"][name="print"] { background: none; border: 1px solid var(--border); color: var(--text-muted); }
+input[type="button"][name="print"]:hover { background: var(--bg-hover); color: var(--text); border-color: var(--text-muted); }
 .commands span.right { margin-left: auto; }
 .expandable { padding: 10px 16px; text-align: left; cursor: pointer; color: var(--text-muted); transition: color var(--transition); }
 .expandable:hover { color: var(--text); }
+
+/* ── Copy button & row ─────────────────────────────────────────────────── */
+.copy-row > .output { display: inline !important; word-break: break-all; }
+.copy-row > .copy-btn { display: inline-flex !important; vertical-align: middle; margin-left: 4px; }
+.singleaddrrow > .copy-row { flex: 1; min-width: 0; }
+.copy-btn {
+    background: none; border: none; cursor: pointer;
+    padding: 3px 4px; border-radius: 4px;
+    color: var(--text-muted);
+    display: inline-flex; align-items: center; vertical-align: middle;
+    flex-shrink: 0; line-height: 1;
+    transition: color var(--transition), background var(--transition);
+}
+.copy-btn:hover { color: var(--accent); background: var(--accent-dim); }
+.copy-btn.copied { color: var(--green); }
+@media print { .copy-btn { display: none !important; } }
 
 /* ── Form Controls ────────────────────────────────────────────────────── */
 label { font-size: 0.85em; color: var(--text-muted); white-space: nowrap; }
@@ -5849,6 +5867,12 @@ input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; p
     #detailprivkeypassphrase { width: 100%; }
     #brainpassphrase, #brainpassphraseconfirm { width: 100%; }
 
+    /* Brain wallet: fix empty spaces and differentiate print button */
+    #braincommands span.print { margin-left: 0; }
+    #brainalgorithm { margin-left: 0; }
+    /* Confirm row: column layout to avoid empty wrapped line above algorithm text */
+    #braincommands .row:has(#brainlabelconfirm) { flex-direction: column; align-items: flex-start; gap: 4px; }
+
     #bulktextarea { font-size: 0.75em; }
 
     .splitsharerow { flex-direction: column; align-items: flex-start; }
@@ -6000,14 +6024,20 @@ input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; p
 							</div>
 							<div class="singleaddrrow">
 								<div id="qrcode_public_single"></div>
-								<span class="output" id="btcaddress_single"></span>
+								<div class="copy-row">
+									<span class="output" id="btcaddress_single"></span>
+									<button class="copy-btn" onclick="ninja.copy(this,'btcaddress_single')"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x=".5" y="3.5" width="8.5" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><rect x="3.5" y=".5" width="8.5" height="9" rx="1.5" fill="var(--bg-card)" stroke="currentColor" stroke-width="1.2"/></svg></button>
+								</div>
 							</div>
 							<div id="singleshare">SHARE</div>
 						</div>
 						<div id="singleprivate">
 							<span class="label" id="singlelabelprivatekey">Private Key (WIF compressed)</span>
 							<div id="qrcode_private"></div>
-							<span class="output" id="btcprivwif"></span>
+							<div class="copy-row">
+								<span class="output" id="btcprivwif"></span>
+								<button class="copy-btn" onclick="ninja.copy(this,'btcprivwif')"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x=".5" y="3.5" width="8.5" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><rect x="3.5" y=".5" width="8.5" height="9" rx="1.5" fill="var(--bg-card)" stroke="currentColor" stroke-width="1.2"/></svg></button>
+							</div>
 							<div id="singlesecret">SECRET</div>
 						</div>
 					</div>
@@ -6135,14 +6165,20 @@ input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; p
 						<div id="brainqrcodepublic" class="qrcode_public"></div>
 						<div class="pubaddress">
 							<span class="label" id="brainlabelbitcoinaddress">Bitcoin Address:</span>
-							<span class="output" id="brainbtcaddress"></span>
+							<div class="copy-row">
+								<span class="output" id="brainbtcaddress"></span>
+								<button class="copy-btn" onclick="ninja.copy(this,'brainbtcaddress')"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x=".5" y="3.5" width="8.5" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><rect x="3.5" y=".5" width="8.5" height="9" rx="1.5" fill="var(--bg-card)" stroke="currentColor" stroke-width="1.2"/></svg></button>
+							</div>
 						</div>
 					</div>
 					<div class="private">
 						<div id="brainqrcodeprivate" class="qrcode_private"></div>
 						<div class="privwif">
 							<span class="label" id="brainlabelprivatekey">Private Key (Wallet Import Format):</span>
-							<span class="output" id="brainbtcprivwif"></span>
+							<div class="copy-row">
+								<span class="output" id="brainbtcprivwif"></span>
+								<button class="copy-btn" onclick="ninja.copy(this,'brainbtcprivwif')"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x=".5" y="3.5" width="8.5" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><rect x="3.5" y=".5" width="8.5" height="9" rx="1.5" fill="var(--bg-card)" stroke="currentColor" stroke-width="1.2"/></svg></button>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -6157,12 +6193,18 @@ input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; p
 				<div id="vanitystep1area">
 					<div>
 						<span class="label" id="vanitylabelstep1publickey">Step 1 Public Key:</span>
-						<div class="output pubkeyhex" id="vanitypubkey"></div>
+						<div class="copy-row">
+							<div class="output pubkeyhex" id="vanitypubkey"></div>
+							<button class="copy-btn" onclick="ninja.copy(this,'vanitypubkey')"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x=".5" y="3.5" width="8.5" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><rect x="3.5" y=".5" width="8.5" height="9" rx="1.5" fill="var(--bg-card)" stroke="currentColor" stroke-width="1.2"/></svg></button>
+						</div>
 						<br /><div class="notes" id="vanitylabelstep1pubnotes">Copy and paste the above into the Your-Part-Public-Key field in the Vanity Pool Website.</div>
 					</div>
 					<div>
 						<span class="label" id="vanitylabelstep1privatekey">Step 1 Private Key:</span>
-						<span class="output" id="vanityprivatekey"></span>
+						<div class="copy-row">
+							<span class="output" id="vanityprivatekey"></span>
+							<button class="copy-btn" onclick="ninja.copy(this,'vanityprivatekey')"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x=".5" y="3.5" width="8.5" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><rect x="3.5" y=".5" width="8.5" height="9" rx="1.5" fill="var(--bg-card)" stroke="currentColor" stroke-width="1.2"/></svg></button>
+						</div>
 						<br /><div class="notes" id="vanitylabelstep1privnotes">Copy and paste the above Private Key field into a text file. Ideally save to an encrypted drive. You will need this to retrieve the Bitcoin Private Key once the Pool has found your prefix.</div>
 					</div>
 				</div>
@@ -6199,19 +6241,28 @@ input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; p
 				<div id="vanitystep2area">
 					<div>
 						<span class="label" id="vanitylabelbitcoinaddress">Vanity Bitcoin Address:</span>
-						<span class="output" id="vanityaddress"></span>
+						<div class="copy-row">
+							<span class="output" id="vanityaddress"></span>
+							<button class="copy-btn" onclick="ninja.copy(this,'vanityaddress')"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x=".5" y="3.5" width="8.5" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><rect x="3.5" y=".5" width="8.5" height="9" rx="1.5" fill="var(--bg-card)" stroke="currentColor" stroke-width="1.2"/></svg></button>
+						</div>
 						<br /><div class="notes" id="vanitylabelnotesbitcoinaddress">The above is your new address that should include your required prefix.</div>
 					</div>
 					
 					<div>
 						<span class="label" id="vanitylabelpublickeyhex">Vanity Public Key (HEX):</span>
-						<span class="output pubkeyhex" id="vanitypublickeyhex"></span>
+						<div class="copy-row">
+							<span class="output pubkeyhex" id="vanitypublickeyhex"></span>
+							<button class="copy-btn" onclick="ninja.copy(this,'vanitypublickeyhex')"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x=".5" y="3.5" width="8.5" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><rect x="3.5" y=".5" width="8.5" height="9" rx="1.5" fill="var(--bg-card)" stroke="currentColor" stroke-width="1.2"/></svg></button>
+						</div>
 						<br /><div class="notes" id="vanitylabelnotespublickeyhex">The above is the Public Key in hexadecimal format. </div>
 					</div>
 
 					<div>
 						<span class="label" id="vanitylabelprivatekey">Vanity Private Key (WIF):</span>
-						<span class="output" id="vanityprivatekeywif"></span>
+						<div class="copy-row">
+							<span class="output" id="vanityprivatekeywif"></span>
+							<button class="copy-btn" onclick="ninja.copy(this,'vanityprivatekeywif')"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x=".5" y="3.5" width="8.5" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><rect x="3.5" y=".5" width="8.5" height="9" rx="1.5" fill="var(--bg-card)" stroke="currentColor" stroke-width="1.2"/></svg></button>
+						</div>
 						<br /><div class="notes" id="vanitylabelnotesprivatekey">The above is the Private Key to load into your wallet. </div>
 					</div>
 				</div>
@@ -6246,7 +6297,7 @@ input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; p
 				</div>
 				<div id="splitstep2area">
 					<div id="combineoutput">
-						<label id="combinelabelprivatekey">Combined Private Key</label>
+						<label id="combinelabelprivatekey">Combined Private Key</label><button class="copy-btn" onclick="ninja.copy(this,'combinedprivatekey')"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x=".5" y="3.5" width="8.5" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><rect x="3.5" y=".5" width="8.5" height="9" rx="1.5" fill="var(--bg-card)" stroke="currentColor" stroke-width="1.2"/></svg></button>
 						<div id="combinedprivatekey" class="output"></div>
 					</div>
 				</div>
@@ -6281,64 +6332,64 @@ input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; p
 						<div class="item">
 							<span class="label" id="detaillabelbitcoinaddress">Bitcoin Address (Legacy P2PKH)</span>
 							<div id="detailqrcodepublic" class="qrcode_public"></div>
-							<span class="output" id="detailaddress"></span>
+							<div class="copy-row"><span class="output" id="detailaddress"></span><button class="copy-btn" onclick="ninja.copy(this,'detailaddress')"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x=".5" y="3.5" width="8.5" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><rect x="3.5" y=".5" width="8.5" height="9" rx="1.5" fill="var(--bg-card)" stroke="currentColor" stroke-width="1.2"/></svg></button></div>
 						</div>
 						<div class="item right">
 							<span class="label" id="detaillabelbitcoinaddresscomp">Bitcoin Address Compressed (Legacy P2PKH)</span>
 							<div id="detailqrcodepubliccomp" class="qrcode_public"></div>
-							<span class="output" id="detailaddresscomp"></span>
+							<div class="copy-row"><span class="output" id="detailaddresscomp"></span><button class="copy-btn" onclick="ninja.copy(this,'detailaddresscomp')"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x=".5" y="3.5" width="8.5" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><rect x="3.5" y=".5" width="8.5" height="9" rx="1.5" fill="var(--bg-card)" stroke="currentColor" stroke-width="1.2"/></svg></button></div>
 						</div>
 					</div>
 					<div class="pubqr">
 						<div class="item">
 							<span class="label" id="detaillabelP2SH">P2SH-P2WPKH Address (3...)</span>
 							<div id="detailqrcodepublicP2SH" class="qrcode_public"></div>
-							<span class="output" id="detailaddressP2SH"></span>
+							<div class="copy-row"><span class="output" id="detailaddressP2SH"></span><button class="copy-btn" onclick="ninja.copy(this,'detailaddressP2SH')"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x=".5" y="3.5" width="8.5" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><rect x="3.5" y=".5" width="8.5" height="9" rx="1.5" fill="var(--bg-card)" stroke="currentColor" stroke-width="1.2"/></svg></button></div>
 						</div>
 						<div class="item right">
 							<span class="label" id="detaillabelSegwit">Native SegWit P2WPKH (bc1q...)</span>
 							<div id="detailqrcodepublicSegwit" class="qrcode_public"></div>
-							<span class="output" id="detailaddressSegwit"></span>
+							<div class="copy-row"><span class="output" id="detailaddressSegwit"></span><button class="copy-btn" onclick="ninja.copy(this,'detailaddressSegwit')"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x=".5" y="3.5" width="8.5" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><rect x="3.5" y=".5" width="8.5" height="9" rx="1.5" fill="var(--bg-card)" stroke="currentColor" stroke-width="1.2"/></svg></button></div>
 						</div>
 					</div>
 					<div class="pubqr">
 						<div class="item">
 							<span class="label" id="detaillabelTaproot">Taproot P2TR (bc1p...)</span>
 							<div id="detailqrcodepublicTaproot" class="qrcode_public"></div>
-							<span class="output" id="detailaddressTaproot"></span>
+							<div class="copy-row"><span class="output" id="detailaddressTaproot"></span><button class="copy-btn" onclick="ninja.copy(this,'detailaddressTaproot')"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x=".5" y="3.5" width="8.5" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><rect x="3.5" y=".5" width="8.5" height="9" rx="1.5" fill="var(--bg-card)" stroke="currentColor" stroke-width="1.2"/></svg></button></div>
 						</div>
 					</div>
 					<br /><br />
 					<div class="item clear">
 						<span class="label" id="detaillabelpublickey">Public Key (130 characters [0-9A-F]):</span>
-						<span class="output pubkeyhex" id="detailpubkey"></span>
+						<div class="copy-row"><span class="output pubkeyhex" id="detailpubkey"></span><button class="copy-btn" onclick="ninja.copy(this,'detailpubkey')"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x=".5" y="3.5" width="8.5" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><rect x="3.5" y=".5" width="8.5" height="9" rx="1.5" fill="var(--bg-card)" stroke="currentColor" stroke-width="1.2"/></svg></button></div>
 					</div>
 					<div class="item">
 						<span class="label" id="detaillabelpublickeycomp">Public Key (compressed, 66 characters [0-9A-F]):</span>
-						<span class="output" id="detailpubkeycomp"></span>
+						<div class="copy-row"><span class="output" id="detailpubkeycomp"></span><button class="copy-btn" onclick="ninja.copy(this,'detailpubkeycomp')"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x=".5" y="3.5" width="8.5" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><rect x="3.5" y=".5" width="8.5" height="9" rx="1.5" fill="var(--bg-card)" stroke="currentColor" stroke-width="1.2"/></svg></button></div>
 					</div>
 					<hr />
 					<div class="privqr">
 						<div class="item">
 							<span class="label"><span id="detaillabelprivwif">Private Key WIF<br />51 characters base58, starts with a</span> <span id="detailwifprefix">'5'</span></span>
 							<div id="detailqrcodeprivate" class="qrcode_private"></div>
-							<span class="output" id="detailprivwif"></span>
+							<div class="copy-row"><span class="output" id="detailprivwif"></span><button class="copy-btn" onclick="ninja.copy(this,'detailprivwif')"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x=".5" y="3.5" width="8.5" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><rect x="3.5" y=".5" width="8.5" height="9" rx="1.5" fill="var(--bg-card)" stroke="currentColor" stroke-width="1.2"/></svg></button></div>
 						</div>
 						<div class="item right">
 							<span class="label"><span id="detaillabelprivwifcomp">Private Key WIF Compressed<br />52 characters base58, starts with a</span> <span id="detailcompwifprefix">'K' or 'L'</span></span>
 							<div id="detailqrcodeprivatecomp" class="qrcode_private"></div>
-							<span class="output" id="detailprivwifcomp"></span>
+							<div class="copy-row"><span class="output" id="detailprivwifcomp"></span><button class="copy-btn" onclick="ninja.copy(this,'detailprivwifcomp')"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x=".5" y="3.5" width="8.5" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><rect x="3.5" y=".5" width="8.5" height="9" rx="1.5" fill="var(--bg-card)" stroke="currentColor" stroke-width="1.2"/></svg></button></div>
 						</div>
 					</div>
 					<br /><br />
 					<div class="item clear">
 						<span class="label" id="detaillabelprivhex">Private Key Hexadecimal Format (64 characters [0-9A-F]):</span>
-						<span class="output" id="detailprivhex"></span>
+						<div class="copy-row"><span class="output" id="detailprivhex"></span><button class="copy-btn" onclick="ninja.copy(this,'detailprivhex')"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x=".5" y="3.5" width="8.5" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><rect x="3.5" y=".5" width="8.5" height="9" rx="1.5" fill="var(--bg-card)" stroke="currentColor" stroke-width="1.2"/></svg></button></div>
 					</div>
 					<div class="item" style="display: none;" id="detailbip38">
 						<span class="label" id="detaillabelprivbip38">Private Key BIP38 Format (58 characters base58, starts with '6P'):</span>
 						<div id="detailqrcodeprivatebip38" class="qrcode_private"></div>
-						<span class="output" id="detailprivbip38"></span>
+						<div class="copy-row"><span class="output" id="detailprivbip38"></span><button class="copy-btn" onclick="ninja.copy(this,'detailprivbip38')"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x=".5" y="3.5" width="8.5" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><rect x="3.5" y=".5" width="8.5" height="9" rx="1.5" fill="var(--bg-card)" stroke="currentColor" stroke-width="1.2"/></svg></button></div>
 					</div>
 				</div>
 			</div>
@@ -7117,6 +7168,32 @@ ninja.tab = {
     }
 
 };
+
+ninja.copy = function(btn, id) {
+	var el = document.getElementById(id);
+	if (!el) return;
+	var text = (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') ? el.value : el.textContent;
+	text = text.trim();
+	if (!text) return;
+	var origHtml = btn.innerHTML;
+	var flash = function() {
+		btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7l3 3 6-7"/></svg>';
+		btn.classList.add('copied');
+		setTimeout(function() { btn.innerHTML = origHtml; btn.classList.remove('copied'); }, 1500);
+	};
+	if (navigator.clipboard && navigator.clipboard.writeText) {
+		navigator.clipboard.writeText(text).then(flash).catch(function() { ninja.copy._legacy(text); flash(); });
+	} else { ninja.copy._legacy(text); flash(); }
+};
+ninja.copy._legacy = function(text) {
+	var ta = document.createElement('textarea');
+	ta.value = text;
+	ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+	document.body.appendChild(ta); ta.select();
+	try { document.execCommand('copy'); } catch(e) {}
+	document.body.removeChild(ta);
+};
+ninja.copy._icon = '<svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x=".5" y="3.5" width="8.5" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><rect x="3.5" y=".5" width="8.5" height="9" rx="1.5" fill="var(--bg-card)" stroke="currentColor" stroke-width="1.2"/></svg>';
 
 ninja.getQueryString = function () {
 	var result = {}, queryString = location.search.substring(1), re = /([^&=]+)=([^&]*)/g, m;
@@ -10329,13 +10406,13 @@ ninja.wallets.brainwallet = {
 	showToggle: function (element) {
 		if (element.checked) {
 			document.getElementById("brainpassphrase").setAttribute("type", "text");
-			document.getElementById("brainpassphraseconfirm").style.visibility = "hidden";
-			document.getElementById("brainlabelconfirm").style.visibility = "hidden";
+			document.getElementById("brainpassphraseconfirm").style.display = "none";
+			document.getElementById("brainlabelconfirm").style.display = "none";
 		}
 		else {
 			document.getElementById("brainpassphrase").setAttribute("type", "password");
-			document.getElementById("brainpassphraseconfirm").style.visibility = "visible";
-			document.getElementById("brainlabelconfirm").style.visibility = "visible";
+			document.getElementById("brainpassphraseconfirm").style.display = "";
+			document.getElementById("brainlabelconfirm").style.display = "";
 		}
 	}
 };
@@ -10783,14 +10860,26 @@ ninja.wallets.splitwallet = {
 		var label = document.createElement("label");
 		label.innerHTML = lbltxt;
 		var qr = document.createElement("div");
+		var outputId = id + "_val";
 		var output = document.createElement("span");
 		output.setAttribute("class", "output");
+		output.setAttribute("id", outputId);
 		output.innerHTML = s;
+
+		var copyBtn = document.createElement("button");
+		copyBtn.className = "copy-btn";
+		copyBtn.innerHTML = ninja.copy._icon;
+		copyBtn.setAttribute("onclick", "ninja.copy(this,'" + outputId + "')");
+
+		var copyRow = document.createElement("div");
+		copyRow.className = "copy-row";
+		copyRow.appendChild(output);
+		copyRow.appendChild(copyBtn);
 
 		qr.setAttribute("id", id);
 		row.setAttribute("class", "splitsharerow");
 		row.appendChild(label);
-		row.appendChild(output);
+		row.appendChild(copyRow);
 		row.appendChild(qr);
 		row.appendChild(document.createElement("br"));
 

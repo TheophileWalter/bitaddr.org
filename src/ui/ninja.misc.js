@@ -137,6 +137,32 @@ ninja.tab = {
 
 };
 
+ninja.copy = function(btn, id) {
+	var el = document.getElementById(id);
+	if (!el) return;
+	var text = (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') ? el.value : el.textContent;
+	text = text.trim();
+	if (!text) return;
+	var origHtml = btn.innerHTML;
+	var flash = function() {
+		btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7l3 3 6-7"/></svg>';
+		btn.classList.add('copied');
+		setTimeout(function() { btn.innerHTML = origHtml; btn.classList.remove('copied'); }, 1500);
+	};
+	if (navigator.clipboard && navigator.clipboard.writeText) {
+		navigator.clipboard.writeText(text).then(flash).catch(function() { ninja.copy._legacy(text); flash(); });
+	} else { ninja.copy._legacy(text); flash(); }
+};
+ninja.copy._legacy = function(text) {
+	var ta = document.createElement('textarea');
+	ta.value = text;
+	ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+	document.body.appendChild(ta); ta.select();
+	try { document.execCommand('copy'); } catch(e) {}
+	document.body.removeChild(ta);
+};
+ninja.copy._icon = '<svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x=".5" y="3.5" width="8.5" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><rect x="3.5" y=".5" width="8.5" height="9" rx="1.5" fill="var(--bg-card)" stroke="currentColor" stroke-width="1.2"/></svg>';
+
 ninja.getQueryString = function () {
 	var result = {}, queryString = location.search.substring(1), re = /([^&=]+)=([^&]*)/g, m;
 	while (m = re.exec(queryString)) {
