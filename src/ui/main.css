@@ -393,6 +393,8 @@ input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; p
 #splitarea span { padding: 0; }
 #splitcommands { padding: 16px; text-align: left; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 #combinecommands { padding: 16px; }
+#combinecommands > span:first-child { display: block; width: 100%; }
+#combinelabelentershares { white-space: normal; }
 #combineinput { width: 100%; min-height: 160px; font-family: var(--font-mono); font-size: 0.82em; }
 #splitstep1area { display: none; text-align: left; padding: 0; border-bottom: 1px solid var(--border); }
 .splitsharerow { border-bottom: 1px solid var(--border); padding: 14px 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
@@ -562,11 +564,19 @@ input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; p
     .commands .row { gap: 6px; }
     .commands span { gap: 4px; }
 
+    /* Brain wallet: stack vertically on mobile */
+    #brainkeyarea .public, #brainkeyarea .private { float: none; display: block; padding: 8px 0; }
+    #brainkeyarea .public { margin-bottom: 16px; }
+    #brainkeyarea .qrcode_public, #brainkeyarea .qrcode_private { float: none; top: 0; display: block; margin-bottom: 8px; }
+    #brainkeyarea .pubaddress { float: none; height: auto; }
+    #brainkeyarea .privwif { float: none; text-align: left; padding: 4px 0; }
+
     /* Single wallet: stack vertically on mobile */
     #singlekeyarea { flex-direction: column; gap: 16px; }
     #singleprivate { width: 100%; text-align: left; }
     #singleprivate canvas { margin-left: 0; }
-    .singleaddrrow .output { font-size: 0.78em; }
+    .singleaddrrow { flex-direction: column; align-items: flex-start; }
+    .singleaddrrow .output { font-size: 0.78em; word-break: break-all; }
 
     /* Detail wallet: stack QR pairs */
     .pubqr, .privqr { flex-direction: column; }
@@ -594,6 +604,29 @@ input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; p
     .singleaddrrow { gap: 8px; }
 }
 
+/* ── Paper wallet: responsive scaling ────────────────────────────────────
+   Breakpoints ensure the 486px card fits within available width.
+   Calculation: available = screen - 10px×2 (main) - 16px×2 (paperkeyarea) = screen - 52px
+   zoom = min_available_in_range / 486
+   ─────────────────────────────────────────────────────────────────────── */
+@media (max-width: 540px) {
+    #paperkeyarea { overflow-x: hidden; }
+    /* 481–540px → min available 429px → 429/486 = 0.88 */
+    #paperarea .artwallet { zoom: 0.88; }
+}
+@media (max-width: 480px) {
+    /* 421–480px → min available 369px → 369/486 = 0.75 */
+    #paperarea .artwallet { zoom: 0.75; }
+}
+@media (max-width: 420px) {
+    /* 361–420px → min available 309px → 309/486 = 0.63 */
+    #paperarea .artwallet { zoom: 0.63; }
+}
+@media (max-width: 360px) {
+    /* 320–360px → min available 268px → 268/486 = 0.54 */
+    #paperarea .artwallet { zoom: 0.54; }
+}
+
 /* ═══════════════════════════════════════════════════════════════════════
    Print Styles (unchanged from original)
    ═══════════════════════════════════════════════════════════════════════ */
@@ -605,7 +638,7 @@ input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; p
     #paperarea .keyarea.art:first-child { border: 0; }
     #paperkeyarea { background: transparent; padding: 0; border: 0; border-radius: 0; }
     #paperarea .keyarea.art { text-align: left; border-bottom: 0; padding-bottom: 0; margin-bottom: 0; }
-    #paperarea .artwallet { box-shadow: none; border-radius: 0; overflow: visible; }
+    #paperarea .artwallet { zoom: 1; box-shadow: none; border-radius: 0; overflow: visible; }
     .pagebreak { height: 1px; }
     .paper #logo { display: none; }
     .menu, .footer, .commands, #tagline, #faqs, #culturemenu, #themetoggle { display: none; }
