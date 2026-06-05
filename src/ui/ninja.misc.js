@@ -8,7 +8,9 @@ ninja.theme = {
 		localStorage.setItem('bitaddr-theme', theme);
 		var label = document.getElementById('themelabel');
 		var icon  = document.querySelector('#themetoggle .theme-icon');
-		if (label) label.textContent = theme === 'light' ? 'Dark' : 'Light';
+		var dark  = (window.ninja && ninja.translator) ? (ninja.translator.get('themedark')  || 'Dark')  : 'Dark';
+		var light = (window.ninja && ninja.translator) ? (ninja.translator.get('themelight') || 'Light') : 'Light';
+		if (label) label.textContent = theme === 'light' ? dark : light;
 		if (icon)  icon.innerHTML    = theme === 'light' ? '&#9790;' : '&#9788;';
 	},
 	toggle: function () {
@@ -93,7 +95,7 @@ ninja.donation = {
 		if (navigator.clipboard) {
 			navigator.clipboard.writeText(ninja.donation.addr).then(function () {
 				var confirm = document.getElementById("donationcopyconfirm");
-				confirm.textContent = "Adresse copiée !";
+				confirm.textContent = ninja.translator.get('donationcopyconfirm') || 'Address copied!';
 				setTimeout(function () { confirm.textContent = ""; }, 2500);
 			});
 		}

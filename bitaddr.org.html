@@ -6943,7 +6943,9 @@ ninja.theme = {
 		localStorage.setItem('bitaddr-theme', theme);
 		var label = document.getElementById('themelabel');
 		var icon  = document.querySelector('#themetoggle .theme-icon');
-		if (label) label.textContent = theme === 'light' ? 'Dark' : 'Light';
+		var dark  = (window.ninja && ninja.translator) ? (ninja.translator.get('themedark')  || 'Dark')  : 'Dark';
+		var light = (window.ninja && ninja.translator) ? (ninja.translator.get('themelight') || 'Light') : 'Light';
+		if (label) label.textContent = theme === 'light' ? dark : light;
 		if (icon)  icon.innerHTML    = theme === 'light' ? '&#9790;' : '&#9788;';
 	},
 	toggle: function () {
@@ -7028,7 +7030,7 @@ ninja.donation = {
 		if (navigator.clipboard) {
 			navigator.clipboard.writeText(ninja.donation.addr).then(function () {
 				var confirm = document.getElementById("donationcopyconfirm");
-				confirm.textContent = "Adresse copiée !";
+				confirm.textContent = ninja.translator.get('donationcopyconfirm') || 'Address copied!';
 				setTimeout(function () { confirm.textContent = ""; }, 2500);
 			});
 		}
@@ -7162,6 +7164,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 						elem.innerHTML = val;
 					}
 				}
+				if (window.ninja && ninja.theme) ninja.theme.apply(ninja.theme.current());
 				return true;
 			} else {
 				return false;
@@ -7218,6 +7221,8 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 
 				// header and menu
 				"tagline": "Open Source JavaScript Client-Side Bitcoin Wallet Generator",
+				"themedark": "Dark",
+				"themelight": "Light",
 				"generatelabelbitcoinaddress": "Generating Bitcoin Address...",
 				"generatelabelmovemouse": "MOVE your mouse around to add some extra randomness...",
 				"generatelabelkeypress": "OR type some random characters into this textbox",
@@ -7329,6 +7334,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 				"detaila1": "An important part of creating a Bitcoin wallet is ensuring the random numbers used to create the wallet are truly random. Physical randomness is better than computer generated pseudo-randomness. The easiest way to generate physical randomness is with dice. To create a Bitcoin private key you only need one six sided die which you roll 99 times. Stopping each time to record the value of the die. When recording the values follow these rules: 1=1, 2=2, 3=3, 4=4, 5=5, 6=0. By doing this you are recording the big random number, your private key, in B6 or base 6 format. You can then enter the 99 character base 6 private key into the text field above and click View Details. You will then see the Bitcoin address associated with your private key. You should also make note of your private key in WIF format since it is more widely used.",
 
 				// footer
+				"donationcopyconfirm": "Address copied!",
 				"footerlabeldonations": "Donations:",
 				"footerlabeltranslatedby": "",
 				"footerlabelpgp": "PGP",
@@ -7471,6 +7477,8 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 
 		// header and menu html
 		"tagline": "Open Source generátor Bitcoin peněženky napsaný v JavaScript",
+		"themedark": "Tmavý",
+		"themelight": "Světlý",
 		"generatelabelbitcoinaddress": "Generuji Bitcoin adresu",
 		"generatelabelmovemouse": "POHYBUJTE myší pro získání dostatku náhody...",
 		"generatelabelkeypress": "NEBO napište několik náhodných znaků do tohoto pole",
@@ -7483,6 +7491,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"detailwallet": "Detail peněženky",
 
 		// footer html
+		"donationcopyconfirm": "Adresa zkopírována!",
 		"footerlabeldonations": "Příspěvek:",
 		"footerlabeltranslatedby": "Překlad: 1LNF2anjkH3HyRKrhMzVYqYRKFeDe2TJWz",
 		"footerlabelpgp": "PGP",
@@ -7522,10 +7531,8 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		// single wallet html
 		"newaddress": "Vytvořit novou adresu",
 		"singleprint": "Tisk",
-		"singlelabelbitcoinaddress": "Bitcoin adresa (Legacy P2PKH)",
-		"singlelabelP2SH": "P2SH-P2WPKH (3…)",
-		"singlelabelSegwit": "Nativní SegWit P2WPKH (bc1q…)",
-		"singlelabelTaproot": "Taproot P2TR (bc1p…)",
+		"singlelabeladdrtype": "Typ adresy",
+		"singleaddrtype": { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "Nativní SegWit (bc1q…)", "taproot": "Taproot (bc1p…)" },
 		"singlelabelprivatekey": "Soukromý klíč (WIF komprimovaný)",
 		"singletip1": "<b>Bitcoin peněženka</b> je jednoduchý pár Bitcoin adresy s přidruženým soukromým klíčem. Taková peněženka byla právě vytvořena ve vašem prohlížeči a zobrazena výše.",
 		"singletip2": "<b>Pro zabezpečení této peněženky</b> musíte tuto Bitcoin adresu a soukromý klíč vytisknout a nebo jinak poznamenat. Je důležité provést zálohu soukromého klíče a jeho uschování na bezpečném místě. Tato webová stránka nemá žádné informace o vašem soukromém klíči. Pokud ovládáte PGP, můžete celou tuto stránku stáhnout v jednom HTML souboru a ověřit její pravost srovnáním SHA256 hashe s podepsaným dokumentem historie verzí. Odkaz naleznete v patičce této stránky. Pokud opustíte či obnovíte tuto stránku nebo kliknete na 'Vytvořit novou adresu' dojde k vygenerování nového soukromého klíče a předtím zobrazený klíč bude ztracen. Váš soukromý klíč musíte uchovat v tajnosti. Každý kdo má tento klíč k dispozici může utratit všechny peníze v této peněžence. Pokud budete peněženku tisknout, uzavřete ji do nepropustného obalu nebo ji zalaminujte. Tím zabráníte jejímu poškození vodou. Chovejte se k této peněžence jako k normálním bankovkám.",
@@ -7672,6 +7679,8 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 
 		// header and menu html
 		"tagline": "Offener, client-seitiger Bitcoin-Wallet-Generator in JavaScript",
+		"themedark": "Dunkel",
+		"themelight": "Hell",
 		"generatelabelbitcoinaddress": "Erstelle Bitcoin-Wallet...",
 		"generatelabelmovemouse": "Bewege deine Maus umher, um die Zuf&auml;lligkeit zu erh&ouml;hen...",
 		"generatelabelkeypress": "ODER tippe einige zufällige Zeichen in dieses Textfeld",
@@ -7684,6 +7693,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"detailwallet": "Walletdetails",
 
 		// footer html
+		"donationcopyconfirm": "Adresse kopiert!",
 		"footerlabeldonations": "Spenden:",
 		"footerlabeltranslatedby": "&Uuml;bersetzung: 1EWPcmYmU8MamRUYMFWQa1r7A2Tskz78t5",
 		"footerlabelpgp": "PGP",
@@ -7723,10 +7733,8 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		// single wallet html
 		"newaddress": "Neues Wallet erstellen",
 		"singleprint": "Drucken",
-		"singlelabelbitcoinaddress": "Bitcoin-Adresse (Legacy P2PKH)",
-		"singlelabelP2SH": "P2SH-P2WPKH (3…)",
-		"singlelabelSegwit": "Natives SegWit P2WPKH (bc1q…)",
-		"singlelabelTaproot": "Taproot P2TR (bc1p…)",
+		"singlelabeladdrtype": "Adresstyp",
+		"singleaddrtype": { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "Natives SegWit (bc1q…)", "taproot": "Taproot (bc1p…)" },
 		"singlelabelprivatekey": "Privater Schlüssel (WIF komprimiert)",
 		"singletip1": "<b>Ein Bitcoin-Wallet </b>(Geldb&ouml;rse) ist nichts anderes als eine Bitcoin-Adresse (&ouml;ffentlicher Schl&uuml;ssel) und der zu ihr geh&ouml;rende private Schl&uuml;ssel. Oben findest du ein solches, gerade f&uuml;r dich erstelltes Wallet, bestehend aus den beiden Zeichenketten. Die QR-Codes dienen lediglich der Vereinfachung und enthalten kodiert die Adresse bzw. den privaten Schl&uuml;ssel.",
 		"singletip2": "<b>Um dieses Wallet zu sch&uuml;tzen,</b> musst du es entweder ausdrucken oder anderweitig die Bitcoin-Adresse und den privaten Schl&uuml;ssel sichern. Fertige auf jeden Fall eine Kopie des privaten Schl&uuml;ssels an und bewahre sie an einem sicheren Ort auf. Der private Schl&uuml;ssel liegt nur lokal auf deinem Rechner vor und wurde nicht ins Internet &uuml;bertragen. Falls du dich mit PGP auskennst, kannst du dir diese all-in-one HTML-Seite herunterladen. Um zu &uuml;berpr&uuml;fen, ob die heruntergeladene Version authentisch ist, kannst du den SHA256-Hash dieser Seite mit dem SHA256-Hash in der signierten Versionsgeschichte am unteren Ende dieser Seite abgleichen. Wenn du diese Seite verl&auml;sst, sie neul&auml;dst bzw. den \"Neues Wallet erstellen\"-Button dr&uuml;ckst, wird ein neues Wallet erstellt und das vorherige wird nicht mehr abrufbar sein. Du solltest deinen privaten Schl&uuml;ssel geheim halten. Wer den privaten Schl&uuml;ssel hat, kann damit auf alle im Wallet befindlichen Bitcoin zugreifen und sie nach Belieben ausgeben. Behandle dein gedrucktes Wallet wie echtes Geld!",
@@ -7873,6 +7881,8 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 
 		// header and menu html
 		"tagline": "Δημιουργός Διευθύνσεων Bitcoin, ανοικτού κώδικα Javascript",
+		"themedark": "Σκοτεινό",
+		"themelight": "Φωτεινό",
 		"generatelabelbitcoinaddress": "Δημιουργία Διεύθυνσης Bitcoin...",
 		"generatelabelmovemouse": "ΚΟΥΝΗΣΤΕ το ποντίκι τριγύρω για να προσθέσετε επιπλέον τυχαιότητα...",
 		"generatelabelkeypress": "Ή πληκτρολογήστε μερικούς τυχαίους χαρακτήρες σε αυτό το πλαίσιο κειμένου",
@@ -7885,6 +7895,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"detailwallet": "Λεπτομέρειες Πορτοφολιού",
 
 		// footer html
+		"donationcopyconfirm": "Διεύθυνση αντιγράφηκε!",
 		"footerlabeldonations": "Δωρεές:",
 		"footerlabeltranslatedby": "Μετάφραση: <a href='http://BitcoinX.gr/'><b>BitcoinX.gr</b></a> 1BitcoiNxkUPcTFxwMqxhRiPEiQRzYskf6",
 		"footerlabelpgp": "PGP",
@@ -7924,11 +7935,9 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		// single wallet html
 		"newaddress": "Δημιουργία μιας νέας Διεύθυνσης",
 		"singleprint": "Εκτύπωση",
-		"singlelabelbitcoinaddress": "Διεύθυνση Bitcoin (Legacy P2PKH)",
-		"singlelabelP2SH": "P2SH-P2WPKH (3…)",
-		"singlelabelSegwit": "Εγγενές SegWit P2WPKH (bc1q…)",
-		"singlelabelTaproot": "Taproot P2TR (bc1p…)",
-		"singlelabelprivatekey": "Ιδιωτικό Κλειδί (WIF συμπιεσμένο)",
+		"singlelabeladdrtype": "Τύπος διεύθυνσης",
+		"singleaddrtype": { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "Εγγενές SegWit (bc1q…)", "taproot": "Taproot (bc1p…)" },
+		"singlelabelprivatekey": "Προσωπικό Κλειδί (WIF συμπιεσμένο)",
 		"singletip1": "<b>Ένα πορτοφόλι Bitcoin</b> είναι τόσο απλό όσο ένα ζευγάρι μιας Διεύθυνσης Bitcoin με το αντίστοιχο Προσωπικό Κλειδί Bitcoin. Ένα τέτοιο πορτοφόλι έχει δημιουργηθεί για εσάς στο πρόγραμμα περιήγησης και εμφανίζεται παραπάνω.",
 		"singletip2": "<b>Για να προστατέψετε αυτό το πορτοφόλι</b> πρέπει να εκτυπώσετε ή να καταγράψετε με άλλο τρόπο τη Διεύθυνση Bitcoin και το Προσωπικό Κλειδί. Είναι σημαντικό να δημιουργήσετε αντίγραφο ασφαλείας του Προσωπικού Κλειδιού και να το αποθηκεύσετε σε ασφαλές μέρος. Ο ιστότοπος αυτός δεν έχει γνώση του Προσωπικού Κλειδιού σας. Εάν εγκαταλείψετε ή ανανεώσετε τον ιστότοπο ή πατήσετε το κουμπί Δημιουργία Νέας Διεύθυνσης, τότε θα δημιουργηθεί νέο Προσωπικό Κλειδί και το προηγουμένως εμφανιζόμενο δεν θα είναι ανακτήσιμο. Το Προσωπικό Κλειδί Bitcoin σας πρέπει να παραμείνει μυστικό. Όποιος γνωρίζει το Προσωπικό Κλειδί έχει πρόσβαση να ξοδέψει όλα τα bitcoins που σχετίζονται με αυτή τη διεύθυνση.",
 		"singletip3": "<b>Προσθέστε κεφάλαια</b> σε αυτό το πορτοφόλι υποδεικνύοντας σε άλλους να στείλουν bitcoins στη Διεύθυνση Bitcoin σας.",
@@ -7943,7 +7952,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"paperlabeladdressestogenerate": "Πλήθος διευθύνσεων:",
 		"papergenerate": "Δημιουργία",
 		"paperprint": "Εκτύπωση",
-		"paperlabelBIPpassphrase": "Passphrase:",
+		"paperlabelBIPpassphrase": "Κωδικός πρόσβασης:",
 		"paperlabelencrypt": "Κρυπτογράφηση BIP38;",
 
 		// bulk wallet html
@@ -7978,7 +7987,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"vanitynewkeypair": "Δημιουργία",
 		"vanitylabelstep1publickey": "Βήμα 1 Δημόσιο Κλειδί:",
 		"vanitylabelstep1pubnotes": "Αντιγράψτε κι επικολλήστε το παραπάνω στο πεδίο Your-Part-Public-Key στην ιστοσελίδα του Vanity Pool.",
-		"vanitylabelstep1privatekey": "Step 1 Προσωπικό Κλειδί:",
+		"vanitylabelstep1privatekey": "Βήμα 1 Προσωπικό Κλειδί:",
 		"vanitylabelstep1privnotes": "Αντιγράψτε κι επικολλήστε το παραπάνω Προσωπικό Κλειδί σε ένα αρχείο κειμένου. Ιδανικά, αποθηκεύστε το σε έναν κρυπτογραφημένο δίσκο. Θα το χρειαστείτε για να ανακτήσετε το Bitcoin Προσωπικό Κλειδί όταν βρεθεί το πρόθεμά σας από το Vanity Pool.",
 		"vanitylabelstep2calculateyourvanitywallet": "Βήμα 2 - Υπολογίστε το Vanity Πορτοφόλι σας.",
 		"vanitylabelenteryourpart": "Εισάγετε το Προσωπικό Κλειδί που δημιουργήσατε στο Βήμα 1 κι αποθηκεύσατε:",
@@ -8005,7 +8014,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 
 		// detail wallet html
 		"detaillabelenterprivatekey": "Εισάγετε το Προσωπικό Κλειδί",
-		"detailkeyformats": "Key Formats: WIF, WIFC, HEX, B64, B6, MINI, BIP38",
+		"detailkeyformats": "Μορφές Κλειδιού: WIF, WIFC, HEX, B64, B6, MINI, BIP38",
 		"detailview": "Προβολή λεπτομερειών",
 		"detailprint": "Εκτύπωση",
 		"detaillabelnote1": "Το Bitcoin Προσωπικό Κλειδί είναι ένας μοναδικός και μυστικός αριθμός που μόνο εσείς πρέπει να γνωρίζετε, ο οποίος μπορεί να κωδικοποιηθεί σε πολλές διαφορετικές μορφές. Εμφανίζουμε παρακάτω τη διεύθυνση Bitcoin και το Δημόσιο Κλειδί, μαζί με το Προσωπικό Κλειδί, στις πιο δημοφιλείς μορφές  (WIF, WIFC, HEX, B64).",
@@ -8030,10 +8039,10 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"detaila1": "Ένα σημαντικό μέρος της δημιουργίας ενός πορτοφολιού Bitcoin είναι η διασφάλιση ότι οι τυχαίοι αριθμοί που χρησιμοποιούνται για τη δημιουργία του πορτοφολιού είναι πραγματικά τυχαίοι. Η φυσική τυχαιότητα είναι καλύτερη από την ψευδοτυχαιότητα που παράγει ο υπολογιστής. Ο πιο εύκολος τρόπος για να δημιουργήσετε φυσική τυχαιότητα είναι με ζάρια. Για να δημιουργήσετε ένα Προσωπικό Κλειδί Bitcoin χρειάζεστε μόνο ένα εξάπλευρο ζάρι το οποίο θα ρίξετε 99 φορές. Σταματώντας κάθε φορά για να καταγράψετε την τιμή. Κατά την καταγραφή των τιμών ακολουθήστε αυτούς τους κανόνες: 1=1, 2=2, 3=3, 4=4, 5=5, 6=0. Κάνοντας αυτό καταγράφετε τον μεγάλο τυχαίο αριθμό, το Προσωπικό Κλειδί σας, σε μορφή B6 ή βάση 6. Μπορείτε στη συνέχεια να εισαγάγετε το Προσωπικό Κλειδί βάσης 6 των 99 χαρακτήρων στο πεδίο κειμένου παραπάνω και να κάνετε κλικ στο Προβολή Λεπτομερειών. Θα δείτε τότε τη Διεύθυνση Bitcoin που σχετίζεται με το Προσωπικό Κλειδί σας. Θα πρέπει επίσης να σημειώσετε το Προσωπικό Κλειδί σας σε μορφή WIF καθώς χρησιμοποιείται ευρύτερα.",
 		"bulklabelencrypt": "Κρυπτογράφηση BIP38;",
 		"detaillabelencrypt": "Κρυπτογράφηση BIP38;",
-		"bulklabelBIPpassphrase": "Passphrase:",
+		"bulklabelBIPpassphrase": "Κωδικός πρόσβασης:",
 		"brainlabelcompressed": "Συμπιεσμένη διεύθυνση;",
 		"detailwifprefix": "'5'",
-		"detaillabelprivb6": "Ιδιωτικό κλειδί μορφή Base6 (99 χαρακτήρες [0-5]):"
+		"detaillabelprivb6": "Προσωπικό κλειδί μορφή Base6 (99 χαρακτήρες [0-5]):"
 	};
 })(ninja.translator);
 
@@ -8074,6 +8083,8 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 
 		// header and menu html
 		"tagline": "Generador de carteras Bitcoin de código abierto en lado de cliente con Javascript",
+		"themedark": "Oscuro",
+		"themelight": "Claro",
 		"generatelabelbitcoinaddress": "Generando dirección Bitcoin...",
 		"generatelabelmovemouse": "Mueve un poco el ratón para crear entropía...",
 		"generatelabelkeypress": "O escribe algunos caracteres aleatorios en este campo de texto",
@@ -8082,10 +8093,11 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"bulkwallet": "Direcciones en masa",
 		"brainwallet": "Cartera mental",
 		"vanitywallet": "Cartera personalizada",
-		"splitwallet": "Billetera Dividida",
+		"splitwallet": "Cartera Dividida",
 		"detailwallet": "Detalles de la cartera",
 
 		// footer html
+		"donationcopyconfirm": "¡Dirección copiada!",
 		"footerlabeldonations": "Donaciones:",
 		"footerlabeltranslatedby": "Traducción: <b>12345</b>Vypv2QSmuRXcciT5oEB27mPbWGeva",
 		"footerlabelpgp": "PGP",
@@ -8125,10 +8137,8 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		// single wallet html
 		"newaddress": "Generar dirección",
 		"singleprint": "Imprimir",
-		"singlelabelbitcoinaddress": "Dirección Bitcoin (Legacy P2PKH)",
-		"singlelabelP2SH": "P2SH-P2WPKH (3…)",
-		"singlelabelSegwit": "SegWit Nativo P2WPKH (bc1q…)",
-		"singlelabelTaproot": "Taproot P2TR (bc1p…)",
+		"singlelabeladdrtype": "Tipo de dirección",
+		"singleaddrtype": { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "SegWit Nativo (bc1q…)", "taproot": "Taproot (bc1p…)" },
 		"singlelabelprivatekey": "Clave Privada (WIF comprimida)",
 		"singletip1": "<b>Una cartera Bitcoin</b> es simplemente un par formado por una dirección Bitcoin y su clave privada correspondiente. Esta cartera ha sido generada en tu navegador y se muestra arriba.",
 		"singletip2": "<b>Para proteger esta cartera</b> debes imprimir o anotar la dirección Bitcoin y la clave privada. Es importante hacer una copia de seguridad de la clave privada y guardarla en un lugar seguro. Este sitio no tiene conocimiento de tu clave privada. Si estás familiarizado con PGP, puedes descargar esta página HTML completa y verificar que tienes una versión auténtica del autor del sitio comparando el hash SHA256 de este HTML con el hash SHA256 disponible en el documento de historial de versiones firmado, enlazado en el pie de página de este sitio. Si abandonas/actualizas el sitio o pulsas el botón Generar Nueva Dirección, se generará una nueva clave privada y la anteriormente mostrada no será recuperable. Tu clave privada Bitcoin debe mantenerse en secreto. Cualquiera con quien compartas la clave privada tendrá acceso a gastar todos los bitcoins asociados con esa dirección. Si imprimes tu cartera, guárdala en una bolsa sellada para protegerla del agua. Trata una cartera en papel como efectivo.",
@@ -8206,7 +8216,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 
 		// detail wallet html
 		"detaillabelenterprivatekey": "Introduce la clave privada",
-		"detailkeyformats": "Key Formats: WIF, WIFC, HEX, B64, B6, MINI, BIP38",
+		"detailkeyformats": "Formatos de Clave: WIF, WIFC, HEX, B64, B6, MINI, BIP38",
 		"detailview": "Ver detalles",
 		"detailprint": "Imprimir",
 		"detaillabelnote1": "Tu clave privada es un número secreto, único, que sólo tú conoces. Se puede expresar en varios formatos. Aquí abajo mostramos la dirección y la clave pública que se corresponden con tu clave privada, así como la clave privada en los formatos más conocidos (para importar, hex, base64 y mini).",
@@ -8277,6 +8287,8 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 
 		// en-tête et menu
 		"tagline": "Générateur De Porte-Monnaie Bitcoin Javascript Hors-Ligne",
+		"themedark": "Sombre",
+		"themelight": "Clair",
 		"generatelabelbitcoinaddress": "Création de l'adresse Bitcoin...",
 		"generatelabelmovemouse": "BOUGEZ votre souris pour ajouter de l'entropie...",
 		"generatelabelkeypress": "OU tapez des caractères aléatoires dans le champ ci-dessous",
@@ -8291,10 +8303,8 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		// porte-monnaie simple
 		"newaddress": "Générer Une Nouvelle Adresse",
 		"singleprint": "Imprimer",
-		"singlelabelbitcoinaddress": "Adresse Bitcoin (Legacy P2PKH)",
-		"singlelabelP2SH": "P2SH-P2WPKH (3…)",
-		"singlelabelSegwit": "SegWit Natif P2WPKH (bc1q…)",
-		"singlelabelTaproot": "Taproot P2TR (bc1p…)",
+		"singlelabeladdrtype": "Type d'adresse",
+		"singleaddrtype": { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "SegWit Natif (bc1q…)", "taproot": "Taproot (bc1p…)" },
 		"singlelabelprivatekey": "Clé Privée (WIF compressé)",
 		"singleshare": "PARTAGER",
 		"singlesecret": "SECRET",
@@ -8401,6 +8411,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"detaila1": "Une partie importante de la création d'un porte-monnaie Bitcoin consiste à s'assurer que les nombres aléatoires utilisés sont véritablement aléatoires. L'aléatoire physique est supérieur au pseudo-aléatoire informatique. Le moyen le plus simple est d'utiliser des dés. Pour créer une clé privée Bitcoin, lancez un dé à six faces 99 fois et notez chaque résultat selon la règle : 1=1, 2=2, 3=3, 4=4, 5=5, 6=0. Vous obtenez ainsi votre clé privée en format B6 (base 6). Saisissez ensuite les 99 caractères dans le champ ci-dessus et cliquez sur « Voir les Détails ».",
 
 		// pied de page
+		"donationcopyconfirm": "Adresse copiée !",
 		"footerlabeldonations": "Dons :",
 		"footerlabeltranslatedby": "Traduction : 1Gy7NYSJNUYqUdXTBow5d7bCUEJkUFDFSq",
 		"footerlabelpgp": "PGP",
@@ -8477,6 +8488,8 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 
 		// header and menu html
 		"tagline": "Nyílt forráskódú, ügyfél oldali JavaScript Bitcoin tárca készítő program",
+		"themedark": "Sötét",
+		"themelight": "Világos",
 		"generatelabelbitcoinaddress": "A bitcoin cím előállítása...",
 		"generatelabelmovemouse": "MOZGASSA az egeret, ha fokozni szeretné a véletlenszerűséget...",
 		"generatelabelkeypress": "VAGY gépeljen be néhány véletlenszerű karaktert ebbe a szövegdobozba",
@@ -8489,6 +8502,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"detailwallet": "A pénztárca részletei",
 
 		// footer html
+		"donationcopyconfirm": "Cím másolva!",
 		"footerlabeldonations": "Adományok:",
 		"footerlabeltranslatedby": "Fordította: 1GEBor11XtqDoamipB8nAV7o4fNW5JcrUD",
 		"footerlabelpgp": "PGP",
@@ -8528,10 +8542,8 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		// single wallet html
 		"newaddress": "Új cím előállítása",
 		"singleprint": "Nyomtatás",
-		"singlelabelbitcoinaddress": "Bitcoin cím (Legacy P2PKH)",
-		"singlelabelP2SH": "P2SH-P2WPKH (3…)",
-		"singlelabelSegwit": "Natív SegWit P2WPKH (bc1q…)",
-		"singlelabelTaproot": "Taproot P2TR (bc1p…)",
+		"singlelabeladdrtype": "Cím típusa",
+		"singleaddrtype": { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "Natív SegWit (bc1q…)", "taproot": "Taproot (bc1p…)" },
 		"singlelabelprivatekey": "Privát kulcs (WIF tömörített)",
 		"singletip1": "<b>A bitcoin pénztárca</b> nem más, mint egy bitcoin címből és a hozzá tartozó privát kulcsból álló számpár. Egy ilyen pénztárcát állítottunk elő és jelenítettünk meg fent az Ön számára a Web böngészőben.",
 		"singletip2": "<b>A pénztárca biztonságos megőrzése</b> érdekében nyomtassa ki vagy más módon rögzítse a bitcoin címet és privát kulcsot. Fontos, hogy a privát kulcsból készítsen másolatot, és tárolja biztonságos helyen. Ez a webhely nem tárol az ön privát kulcsaival kapcsolatos információt. Ha ismeri a PGP-t, akkor egyben letöltheti az egész honlapot, és ellenőrizheti, hogy a webhely szerzője álatal írt valódi változatot töltötte-e le. Ehhez össze kell hasonlítania a HTML-ből képzett SHA256 zanzát a webhely láblécében hivatkozott, digitálisan aláírt verzió történetben lévő SHA256 zanzával. Amennyiben elhagyja vagy frissíti a webhelyet illetve megnyomja az 'Új cím előállítása' gombot, akkor új privát kulcs készül és az előzőleg megjelenített privát kulcs elvész. A bitcoin címhez tartozó privát kulcsot titokban kell tartani. Bárki, aki megszerzi ezt a kulcsot, el tudja költeni a címhez tartozó valamennyi bitcoint. Ha kinyomtatja a pénztárcát, akkor tárolja egy villámzáras vízhatlan nejlonzacskóban. A papírtárcát kezelje úgy, mintha pénz lenne.",
@@ -8677,19 +8689,22 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"splitlabeladdrtype": "Tipo di indirizzo:",
 
 		// header and menu html
-		"tagline": "Open Source JavaScript Client-Side Bitcoin Wallet Generator",
+		"tagline": "Generatore open source JavaScript Bitcoin lato client",
+		"themedark": "Scuro",
+		"themelight": "Chiaro",
 		"generatelabelbitcoinaddress": "Generazione Indirizzo Bitcoin...",
 		"generatelabelmovemouse": "MUOVI il tuo mouse per contribuire alla generazione dei numeri casuali...",
 		"generatelabelkeypress": "OPPURE digita alcuni caratteri casuali in questo campo di testo",
 		"singlewallet": "Singolo portafoglio",
-		"paperwallet": "Paper Wallet",
+		"paperwallet": "Portafoglio di Carta",
 		"bulkwallet": "Portafogli multipli",
-		"brainwallet": "Brain Wallet",
-		"vanitywallet": "Vanity Wallet",
+		"brainwallet": "Portafoglio Mentale",
+		"vanitywallet": "Portafoglio Vanity",
 		"splitwallet": "Portafoglio Diviso",
 		"detailwallet": "Dettagli portafoglio",
 
 		// footer html
+		"donationcopyconfirm": "Indirizzo copiato!",
 		"footerlabeldonations": "Donazioni:",
 		"footerlabeltranslatedby": "",
 		"footerlabelpgp": "PGP",
@@ -8729,10 +8744,8 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		// single wallet html
 		"newaddress": "Genera un Nuovo Indirizzo",
 		"singleprint": "Stampa",
-		"singlelabelbitcoinaddress": "Indirizzo Bitcoin (Legacy P2PKH)",
-		"singlelabelP2SH": "P2SH-P2WPKH (3…)",
-		"singlelabelSegwit": "SegWit Nativo P2WPKH (bc1q…)",
-		"singlelabelTaproot": "Taproot P2TR (bc1p…)",
+		"singlelabeladdrtype": "Tipo di indirizzo",
+		"singleaddrtype": { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "SegWit Nativo (bc1q…)", "taproot": "Taproot (bc1p…)" },
 		"singlelabelprivatekey": "Chiave Privata (WIF compressa)",
 		"singletip1": "<b>Un portafogli bitcoin</b> è composto semplicemente da una coppia di valori: l'indirizzo e la sua chiave privata. Un portafogli è stato appena generato sul tuo browser e mostrato sopra.",
 		"singletip2": "<b>Per mettere in sicurezza questo portafogli</b> devi stampare o quantomeno salvare l'indirizzo bitcoin e la Chiave privata. È molto importante fare una copia di backup della chiave privata e conservarla in un posto sicuro. Questo sito non conosce la tua chiave privata. Se hai familiarità con PGP, puoi scaricare per intero questa pagina HTML e controllare la sua autentiticità. Puoi confrontare il codice SHA256 della pagina scaricata con il codice firmato dall'autore che trovi nella cronologia delle versioni (in fondo alla pagina). Se abbandoni/aggiorni la pagina web oppure premi il tasto Genera, un nuovo indirizzo sostituirà quello vecchio che non potrà più essere recuperato. La chiave privata dovrebbe essere tenuta segreta, chiunque conosca la chiave privata può avere accesso e spendere i tuoi bitcoin. Se stampi il tuo portafogli conservalo in una busta di plastica sigillata per tenerla al riparo dall'acqua. Tratta quanto stampato alla stregua di una banconota.",
@@ -8748,7 +8761,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"paperlabeladdressestogenerate": "Indirizzi da generare:",
 		"papergenerate": "Genera",
 		"paperprint": "Stampa",
-		"paperlabelBIPpassphrase": "Passphrase:",
+		"paperlabelBIPpassphrase": "Frase segreta:",
 		"paperlabelencrypt": "Cifratura BIP38?",
 
 		// bulk wallet html
@@ -8779,11 +8792,11 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"brainlabelprivatekey": "Chiave privata (Wallet Import Format):",
 
 		// vanity wallet html
-		"vanitylabelstep1": "Passo1 1 - Genera la tua Coppia di chiavi",
+		"vanitylabelstep1": "Passo 1 - Genera la tua Coppia di chiavi",
 		"vanitynewkeypair": "Genera",
 		"vanitylabelstep1publickey": "Passo 1 Chiave pubblica:",
 		"vanitylabelstep1pubnotes": "Copia e incolla il testo soprastante nel campo \"chiave-pubblica-parziale\" sul sito web del pool.",
-		"vanitylabelstep1privatekey": "Passo 1 Chiave pubblica:",
+		"vanitylabelstep1privatekey": "Passo 1 Chiave privata:",
 		"vanitylabelstep1privnotes": "Copia & incolla la Chiave privata soprastante su un file di testo. Idealmente conservalo su un disco criptato. Ti servirà per recuperare la Chiave privata una volta che il Pool avrà trovato quella col prefisso scelto.",
 		"vanitylabelstep2calculateyourvanitywallet": "Passo 2 - Calcolo del Vanity Wallet",
 		"vanitylabelenteryourpart": "Inserisci la tua Chiave Privata parziale (Generata nel Passo 1 e precedentemente salvata):",
@@ -8810,7 +8823,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 
 		// detail wallet html
 		"detaillabelenterprivatekey": "Inserisci la Chiave Privata",
-		"detailkeyformats": "Key Formats: WIF, WIFC, HEX, B64, B6, MINI, BIP38",
+		"detailkeyformats": "Formati Chiave: WIF, WIFC, HEX, B64, B6, MINI, BIP38",
 		"detailview": "Mostra Dettagli",
 		"detailprint": "Stampa",
 		"detaillabelnote1": "La tua Chiave privata Bitcoin è rappresentata da un numero segreto, unico al mondo, che dovresti conoscere soltanto tu. Può essere codificato in molti formati differenti. Di seguito verrà mostrato l'indirizzo Bitcoin e la chiave pubblica, con la corrispondente chiave privata, nei più diffusi formati di codifica (WIF, WIFC, HEX, B64).",
@@ -8822,12 +8835,12 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"detaillabelTaproot": "Taproot P2TR (bc1p…)",
 		"detaillabelpublickey": "Chiave pubblica (130 caratteri [0-9A-F]):",
 		"detaillabelpublickeycomp": "Chiave pubblica (compressa, 66 caratteri [0-9A-F]):",
-		"detaillabelprivwif": "Chiave privata WIF<br>51 caratteri base58, inizia per a",
-		"detaillabelprivwifcomp": "Chiave privata WIF compressa<br>52 caratteri base58, inizia per 'a'",
+		"detaillabelprivwif": "Chiave privata WIF<br>51 caratteri base58, inizia per",
+		"detaillabelprivwifcomp": "Chiave privata WIF compressa<br>52 caratteri base58, inizia per",
 		"detailcompwifprefix": "'K' o 'L'",
 		"detaillabelprivhex": "Chiave privata formato esadecimale (64 caratteri [0-9A-F]):",
 		"detaillabelprivb64": "Chiave privata Base64 (44 caratteri):",
-		"detaillabelprivmini": "Chiave privata formato mini (22, 26 or 30 caratteri, inizia per 'S'):",
+		"detaillabelprivmini": "Chiave privata formato mini (22, 26 o 30 caratteri, inizia per 'S'):",
 		"detaillabelpassphrase": "Inserisci passphrase BIP38",
 		"detailbip38decryptbutton": "Decifra BIP38",
 		"detailbip38encryptbutton": "Cifra BIP38",
@@ -8835,7 +8848,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"detaila1": "Una parte importante nella creazione di un portafoglio Bitcoin è assicurarsi che i numeri casuali usati per crearlo siano veramente casuali. La casualità fisica è migliore della pseudo-casualità generata dal computer. Il modo più semplice per generare casualità fisica è con i dadi. Per creare una chiave privata Bitcoin hai bisogno solo di un dado a sei facce che lancerai 99 volte. Fermandoti ogni volta per registrare il valore del dado. Quando registri i valori segui queste regole: 1=1, 2=2, 3=3, 4=4, 5=5, 6=0. Facendo questo stai registrando il grande numero casuale, la tua chiave privata, in formato B6 o base 6. Puoi poi inserire la chiave privata in base 6 di 99 caratteri nel campo di testo sopra e cliccare su Mostra Dettagli. Vedrai quindi l'indirizzo Bitcoin associato alla tua chiave privata. Dovresti anche prendere nota della tua chiave privata in formato WIF poiché è più ampiamente utilizzato.",
 		"bulklabelencrypt": "Cifratura BIP38?",
 		"detaillabelencrypt": "Cifratura BIP38?",
-		"bulklabelBIPpassphrase": "Passphrase:",
+		"bulklabelBIPpassphrase": "Frase segreta:",
 		"brainlabelcompressed": "Indirizzo compresso?",
 		"detailwifprefix": "'5'",
 		"detaillabelprivb6": "Chiave Privata Formato Base6 (99 caratteri [0-5]):"
@@ -8879,6 +8892,8 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 
 		// header and menu html
 		"tagline": "クライエント側ビットコインアドレス生成(JavaScript使用)",
+		"themedark": "ダーク",
+		"themelight": "ライト",
 		"generatelabelbitcoinaddress": "ビットコインアドレスを生成中...",
 		"generatelabelmovemouse": "マウスを動かして、ランダム要素を追加してください。",
 		"generatelabelkeypress": "もしくはこちらの入力欄にランダムな文字を打って下さい。",
@@ -8891,6 +8906,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"detailwallet": "ウォレットの詳細",
 
 		// footer html
+		"donationcopyconfirm": "アドレスをコピーしました！",
 		"footerlabeldonations": "プロジェクト寄付先",
 		"footerlabeltranslatedby": "日本語訳寄付先 1o3EBhxPhGn8cGCL6Wzi5F5kTPuBofdMf",
 		"footerlabelpgp": "PGP",
@@ -8930,10 +8946,8 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		// single wallet html
 		"newaddress": "新アドレス生成",
 		"singleprint": "印刷",
-		"singlelabelbitcoinaddress": "ビットコインアドレス (Legacy P2PKH)",
-		"singlelabelP2SH": "P2SH-P2WPKH (3…)",
-		"singlelabelSegwit": "ネイティブSegWit P2WPKH (bc1q…)",
-		"singlelabelTaproot": "Taproot P2TR (bc1p…)",
+		"singlelabeladdrtype": "アドレスタイプ",
+		"singleaddrtype": { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "ネイティブSegWit (bc1q…)", "taproot": "Taproot (bc1p…)" },
 		"singlelabelprivatekey": "秘密鍵（WIF圧縮）",
 		"singletip1": "<b>ビットコインウォレットとは</b> ビットコインのアドレスと対応するプライベートキーを組み合わせたものです。新しいアドレスがブラウザー上で生成され、上記に表示されています。",
 		"singletip2": "<b>このウォレットを守るためには</b> ビットコインアドレスとビットコインプライベートキーを印刷するなどの手段で記録しなければいけません。プライベートキーが無いとペアになっているアドレスに送られたビットコインが使えないので、人に晒されないような方法でプライベートキーのコピーを取り、大事に保管して下さい。このサイトはこのプライベートキーの保存はしません。PGPをご存知の方は、このサイトを1つのhtmlファイルで落とすことができるので、このサイトのhtmlファイルのSHA256ハッシュとサイトのフッターにデジタル署名されたメッセージに入ったハッシュを比べて不正にいじられていないかをお確かめいただけます。このページを閉じたり、離れたり、「新アドレス生成」を押すと現在表示されているプライベートキーは消え、新規アドレスが生成されるので、ご使用の場合は必ず何らかの手段で記録しておいて下さい。プライベートキーは秘密にしてください。共有されますと、対応するビットコインアドレスに存在するコインが全て共有者間で利用可能となります。ウォレット情報を印刷したら、濡れないようにジップロックに入れましょう。紙幣と同様に扱うよう心がけてください。",
@@ -9080,6 +9094,8 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 
 		// header and menu html
 		"tagline": "Gerador local de carteiras Bitcoin usando Javascript de código aberto",
+		"themedark": "Escuro",
+		"themelight": "Claro",
 		"generatelabelbitcoinaddress": "Gerando endereço Bitcoin...",
 		"generatelabelmovemouse": "Movimente um pouco o ponteiro do mouse para criar entropia...",
 		"generatelabelkeypress": "OU digite alguns caracteres aleatórios nessa caixa de texto",
@@ -9092,6 +9108,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"detailwallet": "Detalhes da carteira",
 
 		// footer html
+		"donationcopyconfirm": "Endereço copiado!",
 		"footerlabeldonations": "Doações:",
 		"footerlabeltranslatedby": "Tradução: 1LwaSNTZ7xAagYKyE68gT5iqX1DmPnmJmy",
 		"footerlabelpgp": "PGP",
@@ -9121,7 +9138,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"statusokprotocolgood": "OK",
 		"statuslabelprotocolbad": "&#9888; Pense duas vezes!",
 		"statuslabelprotocolbad1": "Parece que você está executando este gerador online a partir de um site ativo. Para carteiras valiosas recomenda-se",
-		"statuslabelprotocolbad2": "download",
+		"statuslabelprotocolbad2": "baixar",
 		"statuslabelprotocolbad3": "o arquivo zip do GitHub e execute este gerador offline como um arquivo html local.",
 		"statusokprotocolbad": "OK",
 		"statuslabelkeypool1": "Este é um registro de todos os Endereços Bitcoin e Chaves Privadas que você gerou durante a sessão atual. Recarregar a página criará uma nova sessão.",
@@ -9131,10 +9148,8 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		// single wallet html
 		"newaddress": "Gerar endereço",
 		"singleprint": "Imprimir",
-		"singlelabelbitcoinaddress": "Endereço Bitcoin (Legacy P2PKH)",
-		"singlelabelP2SH": "P2SH-P2WPKH (3…)",
-		"singlelabelSegwit": "SegWit Nativo P2WPKH (bc1q…)",
-		"singlelabelTaproot": "Taproot P2TR (bc1p…)",
+		"singlelabeladdrtype": "Tipo de endereço",
+		"singleaddrtype": { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "SegWit Nativo (bc1q…)", "taproot": "Taproot (bc1p…)" },
 		"singlelabelprivatekey": "Chave Privada (WIF comprimida)",
 		"singletip1": "<b>Uma carteira Bitcoin</b> nada mais é do que um endereço Bitcoin e a sua chave privada Bitcoin correspondente. Essa carteira foi gerada para você em seu navegador web e está sendo exibida acima.",
 		"singletip2": "<b>Para proteger essa carteira</b> você deve imprimir ou anotar/salvar o endereço Bitcoin e a sua chave privada correspondente. É importante que você faça uma cópia de segurança da sua chave privada e armazene-a em um local seguro. Esse site não toma conhecimento da sua chave privada. Se você for familiar com criptografia PGP, você pode baixar essa página HTML em um arquivo único e verificar se você tem uma versão autêntica do autor deste site ao fazer a correspondência do hash SHA256 deste HTML com o hash SHA256 disponível na versão assinada do arquivo contido no link no rodapé deste site. Se você sair/atualizar essa página ou apertar o botão Gerar Novo Endereço, então uma nova chave privada será gerada e a chave exibida anteriormente não será recuperável. A sua chave privada Bitcoin deve ser mantida em um segredo. Qualquer pessoa que tiver acesso a ela poderá gastar todos os seus bitcoins associados com aquele endereço. Se você imprimir sua carteira, armazene-a em um saco plástico selado para mantê-la longe da água. Trate sua carteira em papel como se fosse dinheiro.",
@@ -9177,7 +9192,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"brainlabelconfirm": "Confirmar senha:",
 		"brainview": "Ver",
 		"brainalgorithm": "Algoritmo: SHA256(senha)",
-		"brainlabelbitcoinaddress": "Enderçeo Bitcoin:",
+		"brainlabelbitcoinaddress": "Endereço Bitcoin:",
 		"brainlabelprivatekey": "Chave privada (Wallet Import Format):",
 
 		// vanity wallet html
@@ -9229,7 +9244,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"detailcompwifprefix": "'K' ou 'L'",
 		"detaillabelprivhex": "Chave privada em formato hexadecimal (64 caracteres [0-9A-F]):",
 		"detaillabelprivb64": "Chave privada em base64 (44 caracteres):",
-		"detaillabelprivmini": "Chave privada en formato mini (22, 26 ou 30 caracteres, inicia com 'S'):",
+		"detaillabelprivmini": "Chave privada em formato mini (22, 26 ou 30 caracteres, inicia com 'S'):",
 		"detaillabelpassphrase": "Senha BIP38",
 		"detailbip38decryptbutton": "Descriptografar BIP38",
 		"detailbip38encryptbutton": "Criptografar em BIP38",
@@ -9281,6 +9296,8 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 
 		// header and menu html
 		"tagline": "JavaScript генератор Биткоин кошельков на стороне клиента с открытым исходным кодом",
+		"themedark": "Тёмная",
+		"themelight": "Светлая",
 		"generatelabelbitcoinaddress": "Генерация Биткоин адреса...",
 		"generatelabelmovemouse": "Двигайте указателем мыши по экрану для добавления случайности...",
 		"generatelabelkeypress": "ИЛИ введите несколько случайных символов в это текстовое поле",
@@ -9293,6 +9310,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"detailwallet": "Детали кошелька",
 
 		// footer html
+		"donationcopyconfirm": "Адрес скопирован!",
 		"footerlabeldonations": "Пожертвования:",
 		"footerlabeltranslatedby": "Перевод: 1JGnkKH7gJhTyAz9r47nugFM8sdrUENpJi",
 		"footerlabelpgp": "PGP ключ",
@@ -9332,22 +9350,21 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		// single wallet html
 		"newaddress": "Сгенерировать новый адрес",
 		"singleprint": "Распечатать",
-		"singlelabelbitcoinaddress": "Адрес Bitcoin кошелька (Legacy P2PKH)",
-		"singlelabelP2SH": "P2SH-P2WPKH (3…)",
-		"singlelabelSegwit": "Нативный SegWit P2WPKH (bc1q…)",
-		"singlelabelTaproot": "Taproot P2TR (bc1p…)",
+		"singlelabeladdrtype": "Тип адреса",
+		"singleaddrtype": { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "Нативный SegWit (bc1q…)", "taproot": "Taproot (bc1p…)" },
 		"singlelabelprivatekey": "Приватный ключ (WIF сжатый)",
-		"singletip1": "<b>Биткоин кошелек</b> это простая пара идентификаторов, состоящая из адреса Биткоин кошелька и соответствующего ему приватного ключа. Такой колшелек был сгенерирован для Вас в Вашем браузере и отображен выше.",
-		"singletip2": "<b>Для обеспечения сохранности этого кошелька</b> Вам необходимо распечатать или каким-либо другим спобом записать Биткоин адрес и приватный ключ. Очень важно иметь запасную копию приватного ключа и хранить ее в безопасном месте. Этот сайт не хранит информацию о Вашем ключе. Если Вы имеете опыт работы с PGP, то Вы можете сохранить эту HTML страницу в формате архива и проверить то, что Вы используете подлинную версию страницы от автора сайта, сравнив SHA256 хэш этой HTML страницы с SHA256 хэшем указанным истории версий данной страницы, которая подписана ключем автора сайта. Данную ифнормацию можно найти внизу страницы. Если Вы покинете или обновите страницу с сайтом или нажмете кнопку 'Сгенерировать новый адрес', то будет сгенерирован новый приватный ключ и предыдущий приватный ключ восстановить будет невозможно. Ваш приватный ключ Биткоин кошелька должен храниться в секрете. С кем бы Вы не поделились информацией о приватном ключе - он будет иметь возможность потратить Биткоины кошелька с этим адресом. Если вы распечатали приватный ключ - необходимо обеспечить его сохранность в месте, недоступном для воды. Обращайтесь с бумажным кошельком для Биткоинов как с наличными деньгами.",
+		"singletip1": "<b>Биткоин кошелек</b> это простая пара идентификаторов, состоящая из адреса Биткоин кошелька и соответствующего ему приватного ключа. Такой кошелек был сгенерирован для Вас в Вашем браузере и отображен выше.",
+		"singletip2": "<b>Для обеспечения сохранности этого кошелька</b> Вам необходимо распечатать или каким-либо другим способом записать Биткоин адрес и приватный ключ. Очень важно иметь запасную копию приватного ключа и хранить ее в безопасном месте. Этот сайт не хранит информацию о Вашем ключе. Если Вы имеете опыт работы с PGP, то Вы можете сохранить эту HTML страницу в формате архива и проверить то, что Вы используете подлинную версию страницы от автора сайта, сравнив SHA256 хэш этой HTML страницы с SHA256 хэшем указанным истории версий данной страницы, которая подписана ключем автора сайта. Данную информацию можно найти внизу страницы. Если Вы покинете или обновите страницу с сайтом или нажмете кнопку 'Сгенерировать новый адрес', то будет сгенерирован новый приватный ключ и предыдущий приватный ключ восстановить будет невозможно. Ваш приватный ключ Биткоин кошелька должен храниться в секрете. С кем бы Вы не поделились информацией о приватном ключе - он будет иметь возможность потратить Биткоины кошелька с этим адресом. Если вы распечатали приватный ключ - необходимо обеспечить его сохранность в месте, недоступном для воды. Обращайтесь с бумажным кошельком для Биткоинов как с наличными деньгами.",
 		"singletip3": "<b>Пополните кошелек</b> сообщив другим свой Биткоин адрес.",
-		"singletip4": "<b>Проверить баланс кошелька</b> можно на сайте blockchain.info or blockexplorer.com по адресу Биткоин кошелька.",
-		"singletip5": "<b>Потратить Ваши биткоины</b> можно на сайте blockchain.info переведя все средства соответсвующие приватному ключу на аккаунт этого сайта. Также Вы можете потратить биткоины загрузив один из наиболее популярных Биткоин p2p-клиентов и выполнив импорт Вашего приватного ключа. Необходимо учесть, что когда Вы импортируете свой один приватный ключ в программу-клиент и тратите биткоины - Ваш ключ смешан с другими приватными ключами в программе-клиенте. При выполнении транзакции по расходу или получению средств, сдача будет перенаправлена на другой Биткоин адрес программного кошелька.После выполнения транзации необходимо сделать резервную копию Вашего программного кошелька и сохранить ее в надежном месте, так как на нем будут сожержаться оставшиеся средства. Сатоши рекомендует никогда не удалять кошелек.",
+		"singletip4": "<b>Проверить баланс кошелька</b> можно на сайте blockchain.info или blockexplorer.com по адресу Биткоин кошелька.",
+		"singletip5": "<b>Потратить Ваши биткоины</b> можно на сайте blockchain.info переведя все средства соответсвующие приватному ключу на аккаунт этого сайта. Также Вы можете потратить биткоины загрузив один из наиболее популярных Биткоин p2p-клиентов и выполнив импорт Вашего приватного ключа. Необходимо учесть, что когда Вы импортируете свой один приватный ключ в программу-клиент и тратите биткоины - Ваш ключ смешан с другими приватными ключами в программе-клиенте. При выполнении транзакции по расходу или получению средств, сдача будет перенаправлена на другой Биткоин адрес программного кошелька.После выполнения транзакции необходимо сделать резервную копию Вашего программного кошелька и сохранить ее в надежном месте, так как на нем будут содержаться оставшиеся средства. Сатоши рекомендует никогда не удалять кошелек.",
 		"singleshare": "Поделиться",
 		"singlesecret": "Хранить в секрете",
 
 		// paper wallet html
 		"paperlabelhideart": "Без дизайна",
 		"paperlabeladdressesperpage": "Адресов на страницу:",
+		"paperlabeladdressestogenerate": "Адресов для генерации:",
 		"papergenerate": "Сгенерировать",
 		"paperprint": "Распечатать",
 		"paperlabelBIPpassphrase": "Парольная фраза:",
@@ -9433,22 +9450,21 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"detaillabelpassphrase": "Парольная фраза BIP38",
 		"detailbip38decryptbutton": "Расшифровать BIP38",
 		"detailbip38encryptbutton": "Зашифровать BIP38",
-		"detaillabelq1": "Как сделать кошелек используя игральный кости? Что такое B6?",
+		"detaillabelq1": "Как сделать кошелек используя игральные кости? Что такое B6?",
 		"detaila1": "Очень важно понимать, что при генерации биткоин кошелька используются действительно случайные числа. Физическая случайность лучше компьютерной псевдо-случайности. Самым простым способом генерации физической случайности является игральная кость. Для генерации Приватного Ключа Биткоин кошелька Вам нужна игральная кость с шестью сторонами, которую необходимо бросить 99 раз. Необходимо записать каждую цифру, выпавшую на игральной кости. Итоговый результат необходимо записать в таком виде: 1=1, 2=2, 3=3, 4=4, 5=5, 6=0. Таким образом Вы запишите большое случайное число - Ваш Приватный Ключ, в формате B6 или Base6. После этого Вы можете ввести 99 символов приватного ключа в формате Base6 в текстовое поле вверху страницы и получить детальную информацию о кошельке. После этого Вы сможете увидеть адрес Биткоин кошелька соответствующий полученному приватному ключу. Вам потребуется сделать запись приватного ключа в формате для импорта, так как он наиболее часто используется.",
 		"bulklabelencrypt": "Шифрование BIP38?",
 		"detaillabelencrypt": "Шифрование BIP38?",
 		"bulklabelBIPpassphrase": "Парольная фраза:",
 		"brainlabelcompressed": "Сжатый адрес?",
 		"detailwifprefix": "'5'",
-		"detaillabelprivb6": "Приватный ключ в формате Base6 (99 символов [0-5]):",
-		"paperlabeladdressestogenerate": "Адресов для генерации:"
+		"detaillabelprivb6": "Приватный ключ в формате Base6 (99 символов [0-5]):"
 	};
 })(ninja.translator);
 
 (function (translator) {
 	translator.translations["zh-cn"] = {
 		// javascript alerts or messages
-		"testneteditionactivated": "TESTNET EDITION ACTIVATED",
+		"testneteditionactivated": "测试网版本已激活",
 		"paperlabelbitcoinaddress": "比特币地址",
 		"paperlabelprivatekey": "私钥",
 		"paperlabelencryptedkey": "加密私钥(需要密码)",
@@ -9482,6 +9498,8 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 
 		// header and menu html
 		"tagline": "开源JavaScript比特币钱包工具",
+		"themedark": "深色",
+		"themelight": "浅色",
 		"generatelabelbitcoinaddress": "地址生成中...",
 		"generatelabelmovemouse": "请移动鼠标产生随机种子...",
 		"generatelabelkeypress": "或者在文本框中输入随机字符",
@@ -9494,6 +9512,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"detailwallet": "钱包详情",
 
 		// footer html
+		"donationcopyconfirm": "地址已复制！",
 		"footerlabeldonations": "项目捐赠",
 		"footerlabeltranslatedby": "简中翻译捐赠 1BfXayW2vrj6uRpoZg3nR8rMEckLpGmaiL",
 		"footerlabelpgp": "PGP",
@@ -9503,7 +9522,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"footerlabelsig": "源代码的Bitcoin签名",
 		"footerlabelcopyright1": "Copyright bitaddr.org.",
 		"footerlabelcopyright2": "JavaScript的版权信息已经包含在源代码中。",
-		"footerlabelnowarranty": "No warranty",
+		"footerlabelnowarranty": "无担保。",
 
 		// status html
 		"statuslabelcryptogood": "&#10004; 良好！",
@@ -9533,10 +9552,8 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		// single wallet html
 		"newaddress": "生成新地址",
 		"singleprint": "打印",
-		"singlelabelbitcoinaddress": "比特币地址 (Legacy P2PKH)",
-		"singlelabelP2SH": "P2SH-P2WPKH (3…)",
-		"singlelabelSegwit": "原生隔离见证 P2WPKH (bc1q…)",
-		"singlelabelTaproot": "Taproot P2TR (bc1p…)",
+		"singlelabeladdrtype": "地址类型",
+		"singleaddrtype": { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "原生隔离见证 (bc1q…)", "taproot": "Taproot (bc1p…)" },
 		"singlelabelprivatekey": "私钥（WIF压缩）",
 		"singletip1": "<b>比特币钱包</b>就是这么简单，一个地址，对应一个私钥，浏览器已自动生成了一个，就显示在上面。私钥必须保密，地址可以公开。",
 		"singletip2": "<b>妥善保管你的钱包</b> 为了保护你的钱包，建议你用打印或者其他方式来保管你的私钥和地址。把你的私钥备份保存在安全、保密的位置是必要的。本站不提供私钥的相关知识，请自行学习。如果你熟悉PGP，你也可以下载这个HTML文件（它是单文件全功能的），用它的SHA256摘要和作者在本站页脚留下的相比对。本工具支持离线使用，这样它生成的私钥-地址就很难被监视了。比特币私钥必须保密，任何知道你私钥的人都可以随意花费其对应地址的比特币。你可以打印你的钱包（即纸钱包），把它装进一个防水的口袋里——就像你在保管纸币一样。",

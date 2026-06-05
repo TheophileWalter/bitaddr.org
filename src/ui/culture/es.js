@@ -35,6 +35,8 @@
 
 		// header and menu html
 		"tagline": "Generador de carteras Bitcoin de código abierto en lado de cliente con Javascript",
+		"themedark": "Oscuro",
+		"themelight": "Claro",
 		"generatelabelbitcoinaddress": "Generando dirección Bitcoin...",
 		"generatelabelmovemouse": "Mueve un poco el ratón para crear entropía...",
 		"generatelabelkeypress": "O escribe algunos caracteres aleatorios en este campo de texto",
@@ -43,10 +45,11 @@
 		"bulkwallet": "Direcciones en masa",
 		"brainwallet": "Cartera mental",
 		"vanitywallet": "Cartera personalizada",
-		"splitwallet": "Billetera Dividida",
+		"splitwallet": "Cartera Dividida",
 		"detailwallet": "Detalles de la cartera",
 
 		// footer html
+		"donationcopyconfirm": "¡Dirección copiada!",
 		"footerlabeldonations": "Donaciones:",
 		"footerlabeltranslatedby": "Traducción: <b>12345</b>Vypv2QSmuRXcciT5oEB27mPbWGeva",
 		"footerlabelpgp": "PGP",
@@ -86,10 +89,8 @@
 		// single wallet html
 		"newaddress": "Generar dirección",
 		"singleprint": "Imprimir",
-		"singlelabelbitcoinaddress": "Dirección Bitcoin (Legacy P2PKH)",
-		"singlelabelP2SH": "P2SH-P2WPKH (3…)",
-		"singlelabelSegwit": "SegWit Nativo P2WPKH (bc1q…)",
-		"singlelabelTaproot": "Taproot P2TR (bc1p…)",
+		"singlelabeladdrtype": "Tipo de dirección",
+		"singleaddrtype": { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "SegWit Nativo (bc1q…)", "taproot": "Taproot (bc1p…)" },
 		"singlelabelprivatekey": "Clave Privada (WIF comprimida)",
 		"singletip1": "<b>Una cartera Bitcoin</b> es simplemente un par formado por una dirección Bitcoin y su clave privada correspondiente. Esta cartera ha sido generada en tu navegador y se muestra arriba.",
 		"singletip2": "<b>Para proteger esta cartera</b> debes imprimir o anotar la dirección Bitcoin y la clave privada. Es importante hacer una copia de seguridad de la clave privada y guardarla en un lugar seguro. Este sitio no tiene conocimiento de tu clave privada. Si estás familiarizado con PGP, puedes descargar esta página HTML completa y verificar que tienes una versión auténtica del autor del sitio comparando el hash SHA256 de este HTML con el hash SHA256 disponible en el documento de historial de versiones firmado, enlazado en el pie de página de este sitio. Si abandonas/actualizas el sitio o pulsas el botón Generar Nueva Dirección, se generará una nueva clave privada y la anteriormente mostrada no será recuperable. Tu clave privada Bitcoin debe mantenerse en secreto. Cualquiera con quien compartas la clave privada tendrá acceso a gastar todos los bitcoins asociados con esa dirección. Si imprimes tu cartera, guárdala en una bolsa sellada para protegerla del agua. Trata una cartera en papel como efectivo.",
@@ -167,7 +168,7 @@
 
 		// detail wallet html
 		"detaillabelenterprivatekey": "Introduce la clave privada",
-		"detailkeyformats": "Key Formats: WIF, WIFC, HEX, B64, B6, MINI, BIP38",
+		"detailkeyformats": "Formatos de Clave: WIF, WIFC, HEX, B64, B6, MINI, BIP38",
 		"detailview": "Ver detalles",
 		"detailprint": "Imprimir",
 		"detaillabelnote1": "Tu clave privada es un número secreto, único, que sólo tú conoces. Se puede expresar en varios formatos. Aquí abajo mostramos la dirección y la clave pública que se corresponden con tu clave privada, así como la clave privada en los formatos más conocidos (para importar, hex, base64 y mini).",

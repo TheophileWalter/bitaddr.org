@@ -34,19 +34,22 @@
 		"splitlabeladdrtype": "Tipo di indirizzo:",
 
 		// header and menu html
-		"tagline": "Open Source JavaScript Client-Side Bitcoin Wallet Generator",
+		"tagline": "Generatore open source JavaScript Bitcoin lato client",
+		"themedark": "Scuro",
+		"themelight": "Chiaro",
 		"generatelabelbitcoinaddress": "Generazione Indirizzo Bitcoin...",
 		"generatelabelmovemouse": "MUOVI il tuo mouse per contribuire alla generazione dei numeri casuali...",
 		"generatelabelkeypress": "OPPURE digita alcuni caratteri casuali in questo campo di testo",
 		"singlewallet": "Singolo portafoglio",
-		"paperwallet": "Paper Wallet",
+		"paperwallet": "Portafoglio di Carta",
 		"bulkwallet": "Portafogli multipli",
-		"brainwallet": "Brain Wallet",
-		"vanitywallet": "Vanity Wallet",
+		"brainwallet": "Portafoglio Mentale",
+		"vanitywallet": "Portafoglio Vanity",
 		"splitwallet": "Portafoglio Diviso",
 		"detailwallet": "Dettagli portafoglio",
 
 		// footer html
+		"donationcopyconfirm": "Indirizzo copiato!",
 		"footerlabeldonations": "Donazioni:",
 		"footerlabeltranslatedby": "",
 		"footerlabelpgp": "PGP",
@@ -86,10 +89,8 @@
 		// single wallet html
 		"newaddress": "Genera un Nuovo Indirizzo",
 		"singleprint": "Stampa",
-		"singlelabelbitcoinaddress": "Indirizzo Bitcoin (Legacy P2PKH)",
-		"singlelabelP2SH": "P2SH-P2WPKH (3…)",
-		"singlelabelSegwit": "SegWit Nativo P2WPKH (bc1q…)",
-		"singlelabelTaproot": "Taproot P2TR (bc1p…)",
+		"singlelabeladdrtype": "Tipo di indirizzo",
+		"singleaddrtype": { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "SegWit Nativo (bc1q…)", "taproot": "Taproot (bc1p…)" },
 		"singlelabelprivatekey": "Chiave Privata (WIF compressa)",
 		"singletip1": "<b>Un portafogli bitcoin</b> è composto semplicemente da una coppia di valori: l'indirizzo e la sua chiave privata. Un portafogli è stato appena generato sul tuo browser e mostrato sopra.",
 		"singletip2": "<b>Per mettere in sicurezza questo portafogli</b> devi stampare o quantomeno salvare l'indirizzo bitcoin e la Chiave privata. È molto importante fare una copia di backup della chiave privata e conservarla in un posto sicuro. Questo sito non conosce la tua chiave privata. Se hai familiarità con PGP, puoi scaricare per intero questa pagina HTML e controllare la sua autentiticità. Puoi confrontare il codice SHA256 della pagina scaricata con il codice firmato dall'autore che trovi nella cronologia delle versioni (in fondo alla pagina). Se abbandoni/aggiorni la pagina web oppure premi il tasto Genera, un nuovo indirizzo sostituirà quello vecchio che non potrà più essere recuperato. La chiave privata dovrebbe essere tenuta segreta, chiunque conosca la chiave privata può avere accesso e spendere i tuoi bitcoin. Se stampi il tuo portafogli conservalo in una busta di plastica sigillata per tenerla al riparo dall'acqua. Tratta quanto stampato alla stregua di una banconota.",
@@ -105,7 +106,7 @@
 		"paperlabeladdressestogenerate": "Indirizzi da generare:",
 		"papergenerate": "Genera",
 		"paperprint": "Stampa",
-		"paperlabelBIPpassphrase": "Passphrase:",
+		"paperlabelBIPpassphrase": "Frase segreta:",
 		"paperlabelencrypt": "Cifratura BIP38?",
 
 		// bulk wallet html
@@ -136,11 +137,11 @@
 		"brainlabelprivatekey": "Chiave privata (Wallet Import Format):",
 
 		// vanity wallet html
-		"vanitylabelstep1": "Passo1 1 - Genera la tua Coppia di chiavi",
+		"vanitylabelstep1": "Passo 1 - Genera la tua Coppia di chiavi",
 		"vanitynewkeypair": "Genera",
 		"vanitylabelstep1publickey": "Passo 1 Chiave pubblica:",
 		"vanitylabelstep1pubnotes": "Copia e incolla il testo soprastante nel campo \"chiave-pubblica-parziale\" sul sito web del pool.",
-		"vanitylabelstep1privatekey": "Passo 1 Chiave pubblica:",
+		"vanitylabelstep1privatekey": "Passo 1 Chiave privata:",
 		"vanitylabelstep1privnotes": "Copia & incolla la Chiave privata soprastante su un file di testo. Idealmente conservalo su un disco criptato. Ti servirà per recuperare la Chiave privata una volta che il Pool avrà trovato quella col prefisso scelto.",
 		"vanitylabelstep2calculateyourvanitywallet": "Passo 2 - Calcolo del Vanity Wallet",
 		"vanitylabelenteryourpart": "Inserisci la tua Chiave Privata parziale (Generata nel Passo 1 e precedentemente salvata):",
@@ -167,7 +168,7 @@
 
 		// detail wallet html
 		"detaillabelenterprivatekey": "Inserisci la Chiave Privata",
-		"detailkeyformats": "Key Formats: WIF, WIFC, HEX, B64, B6, MINI, BIP38",
+		"detailkeyformats": "Formati Chiave: WIF, WIFC, HEX, B64, B6, MINI, BIP38",
 		"detailview": "Mostra Dettagli",
 		"detailprint": "Stampa",
 		"detaillabelnote1": "La tua Chiave privata Bitcoin è rappresentata da un numero segreto, unico al mondo, che dovresti conoscere soltanto tu. Può essere codificato in molti formati differenti. Di seguito verrà mostrato l'indirizzo Bitcoin e la chiave pubblica, con la corrispondente chiave privata, nei più diffusi formati di codifica (WIF, WIFC, HEX, B64).",
@@ -179,12 +180,12 @@
 		"detaillabelTaproot": "Taproot P2TR (bc1p…)",
 		"detaillabelpublickey": "Chiave pubblica (130 caratteri [0-9A-F]):",
 		"detaillabelpublickeycomp": "Chiave pubblica (compressa, 66 caratteri [0-9A-F]):",
-		"detaillabelprivwif": "Chiave privata WIF<br>51 caratteri base58, inizia per a",
-		"detaillabelprivwifcomp": "Chiave privata WIF compressa<br>52 caratteri base58, inizia per 'a'",
+		"detaillabelprivwif": "Chiave privata WIF<br>51 caratteri base58, inizia per",
+		"detaillabelprivwifcomp": "Chiave privata WIF compressa<br>52 caratteri base58, inizia per",
 		"detailcompwifprefix": "'K' o 'L'",
 		"detaillabelprivhex": "Chiave privata formato esadecimale (64 caratteri [0-9A-F]):",
 		"detaillabelprivb64": "Chiave privata Base64 (44 caratteri):",
-		"detaillabelprivmini": "Chiave privata formato mini (22, 26 or 30 caratteri, inizia per 'S'):",
+		"detaillabelprivmini": "Chiave privata formato mini (22, 26 o 30 caratteri, inizia per 'S'):",
 		"detaillabelpassphrase": "Inserisci passphrase BIP38",
 		"detailbip38decryptbutton": "Decifra BIP38",
 		"detailbip38encryptbutton": "Cifra BIP38",
@@ -192,7 +193,7 @@
 		"detaila1": "Una parte importante nella creazione di un portafoglio Bitcoin è assicurarsi che i numeri casuali usati per crearlo siano veramente casuali. La casualità fisica è migliore della pseudo-casualità generata dal computer. Il modo più semplice per generare casualità fisica è con i dadi. Per creare una chiave privata Bitcoin hai bisogno solo di un dado a sei facce che lancerai 99 volte. Fermandoti ogni volta per registrare il valore del dado. Quando registri i valori segui queste regole: 1=1, 2=2, 3=3, 4=4, 5=5, 6=0. Facendo questo stai registrando il grande numero casuale, la tua chiave privata, in formato B6 o base 6. Puoi poi inserire la chiave privata in base 6 di 99 caratteri nel campo di testo sopra e cliccare su Mostra Dettagli. Vedrai quindi l'indirizzo Bitcoin associato alla tua chiave privata. Dovresti anche prendere nota della tua chiave privata in formato WIF poiché è più ampiamente utilizzato.",
 		"bulklabelencrypt": "Cifratura BIP38?",
 		"detaillabelencrypt": "Cifratura BIP38?",
-		"bulklabelBIPpassphrase": "Passphrase:",
+		"bulklabelBIPpassphrase": "Frase segreta:",
 		"brainlabelcompressed": "Indirizzo compresso?",
 		"detailwifprefix": "'5'",
 		"detaillabelprivb6": "Chiave Privata Formato Base6 (99 caratteri [0-5]):"

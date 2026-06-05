@@ -37,6 +37,8 @@
 
 		// en-tête et menu
 		"tagline": "Générateur De Porte-Monnaie Bitcoin Javascript Hors-Ligne",
+		"themedark": "Sombre",
+		"themelight": "Clair",
 		"generatelabelbitcoinaddress": "Création de l'adresse Bitcoin...",
 		"generatelabelmovemouse": "BOUGEZ votre souris pour ajouter de l'entropie...",
 		"generatelabelkeypress": "OU tapez des caractères aléatoires dans le champ ci-dessous",
@@ -51,10 +53,8 @@
 		// porte-monnaie simple
 		"newaddress": "Générer Une Nouvelle Adresse",
 		"singleprint": "Imprimer",
-		"singlelabelbitcoinaddress": "Adresse Bitcoin (Legacy P2PKH)",
-		"singlelabelP2SH": "P2SH-P2WPKH (3…)",
-		"singlelabelSegwit": "SegWit Natif P2WPKH (bc1q…)",
-		"singlelabelTaproot": "Taproot P2TR (bc1p…)",
+		"singlelabeladdrtype": "Type d'adresse",
+		"singleaddrtype": { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "SegWit Natif (bc1q…)", "taproot": "Taproot (bc1p…)" },
 		"singlelabelprivatekey": "Clé Privée (WIF compressé)",
 		"singleshare": "PARTAGER",
 		"singlesecret": "SECRET",
@@ -161,6 +161,7 @@
 		"detaila1": "Une partie importante de la création d'un porte-monnaie Bitcoin consiste à s'assurer que les nombres aléatoires utilisés sont véritablement aléatoires. L'aléatoire physique est supérieur au pseudo-aléatoire informatique. Le moyen le plus simple est d'utiliser des dés. Pour créer une clé privée Bitcoin, lancez un dé à six faces 99 fois et notez chaque résultat selon la règle : 1=1, 2=2, 3=3, 4=4, 5=5, 6=0. Vous obtenez ainsi votre clé privée en format B6 (base 6). Saisissez ensuite les 99 caractères dans le champ ci-dessus et cliquez sur « Voir les Détails ».",
 
 		// pied de page
+		"donationcopyconfirm": "Adresse copiée !",
 		"footerlabeldonations": "Dons :",
 		"footerlabeltranslatedby": "Traduction : 1Gy7NYSJNUYqUdXTBow5d7bCUEJkUFDFSq",
 		"footerlabelpgp": "PGP",

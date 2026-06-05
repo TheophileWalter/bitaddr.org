@@ -36,6 +36,8 @@
 
 		// header and menu html
 		"tagline": "Nyílt forráskódú, ügyfél oldali JavaScript Bitcoin tárca készítő program",
+		"themedark": "Sötét",
+		"themelight": "Világos",
 		"generatelabelbitcoinaddress": "A bitcoin cím előállítása...",
 		"generatelabelmovemouse": "MOZGASSA az egeret, ha fokozni szeretné a véletlenszerűséget...",
 		"generatelabelkeypress": "VAGY gépeljen be néhány véletlenszerű karaktert ebbe a szövegdobozba",
@@ -48,6 +50,7 @@
 		"detailwallet": "A pénztárca részletei",
 
 		// footer html
+		"donationcopyconfirm": "Cím másolva!",
 		"footerlabeldonations": "Adományok:",
 		"footerlabeltranslatedby": "Fordította: 1GEBor11XtqDoamipB8nAV7o4fNW5JcrUD",
 		"footerlabelpgp": "PGP",
@@ -87,10 +90,8 @@
 		// single wallet html
 		"newaddress": "Új cím előállítása",
 		"singleprint": "Nyomtatás",
-		"singlelabelbitcoinaddress": "Bitcoin cím (Legacy P2PKH)",
-		"singlelabelP2SH": "P2SH-P2WPKH (3…)",
-		"singlelabelSegwit": "Natív SegWit P2WPKH (bc1q…)",
-		"singlelabelTaproot": "Taproot P2TR (bc1p…)",
+		"singlelabeladdrtype": "Cím típusa",
+		"singleaddrtype": { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "Natív SegWit (bc1q…)", "taproot": "Taproot (bc1p…)" },
 		"singlelabelprivatekey": "Privát kulcs (WIF tömörített)",
 		"singletip1": "<b>A bitcoin pénztárca</b> nem más, mint egy bitcoin címből és a hozzá tartozó privát kulcsból álló számpár. Egy ilyen pénztárcát állítottunk elő és jelenítettünk meg fent az Ön számára a Web böngészőben.",
 		"singletip2": "<b>A pénztárca biztonságos megőrzése</b> érdekében nyomtassa ki vagy más módon rögzítse a bitcoin címet és privát kulcsot. Fontos, hogy a privát kulcsból készítsen másolatot, és tárolja biztonságos helyen. Ez a webhely nem tárol az ön privát kulcsaival kapcsolatos információt. Ha ismeri a PGP-t, akkor egyben letöltheti az egész honlapot, és ellenőrizheti, hogy a webhely szerzője álatal írt valódi változatot töltötte-e le. Ehhez össze kell hasonlítania a HTML-ből képzett SHA256 zanzát a webhely láblécében hivatkozott, digitálisan aláírt verzió történetben lévő SHA256 zanzával. Amennyiben elhagyja vagy frissíti a webhelyet illetve megnyomja az 'Új cím előállítása' gombot, akkor új privát kulcs készül és az előzőleg megjelenített privát kulcs elvész. A bitcoin címhez tartozó privát kulcsot titokban kell tartani. Bárki, aki megszerzi ezt a kulcsot, el tudja költeni a címhez tartozó valamennyi bitcoint. Ha kinyomtatja a pénztárcát, akkor tárolja egy villámzáras vízhatlan nejlonzacskóban. A papírtárcát kezelje úgy, mintha pénz lenne.",

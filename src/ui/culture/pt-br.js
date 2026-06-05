@@ -35,6 +35,8 @@
 
 		// header and menu html
 		"tagline": "Gerador local de carteiras Bitcoin usando Javascript de código aberto",
+		"themedark": "Escuro",
+		"themelight": "Claro",
 		"generatelabelbitcoinaddress": "Gerando endereço Bitcoin...",
 		"generatelabelmovemouse": "Movimente um pouco o ponteiro do mouse para criar entropia...",
 		"generatelabelkeypress": "OU digite alguns caracteres aleatórios nessa caixa de texto",
@@ -47,6 +49,7 @@
 		"detailwallet": "Detalhes da carteira",
 
 		// footer html
+		"donationcopyconfirm": "Endereço copiado!",
 		"footerlabeldonations": "Doações:",
 		"footerlabeltranslatedby": "Tradução: 1LwaSNTZ7xAagYKyE68gT5iqX1DmPnmJmy",
 		"footerlabelpgp": "PGP",
@@ -76,7 +79,7 @@
 		"statusokprotocolgood": "OK",
 		"statuslabelprotocolbad": "&#9888; Pense duas vezes!",
 		"statuslabelprotocolbad1": "Parece que você está executando este gerador online a partir de um site ativo. Para carteiras valiosas recomenda-se",
-		"statuslabelprotocolbad2": "download",
+		"statuslabelprotocolbad2": "baixar",
 		"statuslabelprotocolbad3": "o arquivo zip do GitHub e execute este gerador offline como um arquivo html local.",
 		"statusokprotocolbad": "OK",
 		"statuslabelkeypool1": "Este é um registro de todos os Endereços Bitcoin e Chaves Privadas que você gerou durante a sessão atual. Recarregar a página criará uma nova sessão.",
@@ -86,10 +89,8 @@
 		// single wallet html
 		"newaddress": "Gerar endereço",
 		"singleprint": "Imprimir",
-		"singlelabelbitcoinaddress": "Endereço Bitcoin (Legacy P2PKH)",
-		"singlelabelP2SH": "P2SH-P2WPKH (3…)",
-		"singlelabelSegwit": "SegWit Nativo P2WPKH (bc1q…)",
-		"singlelabelTaproot": "Taproot P2TR (bc1p…)",
+		"singlelabeladdrtype": "Tipo de endereço",
+		"singleaddrtype": { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "SegWit Nativo (bc1q…)", "taproot": "Taproot (bc1p…)" },
 		"singlelabelprivatekey": "Chave Privada (WIF comprimida)",
 		"singletip1": "<b>Uma carteira Bitcoin</b> nada mais é do que um endereço Bitcoin e a sua chave privada Bitcoin correspondente. Essa carteira foi gerada para você em seu navegador web e está sendo exibida acima.",
 		"singletip2": "<b>Para proteger essa carteira</b> você deve imprimir ou anotar/salvar o endereço Bitcoin e a sua chave privada correspondente. É importante que você faça uma cópia de segurança da sua chave privada e armazene-a em um local seguro. Esse site não toma conhecimento da sua chave privada. Se você for familiar com criptografia PGP, você pode baixar essa página HTML em um arquivo único e verificar se você tem uma versão autêntica do autor deste site ao fazer a correspondência do hash SHA256 deste HTML com o hash SHA256 disponível na versão assinada do arquivo contido no link no rodapé deste site. Se você sair/atualizar essa página ou apertar o botão Gerar Novo Endereço, então uma nova chave privada será gerada e a chave exibida anteriormente não será recuperável. A sua chave privada Bitcoin deve ser mantida em um segredo. Qualquer pessoa que tiver acesso a ela poderá gastar todos os seus bitcoins associados com aquele endereço. Se você imprimir sua carteira, armazene-a em um saco plástico selado para mantê-la longe da água. Trate sua carteira em papel como se fosse dinheiro.",
@@ -132,7 +133,7 @@
 		"brainlabelconfirm": "Confirmar senha:",
 		"brainview": "Ver",
 		"brainalgorithm": "Algoritmo: SHA256(senha)",
-		"brainlabelbitcoinaddress": "Enderçeo Bitcoin:",
+		"brainlabelbitcoinaddress": "Endereço Bitcoin:",
 		"brainlabelprivatekey": "Chave privada (Wallet Import Format):",
 
 		// vanity wallet html
@@ -184,7 +185,7 @@
 		"detailcompwifprefix": "'K' ou 'L'",
 		"detaillabelprivhex": "Chave privada em formato hexadecimal (64 caracteres [0-9A-F]):",
 		"detaillabelprivb64": "Chave privada em base64 (44 caracteres):",
-		"detaillabelprivmini": "Chave privada en formato mini (22, 26 ou 30 caracteres, inicia com 'S'):",
+		"detaillabelprivmini": "Chave privada em formato mini (22, 26 ou 30 caracteres, inicia com 'S'):",
 		"detaillabelpassphrase": "Senha BIP38",
 		"detailbip38decryptbutton": "Descriptografar BIP38",
 		"detailbip38encryptbutton": "Criptografar em BIP38",

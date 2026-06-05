@@ -35,6 +35,8 @@
 
 		// header and menu html
 		"tagline": "クライエント側ビットコインアドレス生成(JavaScript使用)",
+		"themedark": "ダーク",
+		"themelight": "ライト",
 		"generatelabelbitcoinaddress": "ビットコインアドレスを生成中...",
 		"generatelabelmovemouse": "マウスを動かして、ランダム要素を追加してください。",
 		"generatelabelkeypress": "もしくはこちらの入力欄にランダムな文字を打って下さい。",
@@ -47,6 +49,7 @@
 		"detailwallet": "ウォレットの詳細",
 
 		// footer html
+		"donationcopyconfirm": "アドレスをコピーしました！",
 		"footerlabeldonations": "プロジェクト寄付先",
 		"footerlabeltranslatedby": "日本語訳寄付先 1o3EBhxPhGn8cGCL6Wzi5F5kTPuBofdMf",
 		"footerlabelpgp": "PGP",
@@ -86,10 +89,8 @@
 		// single wallet html
 		"newaddress": "新アドレス生成",
 		"singleprint": "印刷",
-		"singlelabelbitcoinaddress": "ビットコインアドレス (Legacy P2PKH)",
-		"singlelabelP2SH": "P2SH-P2WPKH (3…)",
-		"singlelabelSegwit": "ネイティブSegWit P2WPKH (bc1q…)",
-		"singlelabelTaproot": "Taproot P2TR (bc1p…)",
+		"singlelabeladdrtype": "アドレスタイプ",
+		"singleaddrtype": { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "ネイティブSegWit (bc1q…)", "taproot": "Taproot (bc1p…)" },
 		"singlelabelprivatekey": "秘密鍵（WIF圧縮）",
 		"singletip1": "<b>ビットコインウォレットとは</b> ビットコインのアドレスと対応するプライベートキーを組み合わせたものです。新しいアドレスがブラウザー上で生成され、上記に表示されています。",
 		"singletip2": "<b>このウォレットを守るためには</b> ビットコインアドレスとビットコインプライベートキーを印刷するなどの手段で記録しなければいけません。プライベートキーが無いとペアになっているアドレスに送られたビットコインが使えないので、人に晒されないような方法でプライベートキーのコピーを取り、大事に保管して下さい。このサイトはこのプライベートキーの保存はしません。PGPをご存知の方は、このサイトを1つのhtmlファイルで落とすことができるので、このサイトのhtmlファイルのSHA256ハッシュとサイトのフッターにデジタル署名されたメッセージに入ったハッシュを比べて不正にいじられていないかをお確かめいただけます。このページを閉じたり、離れたり、「新アドレス生成」を押すと現在表示されているプライベートキーは消え、新規アドレスが生成されるので、ご使用の場合は必ず何らかの手段で記録しておいて下さい。プライベートキーは秘密にしてください。共有されますと、対応するビットコインアドレスに存在するコインが全て共有者間で利用可能となります。ウォレット情報を印刷したら、濡れないようにジップロックに入れましょう。紙幣と同様に扱うよう心がけてください。",

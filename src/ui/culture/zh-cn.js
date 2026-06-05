@@ -1,7 +1,7 @@
 (function (translator) {
 	translator.translations["zh-cn"] = {
 		// javascript alerts or messages
-		"testneteditionactivated": "TESTNET EDITION ACTIVATED",
+		"testneteditionactivated": "测试网版本已激活",
 		"paperlabelbitcoinaddress": "比特币地址",
 		"paperlabelprivatekey": "私钥",
 		"paperlabelencryptedkey": "加密私钥(需要密码)",
@@ -35,6 +35,8 @@
 
 		// header and menu html
 		"tagline": "开源JavaScript比特币钱包工具",
+		"themedark": "深色",
+		"themelight": "浅色",
 		"generatelabelbitcoinaddress": "地址生成中...",
 		"generatelabelmovemouse": "请移动鼠标产生随机种子...",
 		"generatelabelkeypress": "或者在文本框中输入随机字符",
@@ -47,6 +49,7 @@
 		"detailwallet": "钱包详情",
 
 		// footer html
+		"donationcopyconfirm": "地址已复制！",
 		"footerlabeldonations": "项目捐赠",
 		"footerlabeltranslatedby": "简中翻译捐赠 1BfXayW2vrj6uRpoZg3nR8rMEckLpGmaiL",
 		"footerlabelpgp": "PGP",
@@ -56,7 +59,7 @@
 		"footerlabelsig": "源代码的Bitcoin签名",
 		"footerlabelcopyright1": "Copyright bitaddr.org.",
 		"footerlabelcopyright2": "JavaScript的版权信息已经包含在源代码中。",
-		"footerlabelnowarranty": "No warranty",
+		"footerlabelnowarranty": "无担保。",
 
 		// status html
 		"statuslabelcryptogood": "&#10004; 良好！",
@@ -86,10 +89,8 @@
 		// single wallet html
 		"newaddress": "生成新地址",
 		"singleprint": "打印",
-		"singlelabelbitcoinaddress": "比特币地址 (Legacy P2PKH)",
-		"singlelabelP2SH": "P2SH-P2WPKH (3…)",
-		"singlelabelSegwit": "原生隔离见证 P2WPKH (bc1q…)",
-		"singlelabelTaproot": "Taproot P2TR (bc1p…)",
+		"singlelabeladdrtype": "地址类型",
+		"singleaddrtype": { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "原生隔离见证 (bc1q…)", "taproot": "Taproot (bc1p…)" },
 		"singlelabelprivatekey": "私钥（WIF压缩）",
 		"singletip1": "<b>比特币钱包</b>就是这么简单，一个地址，对应一个私钥，浏览器已自动生成了一个，就显示在上面。私钥必须保密，地址可以公开。",
 		"singletip2": "<b>妥善保管你的钱包</b> 为了保护你的钱包，建议你用打印或者其他方式来保管你的私钥和地址。把你的私钥备份保存在安全、保密的位置是必要的。本站不提供私钥的相关知识，请自行学习。如果你熟悉PGP，你也可以下载这个HTML文件（它是单文件全功能的），用它的SHA256摘要和作者在本站页脚留下的相比对。本工具支持离线使用，这样它生成的私钥-地址就很难被监视了。比特币私钥必须保密，任何知道你私钥的人都可以随意花费其对应地址的比特币。你可以打印你的钱包（即纸钱包），把它装进一个防水的口袋里——就像你在保管纸币一样。",

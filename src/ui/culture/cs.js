@@ -35,6 +35,8 @@
 
 		// header and menu html
 		"tagline": "Open Source generátor Bitcoin peněženky napsaný v JavaScript",
+		"themedark": "Tmavý",
+		"themelight": "Světlý",
 		"generatelabelbitcoinaddress": "Generuji Bitcoin adresu",
 		"generatelabelmovemouse": "POHYBUJTE myší pro získání dostatku náhody...",
 		"generatelabelkeypress": "NEBO napište několik náhodných znaků do tohoto pole",
@@ -47,6 +49,7 @@
 		"detailwallet": "Detail peněženky",
 
 		// footer html
+		"donationcopyconfirm": "Adresa zkopírována!",
 		"footerlabeldonations": "Příspěvek:",
 		"footerlabeltranslatedby": "Překlad: 1LNF2anjkH3HyRKrhMzVYqYRKFeDe2TJWz",
 		"footerlabelpgp": "PGP",
@@ -86,10 +89,8 @@
 		// single wallet html
 		"newaddress": "Vytvořit novou adresu",
 		"singleprint": "Tisk",
-		"singlelabelbitcoinaddress": "Bitcoin adresa (Legacy P2PKH)",
-		"singlelabelP2SH": "P2SH-P2WPKH (3…)",
-		"singlelabelSegwit": "Nativní SegWit P2WPKH (bc1q…)",
-		"singlelabelTaproot": "Taproot P2TR (bc1p…)",
+		"singlelabeladdrtype": "Typ adresy",
+		"singleaddrtype": { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "Nativní SegWit (bc1q…)", "taproot": "Taproot (bc1p…)" },
 		"singlelabelprivatekey": "Soukromý klíč (WIF komprimovaný)",
 		"singletip1": "<b>Bitcoin peněženka</b> je jednoduchý pár Bitcoin adresy s přidruženým soukromým klíčem. Taková peněženka byla právě vytvořena ve vašem prohlížeči a zobrazena výše.",
 		"singletip2": "<b>Pro zabezpečení této peněženky</b> musíte tuto Bitcoin adresu a soukromý klíč vytisknout a nebo jinak poznamenat. Je důležité provést zálohu soukromého klíče a jeho uschování na bezpečném místě. Tato webová stránka nemá žádné informace o vašem soukromém klíči. Pokud ovládáte PGP, můžete celou tuto stránku stáhnout v jednom HTML souboru a ověřit její pravost srovnáním SHA256 hashe s podepsaným dokumentem historie verzí. Odkaz naleznete v patičce této stránky. Pokud opustíte či obnovíte tuto stránku nebo kliknete na 'Vytvořit novou adresu' dojde k vygenerování nového soukromého klíče a předtím zobrazený klíč bude ztracen. Váš soukromý klíč musíte uchovat v tajnosti. Každý kdo má tento klíč k dispozici může utratit všechny peníze v této peněžence. Pokud budete peněženku tisknout, uzavřete ji do nepropustného obalu nebo ji zalaminujte. Tím zabráníte jejímu poškození vodou. Chovejte se k této peněžence jako k normálním bankovkám.",
