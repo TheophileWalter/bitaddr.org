@@ -5609,6 +5609,7 @@ input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; p
 .keyarea .qrcode_private { display: inline-block; position: relative; top: 28px; float: right; }
 .keyarea canvas { background: #fff; padding: 4px; border-radius: 4px; }
 /* Artwallet: absolute positions must stay unchanged for print */
+#paperarea .artwallet { position: relative; display: inline-block; vertical-align: top; border-radius: 5px; overflow: hidden; }
 #paperarea .artwallet .papersvg { width: 486px; height: 261px; border: 0; margin: 0; padding: 0; left: 0; }
 #paperarea .artwallet .qrcode_public { top: 31px; left: 11px; z-index: 100; margin: 0; float: none; display: block; position: absolute; background-color: #fff; padding: 5px 5px 2px; }
 #paperarea .artwallet .qrcode_private { top: 93px; left: 355px; z-index: 100; margin: 0; float: none; display: block; position: absolute; background-color: #fff; padding: 5px 5px 2px; }
@@ -5808,6 +5809,12 @@ input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; p
 
     /* Paper: keep border for on-screen preview */
     .paper .commands { border: 1px solid var(--border); }
+
+    /* Paper wallet: background panel, centering, shadow */
+    #paperkeyarea { background: var(--bg); padding: 24px 16px; border: 1px solid var(--border); border-top: 0; border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
+    #paperarea .keyarea.art { text-align: center; padding-bottom: 16px; border-bottom: 1.5px dashed var(--border); margin-bottom: 16px; }
+    #paperarea .keyarea.art:last-child { border-bottom: 0; padding-bottom: 0; margin-bottom: 0; }
+    #paperarea .artwallet { box-shadow: 0 4px 22px rgba(0,0,0,0.18), 0 1px 5px rgba(0,0,0,0.07); }
 }
 
 /* ── Responsive: Tablet ───────────────────────────────────────────────── */
@@ -5858,6 +5865,9 @@ input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; p
     #singlesafety { border: 0; }
     #paperarea .keyarea:first-child { border-top: 2px solid #009900; }
     #paperarea .keyarea.art:first-child { border: 0; }
+    #paperkeyarea { background: transparent; padding: 0; border: 0; border-radius: 0; }
+    #paperarea .keyarea.art { text-align: left; border-bottom: 0; padding-bottom: 0; margin-bottom: 0; }
+    #paperarea .artwallet { box-shadow: none; border-radius: 0; overflow: visible; }
     .pagebreak { height: 1px; }
     .paper #logo { display: none; }
     .menu, .footer, .commands, #tagline, #faqs, #culturemenu { display: none; }
