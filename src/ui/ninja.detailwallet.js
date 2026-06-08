@@ -70,6 +70,7 @@
 				return;
 			}
 			document.getElementById("busyblock").className = "busy";
+			document.getElementById("detailkeyarea").style.display = "block";
 			// show Private Key BIP38 Format
 			document.getElementById("detailprivbip38").innerHTML = key;
 			document.getElementById("detailbip38").style.display = "block";
@@ -144,6 +145,7 @@
 
 		populateKeyDetails: function (btcKey) {
 			if (btcKey.priv != null) {
+				document.getElementById("detailkeyarea").style.display = "block";
 				var originalCompression = btcKey.compressed;
 
 				// Uncompressed key
@@ -209,6 +211,7 @@
 					document.getElementById("detailbip38encryptspan").style.display = "none";
 				}
 			}
+			document.getElementById("detailkeyarea").style.display = "none";
 			document.getElementById("detailpubkey").innerHTML = "";
 			document.getElementById("detailpubkeycomp").innerHTML = "";
 			document.getElementById("detailaddress").innerHTML = "";
