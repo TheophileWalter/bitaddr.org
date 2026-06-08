@@ -1,28 +1,24 @@
 Bitcoin.KeyPool = (function () {
 	var KeyPool = function () {
 		this.keyArray = [];
+		this._addressSet = new Set();
+		this._updateTimer = null;
 
 		this.push = function (item) {
 			if (item == null || item.priv == null) return;
-			var doAdd = true;
-			for (var index in this.keyArray) {
-				var currentItem = this.keyArray[index];
-				if (currentItem != null && currentItem.priv != null && item.getBitcoinAddress() == currentItem.getBitcoinAddress()) {
-					doAdd = false;
-					break;
-				}
-			}
-			if (doAdd) {
-				this.keyArray.push(item);
-				var pool = this;
-				setTimeout(function () {
-					var ta = document.getElementById("keypooltextarea");
-					if (ta) ta.value = pool.toString();
-				}, 0);
-			}
+			var addr = item.getBitcoinAddress();
+			if (this._addressSet.has(addr)) return;
+			this._addressSet.add(addr);
+			this.keyArray.push(item);
+			var pool = this;
+			clearTimeout(pool._updateTimer);
+			pool._updateTimer = setTimeout(function () {
+				var ta = document.getElementById("keypooltextarea");
+				if (ta) ta.value = pool.toString();
+			}, 150);
 		};
 
-		this.reset = function () { this.keyArray = []; };
+		this.reset = function () { this.keyArray = []; this._addressSet = new Set(); };
 		this.getArray = function () { return this.keyArray.slice(0); };
 		this.setArray = function (ka) { this.keyArray = ka; };
 		this.length = function () { return this.keyArray.length; };
