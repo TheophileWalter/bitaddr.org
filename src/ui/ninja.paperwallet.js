@@ -246,7 +246,7 @@ ninja.wallets.paperwallet = {
 		var isLegacy = (element.value === "legacy");
 		var encryptCheckbox = document.getElementById("paperencrypt");
 		if (!isLegacy && encryptCheckbox.checked) {
-			// BIP38 only supports legacy P2PKH — disable it
+			// BIP38 only supports legacy P2PKH - disable it
 			encryptCheckbox.checked = false;
 			document.getElementById("paperpassphrase").disabled = true;
 			ninja.wallets.paperwallet.encrypt = false;
@@ -260,7 +260,7 @@ ninja.wallets.paperwallet = {
 		document.getElementById("paperpassphrase").disabled = !element.checked;
 		ninja.wallets.paperwallet.encrypt = element.checked;
 		if (element.checked) {
-			// Force legacy address type — BIP38 requires it
+			// Force legacy address type - BIP38 requires it
 			document.getElementById("paperaddrtype").value = "legacy";
 			document.getElementById("paperaddrtype").disabled = true;
 		} else {

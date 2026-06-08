@@ -460,7 +460,7 @@ if (typeof Crypto == "undefined" || !Crypto.util) {
 * Copyright (c) 2009-2013, Jeff Mott. All rights reserved.
 * http://code.google.com/p/crypto-js/wiki/License
 *
-* SECURITY NOTE — AES-ECB mode is used exclusively for BIP38 key encryption/decryption.
+* SECURITY NOTE - AES-ECB mode is used exclusively for BIP38 key encryption/decryption.
 * BIP38 (https://github.com/bitcoin/bips/blob/master/bip-0038.mediawiki) mandates raw
 * AES-256-ECB on exactly 16-byte blocks that have been XOR-mixed with scrypt-derived key
 * material.  This is a protocol requirement; replacing ECB with an AEAD mode would break
@@ -2748,7 +2748,7 @@ var nobleSecp256k1 = (() => {
 		window.crypto.getRandomValues(ua);
 
 		if (!_auxPoolHasUserEntropy) {
-			// User entropy not yet collected — use CSPRNG output directly.
+			// User entropy not yet collected - use CSPRNG output directly.
 			for (var i = 0; i < ua.length; i++) ba[i] = ua[i];
 			return;
 		}
@@ -2904,7 +2904,7 @@ function getRNG(){
 		}
 	}
 
-	// No CSPRNG available — abort rather than fall back to Math.random
+	// No CSPRNG available - abort rather than fall back to Math.random
 	throw new Error(
 		'secrets.js: No cryptographically secure RNG found. ' +
 		'Key splitting requires window.crypto.getRandomValues (browser) or crypto.randomBytes (Node.js).'
@@ -4510,7 +4510,7 @@ Bitcoin.Bech32 = (function () {
 	</script>
 	<script type="text/javascript">
 /*
- * Bitcoin ECDSA — backed by noble-secp256k1 (MIT, audited)
+ * Bitcoin ECDSA - backed by noble-secp256k1 (MIT, audited)
  * https://github.com/paulmillr/noble-secp256k1
  */
 
@@ -4642,7 +4642,7 @@ Bitcoin.ECKey = (function () {
 
 	var ECKey = function (input) {
 		if (!input) {
-			// Random key — noble uses window.crypto.getRandomValues, rejects invalid scalars
+			// Random key - noble uses window.crypto.getRandomValues, rejects invalid scalars
 			this.priv = nobleSecp256k1.utils.randomPrivateKey(); // Uint8Array(32)
 		} else if (Bitcoin.Util.isArray(input) || input instanceof Uint8Array) {
 			var arr = Array.from(input);
@@ -4698,7 +4698,7 @@ Bitcoin.ECKey = (function () {
 		return this;
 	};
 
-	// Return public key bytes — noble performs point multiplication
+	// Return public key bytes - noble performs point multiplication
 	ECKey.prototype.getPub = function () {
 		if (!this._pubCache || this._pubCacheComp !== this.compressed) {
 			this._pubCache = Array.from(nobleSecp256k1.getPublicKey(this.priv, this.compressed));
@@ -4735,7 +4735,7 @@ Bitcoin.ECKey = (function () {
 		}
 	};
 
-	// P2SH-P2WPKH address (starts with '3') — compressed key required
+	// P2SH-P2WPKH address (starts with '3') - compressed key required
 	ECKey.prototype.getP2SHAddress = function () {
 		var savedComp = this.compressed;
 		this.setCompressed(true);
@@ -4748,7 +4748,7 @@ Bitcoin.ECKey = (function () {
 		return addr.toString();
 	};
 
-	// Native SegWit P2WPKH address (bc1q...) — compressed key required
+	// Native SegWit P2WPKH address (bc1q...) - compressed key required
 	ECKey.prototype.getSegwitAddress = function () {
 		var savedComp = this.compressed;
 		this.setCompressed(true);
@@ -4757,7 +4757,7 @@ Bitcoin.ECKey = (function () {
 		return Bitcoin.Bech32.segwitAddress('bc', 0, pubKeyHash);
 	};
 
-	// Taproot P2TR address (bc1p...) — key-path spend, no script tree
+	// Taproot P2TR address (bc1p...) - key-path spend, no script tree
 	ECKey.prototype.getTaprootAddress = function () {
 		var savedComp = this.compressed;
 		this.setCompressed(true);
@@ -5258,7 +5258,7 @@ Bitcoin.Util = {
 	</script>
 	<style type="text/css">
 /* ═══════════════════════════════════════════════════════════════════════
-   bitaddr.org — Modern Crypto Theme (dark + light)
+   bitaddr.org - Modern Crypto Theme (dark + light)
    Mobile-first, responsive, CSS-variable driven
    ═══════════════════════════════════════════════════════════════════════ */
 
@@ -6696,7 +6696,7 @@ ninja.privateKey = {
 			// Take SHA256(SHA256(prefactor + ownerentropy)) and call this passfactor
 			var passfactorBytes = noNumbers ? prefactor : Bitcoin.Util.dsha256(prefactor.concat(ownerEntropy));
 
-			// 5) G * passfactor (compressed) — equivalent to ECKey public key derivation
+			// 5) G * passfactor (compressed) - equivalent to ECKey public key derivation
 			var passpoint = Array.from(nobleSecp256k1.getPublicKey(new Uint8Array(passfactorBytes), true));
 
 			// 6) Convey ownersalt and passpoint to the party generating the keys, along with a checksum to ensure integrity.
@@ -6854,7 +6854,7 @@ ninja.publicKey = {
 	</script>
 	<script type="text/javascript">
 /*
- * ninja.seeder — Auxiliary entropy collection from mouse and keyboard events.
+ * ninja.seeder - Auxiliary entropy collection from mouse and keyboard events.
  *
  * The browser CSPRNG (window.crypto.getRandomValues) is the primary and
  * sufficient source of randomness.  This seeder exists ONLY as a
@@ -6888,7 +6888,7 @@ ninja.seeder = {
 		// Keyboard events are bound via onkeydown on #generatekeyinput.
 	},
 
-	// Bound to body onmousemove — collects coordinates and timing.
+	// Bound to body onmousemove - collects coordinates and timing.
 	seed: function (evt) {
 		if (!ninja.seeder.isStillSeeding) return;
 		var now = Date.now();
@@ -6905,7 +6905,7 @@ ninja.seeder = {
 		ninja.seeder._advance();
 	},
 
-	// Bound to #generatekeyinput onkeydown — collects key identity and timing.
+	// Bound to #generatekeyinput onkeydown - collects key identity and timing.
 	seedKeyPress: function (evt) {
 		if (!ninja.seeder.isStillSeeding) return;
 		var now = Date.now();
@@ -8433,10 +8433,10 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"singleshare": "PARTAGER",
 		"singlesecret": "SECRET",
 		"singletip1": "Un porte-monnaie Bitcoin est simplement une paire constituée d'une adresse Bitcoin et de la clé privée correspondante. Ce porte-monnaie a été généré dans votre navigateur et est affiché ci-dessus.",
-		"singletip2": "Pour sécuriser ce porte-monnaie, imprimez-le ou enregistrez l'adresse et la clé privée. Il est important de conserver une copie de sauvegarde de la clé privée dans un endroit sûr. Ce site ne conserve aucune trace de votre clé privée. Si vous quittez ou rafraîchissez la page, ou cliquez sur « Générer Une Nouvelle Adresse », une nouvelle clé privée sera créée et l'ancienne sera définitivement perdue. Votre clé privée Bitcoin doit rester secrète — quiconque la possède peut dépenser vos fonds. Si vous imprimez votre porte-monnaie, conservez-le à l'abri de l'humidité. Traitez un porte-monnaie papier comme des espèces.",
+		"singletip2": "Pour sécuriser ce porte-monnaie, imprimez-le ou enregistrez l'adresse et la clé privée. Il est important de conserver une copie de sauvegarde de la clé privée dans un endroit sûr. Ce site ne conserve aucune trace de votre clé privée. Si vous quittez ou rafraîchissez la page, ou cliquez sur « Générer Une Nouvelle Adresse », une nouvelle clé privée sera créée et l'ancienne sera définitivement perdue. Votre clé privée Bitcoin doit rester secrète - quiconque la possède peut dépenser vos fonds. Si vous imprimez votre porte-monnaie, conservez-le à l'abri de l'humidité. Traitez un porte-monnaie papier comme des espèces.",
 		"singletip3": "Pour alimenter ce porte-monnaie, demandez à vos correspondants d'envoyer des Bitcoins à votre adresse Bitcoin.",
 		"singletip4": "Vérifiez votre solde sur blockchain.info ou blockexplorer.com en y renseignant votre adresse Bitcoin.",
-		"singletip5": "Pour dépenser vos Bitcoins, rendez-vous sur blockchain.info et effectuez un « sweep » (transfert total) de votre clé privée. Vous pouvez aussi importer la clé dans un client Bitcoin. Notez que lors d'une transaction, la monnaie restante sera renvoyée vers une nouvelle adresse du portefeuille — pensez à effectuer une sauvegarde.",
+		"singletip5": "Pour dépenser vos Bitcoins, rendez-vous sur blockchain.info et effectuez un « sweep » (transfert total) de votre clé privée. Vous pouvez aussi importer la clé dans un client Bitcoin. Notez que lors d'une transaction, la monnaie restante sera renvoyée vers une nouvelle adresse du portefeuille - pensez à effectuer une sauvegarde.",
 
 		// porte-monnaie papier
 		"paperlabelhideart": "Masquer l'image ?",
@@ -8461,7 +8461,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"bulka1": "L'approche traditionnelle pour accepter des Bitcoins sur votre site requiert l'installation du daemon Bitcoin officiel (« bitcoind »). De nombreux hébergeurs ne supportent pas ce daemon. De plus, l'exécuter sur votre serveur web signifie que vos clés privées y sont stockées et pourraient être volées en cas de piratage. En utilisant un Porte-Monnaie En Vrac, vous n'uploadez que les adresses Bitcoin sur votre serveur, sans les clés privées. Votre porte-monnaie ne risque donc pas d'être volé même si le serveur est compromis.",
 		"bulklabelq2": "Comment utiliser le Porte-Monnaie En Vrac pour accepter les Bitcoins sur mon site ?",
 		"bulklabela2li1": "Utilisez l'onglet Porte-Monnaie En Vrac pour pré-générer un grand nombre d'adresses Bitcoin (10 000+). Copiez-collez les données CSV dans un fichier texte sécurisé. Sauvegardez ce fichier en lieu sûr.",
-		"bulklabela2li2": "Importez les adresses Bitcoin dans une base de données sur votre serveur web. (N'y mettez pas les clés privées — seulement les adresses visibles par les clients.)",
+		"bulklabela2li2": "Importez les adresses Bitcoin dans une base de données sur votre serveur web. (N'y mettez pas les clés privées - seulement les adresses visibles par les clients.)",
 		"bulklabela2li3": "Proposez le paiement en Bitcoin dans votre panier. Quand un client choisit Bitcoin, affichez-lui une adresse de votre base de données et associez-la à sa commande.",
 		"bulklabela2li4": "Abonnez-vous à un service de notification de paiement Bitcoin pour être averti des transactions. Une fois la notification reçue, traitez la commande. Pour vérifier manuellement, utilisez Block Explorer en remplaçant ADRESSE par l'adresse à vérifier.",
 		"bulklabela2li5": "Les Bitcoins s'accumulent en toute sécurité sur la blockchain. Utilisez le fichier de porte-monnaie généré à l'étape 1 pour les dépenser.",
@@ -8478,13 +8478,13 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"brainlabelprivatekey": "Clé Privée (Format d'importation) :",
 
 		// porte-monnaie vanité
-		"vanitylabelstep1": "Étape 1 — Générer votre paire de clés",
+		"vanitylabelstep1": "Étape 1 - Générer votre paire de clés",
 		"vanitynewkeypair": "Générer",
 		"vanitylabelstep1publickey": "Clé Publique (Étape 1) :",
 		"vanitylabelstep1pubnotes": "Copiez-collez cette clé dans le champ « Votre Clé Publique » du site Vanity Pool.",
 		"vanitylabelstep1privatekey": "Clé Privée (Étape 1) :",
 		"vanitylabelstep1privnotes": "Copiez-collez cette Clé Privée dans un fichier texte. Idéalement, sauvegardez-la sur un support chiffré. Elle sera nécessaire pour récupérer la Clé Privée une fois que Vanity Pool aura trouvé votre préfixe.",
-		"vanitylabelstep2calculateyourvanitywallet": "Étape 2 — Calculer votre Porte-Monnaie Vanité",
+		"vanitylabelstep2calculateyourvanitywallet": "Étape 2 - Calculer votre Porte-Monnaie Vanité",
 		"vanitylabelenteryourpart": "Entrez votre Clé Privée (générée à l'étape 1 et préalablement sauvegardée) :",
 		"vanitylabelnote1": "[NOTE : ce champ accepte une clé publique ou une clé privée]",
 		"vanitylabelenteryourpoolpart": "Entrez la Clé Privée du Pool (issue de Vanity Pool) :",
@@ -9680,7 +9680,7 @@ ninja.foreachSerialized = function (collection, whatToDo, onComplete) {
 		"singleaddrtype": { "legacy": "Legacy P2PKH (1…)", "p2sh": "P2SH-P2WPKH (3…)", "segwit": "原生隔离见证 (bc1q…)", "taproot": "Taproot (bc1p…)" },
 		"singlelabelprivatekey": "私钥（WIF压缩）",
 		"singletip1": "<b>比特币钱包</b>就是这么简单，一个地址，对应一个私钥，浏览器已自动生成了一个，就显示在上面。私钥必须保密，地址可以公开。",
-		"singletip2": "<b>妥善保管你的钱包</b> 为了保护你的钱包，建议你用打印或者其他方式来保管你的私钥和地址。把你的私钥备份保存在安全、保密的位置是必要的。本站不提供私钥的相关知识，请自行学习。如果你熟悉PGP，你也可以下载这个HTML文件（它是单文件全功能的），用它的SHA256摘要和作者在本站页脚留下的相比对。本工具支持离线使用，这样它生成的私钥-地址就很难被监视了。比特币私钥必须保密，任何知道你私钥的人都可以随意花费其对应地址的比特币。你可以打印你的钱包（即纸钱包），把它装进一个防水的口袋里——就像你在保管纸币一样。",
+		"singletip2": "<b>妥善保管你的钱包</b> 为了保护你的钱包，建议你用打印或者其他方式来保管你的私钥和地址。把你的私钥备份保存在安全、保密的位置是必要的。本站不提供私钥的相关知识，请自行学习。如果你熟悉PGP，你也可以下载这个HTML文件（它是单文件全功能的），用它的SHA256摘要和作者在本站页脚留下的相比对。本工具支持离线使用，这样它生成的私钥-地址就很难被监视了。比特币私钥必须保密，任何知道你私钥的人都可以随意花费其对应地址的比特币。你可以打印你的钱包（即纸钱包），把它装进一个防水的口袋里--就像你在保管纸币一样。",
 		"singletip3": "<b>获得比特币: </b> 让别人往你的地址汇入比特币。",
 		"singletip4": "<b>查询余额：</b> 访问blockchain.info或者blockexplorer.com可以查看到任何地址中的比特币余额。",
 		"singletip5": "<b>花费比特币：</b> 你可以下载比特币客户端，或者访问blockchain.info之类的在线钱包网站，导入你的比特币私钥来花费对应地址上的比特币。如果你选择了客户端，每当你发送一笔钱之后，找零有可能会发回客户端生成的另外一个地址，记得备份客户端生成的钱包文件，否则你可能丢钱。比特币作者中本聪说过，不要删除任何钱包，因为你的亲戚朋友说不定还会往你的旧地址里汇款。",
@@ -10115,7 +10115,7 @@ ninja.wallets.paperwallet = {
 		var isLegacy = (element.value === "legacy");
 		var encryptCheckbox = document.getElementById("paperencrypt");
 		if (!isLegacy && encryptCheckbox.checked) {
-			// BIP38 only supports legacy P2PKH — disable it
+			// BIP38 only supports legacy P2PKH - disable it
 			encryptCheckbox.checked = false;
 			document.getElementById("paperpassphrase").disabled = true;
 			ninja.wallets.paperwallet.encrypt = false;
@@ -10129,7 +10129,7 @@ ninja.wallets.paperwallet = {
 		document.getElementById("paperpassphrase").disabled = !element.checked;
 		ninja.wallets.paperwallet.encrypt = element.checked;
 		if (element.checked) {
-			// Force legacy address type — BIP38 requires it
+			// Force legacy address type - BIP38 requires it
 			document.getElementById("paperaddrtype").value = "legacy";
 			document.getElementById("paperaddrtype").disabled = true;
 		} else {
@@ -10308,7 +10308,7 @@ ninja.wallets.paperwallet = {
 			document.getElementById("bulkpassphrase").disabled = !element.checked;
 			bulk.encrypt = element.checked;
 			if (element.checked) {
-				// Force legacy address type — BIP38 requires it
+				// Force legacy address type - BIP38 requires it
 				document.getElementById("bulkaddrtype").value = "legacy";
 				document.getElementById("bulkaddrtype").disabled = true;
 				document.getElementById("bulkcompressed").disabled = false;
@@ -11019,7 +11019,7 @@ ninja.wallets.splitwallet = {
 				}
 				else {
 					var passFailStr = "<b>FAIL " + exceptionMsg + "</b>";
-					console.error("[unit test FAIL] " + test + (exceptionMsg ? " — " + exceptionMsg : ""));
+					console.error("[unit test FAIL] " + test + (exceptionMsg ? " - " + exceptionMsg : ""));
 				}
 				testCount++;
 				testResults += test + ": " + passFailStr + "<br/>";
@@ -11312,7 +11312,7 @@ ninja.wallets.splitwallet = {
 				return true;
 			},
 			testMiniFormatIsRejected: function () {
-				// Mini format is no longer accepted — keys must be WIF, WIF-compressed, or HEX
+				// Mini format is no longer accepted - keys must be WIF, WIF-compressed, or HEX
 				var key = "SQE6yipP5oW8RBaStWoB47xsRQ8pat";
 				var btcKey = new Bitcoin.ECKey(key);
 				return btcKey.priv == null;
@@ -11408,7 +11408,7 @@ ninja.wallets.splitwallet = {
 				return true;
 			},
 			testBase6FormatIsRejected: function () {
-				// Base6 format is no longer accepted — keys must be WIF, WIF-compressed, or HEX
+				// Base6 format is no longer accepted - keys must be WIF, WIF-compressed, or HEX
 				var baseKey = "100531114202410255230521444145414341221420541210522412225005202300434134213212540304311321323051431";
 				var ecKey = new Bitcoin.ECKey(baseKey);
 				return ecKey.priv == null;
@@ -11707,7 +11707,7 @@ ninja.wallets.splitwallet = {
 				);
 			},
 
-			// window.crypto.getRandomValues must be available — failing here means
+			// window.crypto.getRandomValues must be available - failing here means
 			// this browser cannot safely generate Bitcoin keys
 			testCSPRNGAvailable: function () {
 				return !!(window.crypto && typeof window.crypto.getRandomValues === 'function');
@@ -11717,7 +11717,7 @@ ninja.wallets.splitwallet = {
 			testRandomKeyIsInValidRange: function () {
 				var btcKey = new Bitcoin.ECKey(false);
 				if (btcKey.error || btcKey.priv == null) return false;
-				// priv is now a Uint8Array(32) — validate directly
+				// priv is now a Uint8Array(32) - validate directly
 				return nobleSecp256k1.utils.isValidPrivateKey(btcKey.priv);
 			},
 
@@ -11744,7 +11744,7 @@ ninja.wallets.splitwallet = {
 			},
 
 			// An uncompressed public key that is NOT on the secp256k1 curve must be rejected
-			// We flip the last byte of a valid uncompressed key — the point (x, y') is off-curve.
+			// We flip the last byte of a valid uncompressed key - the point (x, y') is off-curve.
 			testOffCurvePublicKeyIsRejected: function () {
 				var validHex = "0478982F40FA0C0B7A55717583AFC99A4EDFD301A2729DC59B0B8EB9E18692BCB521F054FAD982AF4CC1933AFD1F1B563EA779A6AA6CCE36A30B947DD653E63E44";
 				var invalidHex = validHex.slice(0, -2) + "45"; // corrupt last byte
@@ -11756,7 +11756,7 @@ ninja.wallets.splitwallet = {
 				}
 			},
 
-			// Hybrid-encoded points (prefix 06/07) must be rejected — non-canonical encoding
+			// Hybrid-encoded points (prefix 06/07) must be rejected - non-canonical encoding
 			testHybridEncodedPointIsRejected: function () {
 				var hybridHex = "0678982F40FA0C0B7A55717583AFC99A4EDFD301A2729DC59B0B8EB9E18692BCB521F054FAD982AF4CC1933AFD1F1B563EA779A6AA6CCE36A30B947DD653E63E44";
 				try {
@@ -11946,7 +11946,7 @@ ninja.wallets.splitwallet = {
 })(ninja);
 	</script>
 	<script type="text/javascript">
-// All scripts loaded — start entropy collection.
+// All scripts loaded - start entropy collection.
 // seedingOver() is called internally once enough mouse/keyboard events have
 // been collected; the #generate overlay hides at that point.
 ninja.seeder.start();
@@ -11962,7 +11962,7 @@ if (ninja.getQueryString()["unittests"] == "true" || ninja.getQueryString()["uni
 if (ninja.getQueryString()["asyncunittests"] == "true" || ninja.getQueryString()["asyncunittests"] == "1") {
 	ninja.unitTests.runAsynchronousTests(true);
 }
-// change language — priority: URL param > localStorage > browser language
+// change language - priority: URL param > localStorage > browser language
 ninja.translator.extractEnglishFromDomAndUpdateDictionary();
 if (ninja.getQueryString()["culture"] != undefined) {
 	ninja.translator.translate(ninja.getQueryString()["culture"]);
@@ -11985,7 +11985,7 @@ if (ninja.getQueryString()["testnet"] == "true" || ninja.getQueryString()["testn
 	Bitcoin.ECKey.privateKeyPrefix = 0xEF; // testnet
 	ninja.testnetMode = true;
 }
-// showseedpool URL parameter removed — the entropy pool is never exposed in the UI
+// showseedpool URL parameter removed - the entropy pool is never exposed in the UI
 	</script>
 </body>
 </html>

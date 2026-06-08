@@ -62,7 +62,7 @@
 		window.crypto.getRandomValues(ua);
 
 		if (!_auxPoolHasUserEntropy) {
-			// User entropy not yet collected — use CSPRNG output directly.
+			// User entropy not yet collected - use CSPRNG output directly.
 			for (var i = 0; i < ua.length; i++) ba[i] = ua[i];
 			return;
 		}

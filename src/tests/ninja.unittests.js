@@ -26,7 +26,7 @@
 				}
 				else {
 					var passFailStr = "<b>FAIL " + exceptionMsg + "</b>";
-					console.error("[unit test FAIL] " + test + (exceptionMsg ? " — " + exceptionMsg : ""));
+					console.error("[unit test FAIL] " + test + (exceptionMsg ? " - " + exceptionMsg : ""));
 				}
 				testCount++;
 				testResults += test + ": " + passFailStr + "<br/>";
@@ -319,7 +319,7 @@
 				return true;
 			},
 			testMiniFormatIsRejected: function () {
-				// Mini format is no longer accepted — keys must be WIF, WIF-compressed, or HEX
+				// Mini format is no longer accepted - keys must be WIF, WIF-compressed, or HEX
 				var key = "SQE6yipP5oW8RBaStWoB47xsRQ8pat";
 				var btcKey = new Bitcoin.ECKey(key);
 				return btcKey.priv == null;
@@ -415,7 +415,7 @@
 				return true;
 			},
 			testBase6FormatIsRejected: function () {
-				// Base6 format is no longer accepted — keys must be WIF, WIF-compressed, or HEX
+				// Base6 format is no longer accepted - keys must be WIF, WIF-compressed, or HEX
 				var baseKey = "100531114202410255230521444145414341221420541210522412225005202300434134213212540304311321323051431";
 				var ecKey = new Bitcoin.ECKey(baseKey);
 				return ecKey.priv == null;
@@ -714,7 +714,7 @@
 				);
 			},
 
-			// window.crypto.getRandomValues must be available — failing here means
+			// window.crypto.getRandomValues must be available - failing here means
 			// this browser cannot safely generate Bitcoin keys
 			testCSPRNGAvailable: function () {
 				return !!(window.crypto && typeof window.crypto.getRandomValues === 'function');
@@ -724,7 +724,7 @@
 			testRandomKeyIsInValidRange: function () {
 				var btcKey = new Bitcoin.ECKey(false);
 				if (btcKey.error || btcKey.priv == null) return false;
-				// priv is now a Uint8Array(32) — validate directly
+				// priv is now a Uint8Array(32) - validate directly
 				return nobleSecp256k1.utils.isValidPrivateKey(btcKey.priv);
 			},
 
@@ -751,7 +751,7 @@
 			},
 
 			// An uncompressed public key that is NOT on the secp256k1 curve must be rejected
-			// We flip the last byte of a valid uncompressed key — the point (x, y') is off-curve.
+			// We flip the last byte of a valid uncompressed key - the point (x, y') is off-curve.
 			testOffCurvePublicKeyIsRejected: function () {
 				var validHex = "0478982F40FA0C0B7A55717583AFC99A4EDFD301A2729DC59B0B8EB9E18692BCB521F054FAD982AF4CC1933AFD1F1B563EA779A6AA6CCE36A30B947DD653E63E44";
 				var invalidHex = validHex.slice(0, -2) + "45"; // corrupt last byte
@@ -763,7 +763,7 @@
 				}
 			},
 
-			// Hybrid-encoded points (prefix 06/07) must be rejected — non-canonical encoding
+			// Hybrid-encoded points (prefix 06/07) must be rejected - non-canonical encoding
 			testHybridEncodedPointIsRejected: function () {
 				var hybridHex = "0678982F40FA0C0B7A55717583AFC99A4EDFD301A2729DC59B0B8EB9E18692BCB521F054FAD982AF4CC1933AFD1F1B563EA779A6AA6CCE36A30B947DD653E63E44";
 				try {

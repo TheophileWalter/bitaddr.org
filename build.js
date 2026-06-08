@@ -1,17 +1,17 @@
 #!/usr/bin/env node
-// Simple build script — equivalent to `grunt` (grunt 0.4.x is incompatible with Node ≥ 18)
+// Simple build script - equivalent to `grunt` (grunt 0.4.x is incompatible with Node ≥ 18)
 // Usage: node build.js
 
 const fs = require('fs');
 
 // Module layout:
-//   src/crypto/   — cryptographic primitives (noble, CryptoJS, ECC, ECDSA)
-//   src/wallet/   — wallet logic (address formats, ECKey, BIP38, key helpers)
-//   src/ui/       — wallet UI wallets, CSS, HTML template, translations
-//   src/tests/    — unit tests
+//   src/crypto/   - cryptographic primitives (noble, CryptoJS, ECC, ECDSA)
+//   src/wallet/   - wallet logic (address formats, ECKey, BIP38, key helpers)
+//   src/ui/       - wallet UI wallets, CSS, HTML template, translations
+//   src/tests/    - unit tests
 
 const tokens = [
-	// noble-secp256k1 must be loaded first — ECDSA and ECKey depend on it
+	// noble-secp256k1 must be loaded first - ECDSA and ECKey depend on it
 	{ token: '//noble-secp256k1.js',       file: './src/crypto/noble-secp256k1.js' },
 	{ token: '//bitcoinjs-lib.js',         file: './src/wallet/bitcoinjs-lib.js' },
 	{ token: '//bitcoinjs-lib.address.js', file: './src/wallet/bitcoinjs-lib.address.js' },

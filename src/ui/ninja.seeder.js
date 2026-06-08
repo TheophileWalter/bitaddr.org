@@ -1,5 +1,5 @@
 /*
- * ninja.seeder — Auxiliary entropy collection from mouse and keyboard events.
+ * ninja.seeder - Auxiliary entropy collection from mouse and keyboard events.
  *
  * The browser CSPRNG (window.crypto.getRandomValues) is the primary and
  * sufficient source of randomness.  This seeder exists ONLY as a
@@ -33,7 +33,7 @@ ninja.seeder = {
 		// Keyboard events are bound via onkeydown on #generatekeyinput.
 	},
 
-	// Bound to body onmousemove — collects coordinates and timing.
+	// Bound to body onmousemove - collects coordinates and timing.
 	seed: function (evt) {
 		if (!ninja.seeder.isStillSeeding) return;
 		var now = Date.now();
@@ -50,7 +50,7 @@ ninja.seeder = {
 		ninja.seeder._advance();
 	},
 
-	// Bound to #generatekeyinput onkeydown — collects key identity and timing.
+	// Bound to #generatekeyinput onkeydown - collects key identity and timing.
 	seedKeyPress: function (evt) {
 		if (!ninja.seeder.isStillSeeding) return;
 		var now = Date.now();

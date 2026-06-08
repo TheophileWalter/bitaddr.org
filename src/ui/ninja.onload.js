@@ -1,4 +1,4 @@
-// All scripts loaded — start entropy collection.
+// All scripts loaded - start entropy collection.
 // seedingOver() is called internally once enough mouse/keyboard events have
 // been collected; the #generate overlay hides at that point.
 ninja.seeder.start();
@@ -14,7 +14,7 @@ if (ninja.getQueryString()["unittests"] == "true" || ninja.getQueryString()["uni
 if (ninja.getQueryString()["asyncunittests"] == "true" || ninja.getQueryString()["asyncunittests"] == "1") {
 	ninja.unitTests.runAsynchronousTests(true);
 }
-// change language — priority: URL param > localStorage > browser language
+// change language - priority: URL param > localStorage > browser language
 ninja.translator.extractEnglishFromDomAndUpdateDictionary();
 if (ninja.getQueryString()["culture"] != undefined) {
 	ninja.translator.translate(ninja.getQueryString()["culture"]);
@@ -37,4 +37,4 @@ if (ninja.getQueryString()["testnet"] == "true" || ninja.getQueryString()["testn
 	Bitcoin.ECKey.privateKeyPrefix = 0xEF; // testnet
 	ninja.testnetMode = true;
 }
-// showseedpool URL parameter removed — the entropy pool is never exposed in the UI
+// showseedpool URL parameter removed - the entropy pool is never exposed in the UI

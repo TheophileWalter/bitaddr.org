@@ -141,7 +141,7 @@
 			document.getElementById("bulkpassphrase").disabled = !element.checked;
 			bulk.encrypt = element.checked;
 			if (element.checked) {
-				// Force legacy address type — BIP38 requires it
+				// Force legacy address type - BIP38 requires it
 				document.getElementById("bulkaddrtype").value = "legacy";
 				document.getElementById("bulkaddrtype").disabled = true;
 				document.getElementById("bulkcompressed").disabled = false;

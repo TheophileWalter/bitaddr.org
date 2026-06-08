@@ -18,8 +18,8 @@ while ((m = re.exec(html)) !== null) {
 	if (m[1].trim()) scripts.push(m[1]);
 }
 
-// Minimal browser environment — only what the code actually needs.
-// Do NOT inject host String/Array/Object/JSON/Error etc. — CryptoJS uses
+// Minimal browser environment - only what the code actually needs.
+// Do NOT inject host String/Array/Object/JSON/Error etc. - CryptoJS uses
 // `message.constructor == String` which breaks when the String comes from
 // a different realm (the host) rather than the VM's own String constructor.
 const ctx = vm.createContext({
@@ -40,7 +40,7 @@ const ctx = vm.createContext({
 	clearInterval: clearInterval,
 	console: console,
 	localStorage: { getItem: function () { return null; }, setItem: function () {} },
-	// CSPRNG — noble detects: typeof self === 'object' && 'crypto' in self
+	// CSPRNG - noble detects: typeof self === 'object' && 'crypto' in self
 	crypto: require('crypto').webcrypto,
 });
 // self must point to ctx itself (noble checks `self.crypto`)

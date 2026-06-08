@@ -114,7 +114,7 @@ function getRNG(){
 		}
 	}
 
-	// No CSPRNG available — abort rather than fall back to Math.random
+	// No CSPRNG available - abort rather than fall back to Math.random
 	throw new Error(
 		'secrets.js: No cryptographically secure RNG found. ' +
 		'Key splitting requires window.crypto.getRandomValues (browser) or crypto.randomBytes (Node.js).'

@@ -17,7 +17,7 @@ New features compared to the original:
 
 Security improvements:
 - All secp256k1 operations backed by [noble-secp256k1](https://github.com/paulmillr/noble-secp256k1) v1.7.1 (audited, MIT)
-- Homemade BigInteger and EllipticCurve libraries fully removed — no custom cryptographic arithmetic
+- Homemade BigInteger and EllipticCurve libraries fully removed - no custom cryptographic arithmetic
 - Deterministic RFC 6979 signatures (constant-time, low-s) via noble's `signSync`
 - Private keys stored as `Uint8Array(32)`; scalar arithmetic uses native `BigInt`
 
@@ -30,8 +30,8 @@ src/
 └── tests/    unit tests (73 synchronous tests)
 ```
 
-Build: `node build.js` — produces a single self-contained `bitaddr.org.html`.
-Tests: `node run-tests.js` — runs all 73 tests in Node.js (no browser required).
+Build: `node build.js` - produces a single self-contained `bitaddr.org.html`.
+Tests: `node run-tests.js` - runs all 73 tests in Node.js (no browser required).
 
 
 Please send DONATIONS for this project to Bitcoin Address:

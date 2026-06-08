@@ -70,7 +70,7 @@ Bitcoin.ECKey = (function () {
 
 	var ECKey = function (input) {
 		if (!input) {
-			// Random key — noble uses window.crypto.getRandomValues, rejects invalid scalars
+			// Random key - noble uses window.crypto.getRandomValues, rejects invalid scalars
 			this.priv = nobleSecp256k1.utils.randomPrivateKey(); // Uint8Array(32)
 		} else if (Bitcoin.Util.isArray(input) || input instanceof Uint8Array) {
 			var arr = Array.from(input);
@@ -126,7 +126,7 @@ Bitcoin.ECKey = (function () {
 		return this;
 	};
 
-	// Return public key bytes — noble performs point multiplication
+	// Return public key bytes - noble performs point multiplication
 	ECKey.prototype.getPub = function () {
 		if (!this._pubCache || this._pubCacheComp !== this.compressed) {
 			this._pubCache = Array.from(nobleSecp256k1.getPublicKey(this.priv, this.compressed));
@@ -163,7 +163,7 @@ Bitcoin.ECKey = (function () {
 		}
 	};
 
-	// P2SH-P2WPKH address (starts with '3') — compressed key required
+	// P2SH-P2WPKH address (starts with '3') - compressed key required
 	ECKey.prototype.getP2SHAddress = function () {
 		var savedComp = this.compressed;
 		this.setCompressed(true);
@@ -176,7 +176,7 @@ Bitcoin.ECKey = (function () {
 		return addr.toString();
 	};
 
-	// Native SegWit P2WPKH address (bc1q...) — compressed key required
+	// Native SegWit P2WPKH address (bc1q...) - compressed key required
 	ECKey.prototype.getSegwitAddress = function () {
 		var savedComp = this.compressed;
 		this.setCompressed(true);
@@ -185,7 +185,7 @@ Bitcoin.ECKey = (function () {
 		return Bitcoin.Bech32.segwitAddress('bc', 0, pubKeyHash);
 	};
 
-	// Taproot P2TR address (bc1p...) — key-path spend, no script tree
+	// Taproot P2TR address (bc1p...) - key-path spend, no script tree
 	ECKey.prototype.getTaprootAddress = function () {
 		var savedComp = this.compressed;
 		this.setCompressed(true);

@@ -226,7 +226,7 @@ ninja.privateKey = {
 			// Take SHA256(SHA256(prefactor + ownerentropy)) and call this passfactor
 			var passfactorBytes = noNumbers ? prefactor : Bitcoin.Util.dsha256(prefactor.concat(ownerEntropy));
 
-			// 5) G * passfactor (compressed) — equivalent to ECKey public key derivation
+			// 5) G * passfactor (compressed) - equivalent to ECKey public key derivation
 			var passpoint = Array.from(nobleSecp256k1.getPublicKey(new Uint8Array(passfactorBytes), true));
 
 			// 6) Convey ownersalt and passpoint to the party generating the keys, along with a checksum to ensure integrity.

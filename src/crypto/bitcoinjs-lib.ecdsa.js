@@ -1,5 +1,5 @@
 /*
- * Bitcoin ECDSA — backed by noble-secp256k1 (MIT, audited)
+ * Bitcoin ECDSA - backed by noble-secp256k1 (MIT, audited)
  * https://github.com/paulmillr/noble-secp256k1
  */
 

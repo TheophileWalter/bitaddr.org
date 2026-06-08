@@ -59,10 +59,10 @@
 		"singleshare": "PARTAGER",
 		"singlesecret": "SECRET",
 		"singletip1": "Un porte-monnaie Bitcoin est simplement une paire constituée d'une adresse Bitcoin et de la clé privée correspondante. Ce porte-monnaie a été généré dans votre navigateur et est affiché ci-dessus.",
-		"singletip2": "Pour sécuriser ce porte-monnaie, imprimez-le ou enregistrez l'adresse et la clé privée. Il est important de conserver une copie de sauvegarde de la clé privée dans un endroit sûr. Ce site ne conserve aucune trace de votre clé privée. Si vous quittez ou rafraîchissez la page, ou cliquez sur « Générer Une Nouvelle Adresse », une nouvelle clé privée sera créée et l'ancienne sera définitivement perdue. Votre clé privée Bitcoin doit rester secrète — quiconque la possède peut dépenser vos fonds. Si vous imprimez votre porte-monnaie, conservez-le à l'abri de l'humidité. Traitez un porte-monnaie papier comme des espèces.",
+		"singletip2": "Pour sécuriser ce porte-monnaie, imprimez-le ou enregistrez l'adresse et la clé privée. Il est important de conserver une copie de sauvegarde de la clé privée dans un endroit sûr. Ce site ne conserve aucune trace de votre clé privée. Si vous quittez ou rafraîchissez la page, ou cliquez sur « Générer Une Nouvelle Adresse », une nouvelle clé privée sera créée et l'ancienne sera définitivement perdue. Votre clé privée Bitcoin doit rester secrète - quiconque la possède peut dépenser vos fonds. Si vous imprimez votre porte-monnaie, conservez-le à l'abri de l'humidité. Traitez un porte-monnaie papier comme des espèces.",
 		"singletip3": "Pour alimenter ce porte-monnaie, demandez à vos correspondants d'envoyer des Bitcoins à votre adresse Bitcoin.",
 		"singletip4": "Vérifiez votre solde sur blockchain.info ou blockexplorer.com en y renseignant votre adresse Bitcoin.",
-		"singletip5": "Pour dépenser vos Bitcoins, rendez-vous sur blockchain.info et effectuez un « sweep » (transfert total) de votre clé privée. Vous pouvez aussi importer la clé dans un client Bitcoin. Notez que lors d'une transaction, la monnaie restante sera renvoyée vers une nouvelle adresse du portefeuille — pensez à effectuer une sauvegarde.",
+		"singletip5": "Pour dépenser vos Bitcoins, rendez-vous sur blockchain.info et effectuez un « sweep » (transfert total) de votre clé privée. Vous pouvez aussi importer la clé dans un client Bitcoin. Notez que lors d'une transaction, la monnaie restante sera renvoyée vers une nouvelle adresse du portefeuille - pensez à effectuer une sauvegarde.",
 
 		// porte-monnaie papier
 		"paperlabelhideart": "Masquer l'image ?",
@@ -87,7 +87,7 @@
 		"bulka1": "L'approche traditionnelle pour accepter des Bitcoins sur votre site requiert l'installation du daemon Bitcoin officiel (« bitcoind »). De nombreux hébergeurs ne supportent pas ce daemon. De plus, l'exécuter sur votre serveur web signifie que vos clés privées y sont stockées et pourraient être volées en cas de piratage. En utilisant un Porte-Monnaie En Vrac, vous n'uploadez que les adresses Bitcoin sur votre serveur, sans les clés privées. Votre porte-monnaie ne risque donc pas d'être volé même si le serveur est compromis.",
 		"bulklabelq2": "Comment utiliser le Porte-Monnaie En Vrac pour accepter les Bitcoins sur mon site ?",
 		"bulklabela2li1": "Utilisez l'onglet Porte-Monnaie En Vrac pour pré-générer un grand nombre d'adresses Bitcoin (10 000+). Copiez-collez les données CSV dans un fichier texte sécurisé. Sauvegardez ce fichier en lieu sûr.",
-		"bulklabela2li2": "Importez les adresses Bitcoin dans une base de données sur votre serveur web. (N'y mettez pas les clés privées — seulement les adresses visibles par les clients.)",
+		"bulklabela2li2": "Importez les adresses Bitcoin dans une base de données sur votre serveur web. (N'y mettez pas les clés privées - seulement les adresses visibles par les clients.)",
 		"bulklabela2li3": "Proposez le paiement en Bitcoin dans votre panier. Quand un client choisit Bitcoin, affichez-lui une adresse de votre base de données et associez-la à sa commande.",
 		"bulklabela2li4": "Abonnez-vous à un service de notification de paiement Bitcoin pour être averti des transactions. Une fois la notification reçue, traitez la commande. Pour vérifier manuellement, utilisez Block Explorer en remplaçant ADRESSE par l'adresse à vérifier.",
 		"bulklabela2li5": "Les Bitcoins s'accumulent en toute sécurité sur la blockchain. Utilisez le fichier de porte-monnaie généré à l'étape 1 pour les dépenser.",
@@ -104,13 +104,13 @@
 		"brainlabelprivatekey": "Clé Privée (Format d'importation) :",
 
 		// porte-monnaie vanité
-		"vanitylabelstep1": "Étape 1 — Générer votre paire de clés",
+		"vanitylabelstep1": "Étape 1 - Générer votre paire de clés",
 		"vanitynewkeypair": "Générer",
 		"vanitylabelstep1publickey": "Clé Publique (Étape 1) :",
 		"vanitylabelstep1pubnotes": "Copiez-collez cette clé dans le champ « Votre Clé Publique » du site Vanity Pool.",
 		"vanitylabelstep1privatekey": "Clé Privée (Étape 1) :",
 		"vanitylabelstep1privnotes": "Copiez-collez cette Clé Privée dans un fichier texte. Idéalement, sauvegardez-la sur un support chiffré. Elle sera nécessaire pour récupérer la Clé Privée une fois que Vanity Pool aura trouvé votre préfixe.",
-		"vanitylabelstep2calculateyourvanitywallet": "Étape 2 — Calculer votre Porte-Monnaie Vanité",
+		"vanitylabelstep2calculateyourvanitywallet": "Étape 2 - Calculer votre Porte-Monnaie Vanité",
 		"vanitylabelenteryourpart": "Entrez votre Clé Privée (générée à l'étape 1 et préalablement sauvegardée) :",
 		"vanitylabelnote1": "[NOTE : ce champ accepte une clé publique ou une clé privée]",
 		"vanitylabelenteryourpoolpart": "Entrez la Clé Privée du Pool (issue de Vanity Pool) :",
