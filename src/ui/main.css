@@ -281,7 +281,7 @@ input[type="button"][name="print"]:hover { background: var(--bg-hover); color: v
 }
 .copy-btn:hover { color: var(--accent); background: var(--accent-dim); }
 .copy-btn.copied { color: var(--green); }
-@media print { .copy-btn { display: none !important; } }
+@media print { .copy-btn, .copy-row > .copy-btn { display: none !important; } }
 
 /* ── Form Controls ────────────────────────────────────────────────────── */
 label { font-size: 0.85em; color: var(--text-muted); white-space: nowrap; }
@@ -381,6 +381,7 @@ input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; p
 #bulkarea .body { padding: 16px; }
 #bulkarea .format { font-style: italic; font-size: 0.82em; color: var(--text-muted); }
 #bulktextarea { font-size: 0.82em; width: 100%; margin-top: 8px; min-height: 260px; }
+#bulkprintcontent { display: none; }
 #bulkstartindex { width: 50px; }
 #bulklimit { width: 55px; }
 
@@ -664,7 +665,6 @@ input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; p
     #paperarea .keyarea.art { text-align: left; border-bottom: 0; padding-bottom: 0; margin-bottom: 0; }
     #paperarea .artwallet { zoom: 1; box-shadow: none; border-radius: 0; overflow: visible; }
     .pagebreak { height: 1px; }
-    .paper #logo { display: none; }
     .menu, .footer, .commands, #tagline, #faqs, #culturemenu, #themetoggle { display: none; }
     #detailprivwif { width: 285px; word-wrap: break-word; }
     #detailprivwifcomp { width: 310px; word-wrap: break-word; text-align: right; }
@@ -674,4 +674,6 @@ input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; p
     .faq { display: none; }
     body { background: #fff; color: #000; }
     .walletarea { border: none; background: none; }
+    #bulktextarea { display: none !important; }
+    #bulkprintcontent { display: block !important; font-family: var(--font-mono); font-size: 0.82em; white-space: pre-wrap; word-break: break-all; margin-top: 8px; }
 }

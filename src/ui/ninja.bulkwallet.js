@@ -26,6 +26,7 @@
 		// index,bitcoinAddress,privateKeyWif
 		buildCSV: function (rowLimit, startIndex, compressedAddrs, passphrase) {
 			document.getElementById("bulktextarea").value = translator.get("bulkgeneratingaddresses") + rowLimit;
+			document.getElementById("bulkprintcontent").textContent = "";
 			bulk.csv = [];
 			bulk.csvRowLimit = rowLimit;
 			bulk.csvRowsRemaining = rowLimit;
@@ -88,7 +89,9 @@
 			}
 			// processing is finished so put CSV in text area
 			else if (bulk.csvRowsRemaining === 0) {
-				document.getElementById("bulktextarea").value = bulk.csv.join("\n");
+				var csvText = bulk.csv.join("\n");
+				document.getElementById("bulktextarea").value = csvText;
+				document.getElementById("bulkprintcontent").textContent = csvText;
 			}
 		},
 
