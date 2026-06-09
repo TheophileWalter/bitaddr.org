@@ -9,17 +9,13 @@ JavaScript/CSS/Images. The JavaScript is readable, not minified, and contains no
 XMLHttpRequest's (no AJAX). The benefit of this technique is you can load the
 JavaScript locally and trust that the JavaScript did not change after being loaded.
 
-New features compared to the original:
-- Native SegWit (bc1q…) and Taproot (bc1p…) address support
-- All four address types shown in Single Wallet
-- Modern dark/light theme
-- Improved entropy collection with progress bar
+Improvements compared to the original:
 
-Security improvements:
-- All secp256k1 operations backed by [noble-secp256k1](https://github.com/paulmillr/noble-secp256k1) v1.7.1 (audited, MIT)
-- Homemade BigInteger and EllipticCurve libraries fully removed - no custom cryptographic arithmetic
-- Deterministic RFC 6979 signatures (constant-time, low-s) via noble's `signSync`
-- Private keys stored as `Uint8Array(32)`; scalar arithmetic uses native `BigInt`
+- **Modern address support** — Native SegWit (bc1q…) and Taproot (bc1p…) addresses across all wallet types (Single, Brain, Split, Bulk, Detail).
+- **Hardened cryptography** — Custom BigInteger and EllipticCurve code fully replaced by [noble-secp256k1](https://github.com/paulmillr/noble-secp256k1) (audited, MIT). Private keys stored as `Uint8Array(32)`, deterministic RFC 6979 signatures, no custom scalar arithmetic.
+- **Responsive dark/light theme** — Fully redesigned UI with mobile-first layout, dark/light mode toggle, and paper wallets that scale correctly on all screen sizes.
+- **UX polish** — Copy-to-clipboard buttons on all addresses and keys, paper wallets rendered in SVG (fully vector, never blurry at any print size), print views cleaned up (no form elements, no copy buttons), bulk wallet renders all rows when printed.
+- **Performance** — Bulk wallet generation optimised from O(n²) to O(n) (key pool deduplication via `Set`, debounced textarea updates).
 
 Project structure:
 ```
