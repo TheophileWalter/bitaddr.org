@@ -9,7 +9,7 @@ JavaScript/CSS/Images. The JavaScript is readable, not minified, and contains no
 XMLHttpRequest's (no AJAX). The benefit of this technique is you can load the
 JavaScript locally and trust that the JavaScript did not change after being loaded.
 
-Improvements compared to the original:
+### Improvements compared to the original:
 
 - **Modern address support** — Native SegWit (bc1q…) and Taproot (bc1p…) addresses across all wallet types (Single, Brain, Split, Bulk, Detail).
 - **Hardened cryptography** — Custom BigInteger and EllipticCurve code fully replaced by [noble-secp256k1](https://github.com/paulmillr/noble-secp256k1) (audited, MIT). Private keys stored as `Uint8Array(32)`, deterministic RFC 6979 signatures, no custom scalar arithmetic.
