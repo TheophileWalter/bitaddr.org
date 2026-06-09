@@ -11,11 +11,11 @@ JavaScript locally and trust that the JavaScript did not change after being load
 
 ### Improvements compared to the original:
 
-- **Modern address support** — Native SegWit (bc1q…) and Taproot (bc1p…) addresses across all wallet types (Single, Brain, Split, Bulk, Detail).
-- **Hardened cryptography** — Custom BigInteger and EllipticCurve code fully replaced by [noble-secp256k1](https://github.com/paulmillr/noble-secp256k1) (audited, MIT). Private keys stored as `Uint8Array(32)`, deterministic RFC 6979 signatures, no custom scalar arithmetic.
-- **Responsive dark/light theme** — Fully redesigned UI with mobile-first layout, dark/light mode toggle, and paper wallets that scale correctly on all screen sizes.
-- **UX polish** — Copy-to-clipboard buttons on all addresses and keys, paper wallets rendered in SVG (fully vector, never blurry at any print size), print views cleaned up (no form elements, no copy buttons), bulk wallet renders all rows when printed.
-- **Performance** — Bulk wallet generation optimised from O(n²) to O(n) (key pool deduplication via `Set`, debounced textarea updates).
+- **Modern address support** - Native SegWit (bc1q…) and Taproot (bc1p…) addresses across all wallet types (Single, Brain, Split, Bulk, Detail).
+- **Hardened cryptography** - Custom BigInteger and EllipticCurve code fully replaced by [noble-secp256k1](https://github.com/paulmillr/noble-secp256k1) (audited, MIT). Private keys stored as `Uint8Array(32)`, deterministic RFC 6979 signatures, no custom scalar arithmetic.
+- **Responsive dark/light theme** - Fully redesigned UI with mobile-first layout, dark/light mode toggle, and paper wallets that scale correctly on all screen sizes.
+- **UX polish** - Copy-to-clipboard buttons on all addresses and keys, paper wallets rendered in SVG (fully vector, never blurry at any print size), print views cleaned up (no form elements, no copy buttons), bulk wallet renders all rows when printed.
+- **Performance** - Bulk wallet generation optimised from O(n²) to O(n) (key pool deduplication via `Set`, debounced textarea updates).
 
 Project structure:
 ```
